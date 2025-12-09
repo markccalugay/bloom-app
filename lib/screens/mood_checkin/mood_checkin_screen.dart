@@ -1,0 +1,171 @@
+import 'package:flutter/material.dart';
+import 'mood_checkin_constants.dart';
+import 'mood_checkin_controller.dart';
+import 'mood_checkin_strings.dart';
+import 'widgets/mood_checkin_header.dart';
+import 'widgets/mood_checkin_slider.dart';
+import 'widgets/mood_checkin_skip_button.dart';
+import 'package:quietline_app/widgets/ql_primary_button.dart';
+
+import 'package:quietline_app/data/mood/mood_checkin_record.dart';
+import 'package:quietline_app/data/mood/mood_checkin_store.dart';
+import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:quietline_app/data/user/user_service.dart';
+import 'package:quietline_app/services/first_launch_service.dart';
+import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
+import 'package:quietline_app/screens/results/quiet_results_not_ok_screen.dart';
+
+class MoodCheckinScreen extends StatefulWidget {
+  final MoodCheckinMode mode;
+  final void Function(int score) onSubmit;
+  final VoidCallback? onSkip; // used only for pre mode
+  final int initialValue;
+  final String? sessionId;
+
+  const MoodCheckinScreen({
+    super.key,
+    required this.mode,
+    required this.onSubmit,
+    this.onSkip,
+    this.initialValue = 3,
+    this.sessionId,
+  });
+
+  @override
+  State<MoodCheckinScreen> createState() => _MoodCheckinScreenState();
+}
+
+class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
+  late MoodCheckinController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = MoodCheckinController(
+      mode: widget.mode,
+      onSubmit: widget.onSubmit,
+      onSkip: widget.onSkip,
+    );
+    controller.value = widget.initialValue;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bool isPre = widget.mode == MoodCheckinMode.pre;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: kMCHeaderTopGap),
+
+            // HEADER
+            MoodCheckinHeader(text: controller.header),
+
+            const SizedBox(height: kMCHeaderToQuestionGap),
+
+            // QUESTION LABEL
+            const Text(
+              kMCQuestionLabel,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: kMCTextColor,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+
+            const SizedBox(height: kMCQuestionToSliderGap),
+
+            // SLIDER
+            MoodCheckinSlider(
+              value: controller.value,
+              onChanged: (v) => setState(() => controller.setValue(v)),
+            ),
+
+            const Spacer(),
+
+            // PRIMARY BUTTON
+            QLPrimaryButton(
+              label: isPre ? 'Begin' : 'Continue',
+              onPressed: () async {
+                // 1. Get the current score from the controller (round to int if needed).
+                final int score = controller.value.round();
+                debugPrint(
+                  'MoodCheckin pressed: mode=${widget.mode}, score=$score',
+                );
+
+                // 2. Build a new mood record for this check-in.
+                final record = MoodCheckinRecord.newEntry(
+                  mode: widget.mode, // pre OR post
+                  score: score,
+                  sessionId:
+                      widget.sessionId, // <-- link this check-in to a session
+                );
+
+                // 3. Save to local storage.
+                const store = MoodCheckinStore();
+                await store.save(record);
+
+                // 4. Continue the original flow (pre → breath, post → next screen).
+                // controller.submit();
+
+                // Phase 3 – Step 2: Results Router
+                if (widget.mode == MoodCheckinMode.pre) {
+                  // Original behavior: continue to the breath screen.
+                  controller.submit();
+                } else {
+                  // POST mode: route to results.
+                  if (score >= 3) {
+                    // 1. Update streak as usual.
+                    final newStreak = await QuietStreakService.repo
+                        .registerSessionCompletedToday();
+
+                    // 2. Ensure anonymous user exists.
+                    final user = await UserService.instance.getOrCreateUser();
+                    debugPrint('Using user: ${user.username} (${user.id})');
+
+                    // 3. Mark first session completion (idempotent).
+                    await FirstLaunchService.instance.markCompleted();
+
+                    // 4. Continue into results.
+                    if (!context.mounted) return;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => QuietResultsOkScreen(
+                          streak: newStreak,
+                          isNew: true,
+                        ),
+                      ),
+                    );
+                  } else {
+                    if (!context.mounted) return;
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const QuietResultsNotOkScreen(),
+                      ),
+                    );
+                  }
+                }
+              },
+              backgroundColor: kMCPrimaryTeal,
+              textColor: Colors.white,
+              margin: const EdgeInsets.only(
+                left: 40,
+                right: 40,
+                top: 24,
+                bottom: 8,
+              ),
+            ),
+
+            // SKIP BUTTON (PRE ONLY)
+            if (isPre && widget.onSkip != null)
+              MoodCheckinSkipButton(onTap: () => controller.skip()),
+
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+}
