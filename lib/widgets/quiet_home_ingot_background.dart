@@ -16,7 +16,7 @@ class QuietHomeIngotBackground extends StatelessWidget {
 
           return Align(
             // Slightly above center, tweak if needed
-            alignment: const Alignment(0, 0.05),
+            alignment: const Alignment(0, -0.10),
             child: Opacity(
               opacity: 0.25, // matches your current design
               child: SizedBox(
