@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/screens/results/quiet_results_constants.dart';
+import 'package:quietline_app/core/app_assets.dart';
 
 /// Top-of-home streak strip: 7 mini flames + 1–7 labels.
 /// This is separate from the 3-day results streak mechanic.
@@ -76,10 +77,10 @@ class _MiniFlame extends StatelessWidget {
               shaderCallback: (bounds) =>
                   QuietResultsConstants.streakGradient.createShader(bounds),
               blendMode: BlendMode.srcIn,
-              child: SvgPicture.asset('assets/icons/flame_icon.svg'),
+              child: SvgPicture.asset(AppAssets.flame),
             )
           : SvgPicture.asset(
-              'assets/icons/flame_icon.svg',
+              AppAssets.flame,
               colorFilter: const ColorFilter.mode(
                 QuietResultsConstants.inactiveFlame,
                 BlendMode.srcIn,

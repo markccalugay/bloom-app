@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quietline_app/core/app_assets.dart';
 
 const double _kDockHeight = 70.0;          // height of the gray bar (similar to X)
 const double _kNavTotalHeight = 120.0;      // total space reserved for nav + overlap
@@ -142,7 +143,7 @@ class _PrimaryNavItem extends StatelessWidget {
         ),
         child: Center(
           child: SvgPicture.asset(
-            'assets/images/quietline_logo.svg',
+            AppAssets.quietlineLogo,
             width: 45,
             height: 45,
           ),

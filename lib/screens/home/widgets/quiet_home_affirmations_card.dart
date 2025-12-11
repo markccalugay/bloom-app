@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quietline_app/core/app_assets.dart';
 
 /// Main affirmation card on the Home screen.
 /// For now it takes plain strings so we don't depend on
@@ -79,7 +80,7 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(12.0),
                 child: SvgPicture.asset(
-                  'assets/images/quietline_logo.svg',
+                  AppAssets.quietlineLogo,
                   width: 20,
                   height: 20,
                   colorFilter: const ColorFilter.mode(

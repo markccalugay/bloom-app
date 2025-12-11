@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../quiet_results_constants.dart';
+import 'package:quietline_app/core/app_assets.dart';
 
 class QuietResultsStreakRow extends StatelessWidget {
   final int streak;
@@ -67,10 +68,10 @@ class _SmallFlame extends StatelessWidget {
                   shaderCallback: (bounds) =>
                       QuietResultsConstants.streakGradient.createShader(bounds),
                   blendMode: BlendMode.srcIn,
-                  child: SvgPicture.asset('assets/icons/flame_icon.svg'),
+                  child: SvgPicture.asset(AppAssets.flame),
                 )
               : SvgPicture.asset(
-                  'assets/icons/flame_icon.svg',
+                  AppAssets.flame,
                   colorFilter: const ColorFilter.mode(
                     QuietResultsConstants.inactiveFlame,
                     BlendMode.srcIn,
