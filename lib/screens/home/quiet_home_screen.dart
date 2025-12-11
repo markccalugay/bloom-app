@@ -6,6 +6,10 @@ import '../home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 
+const double kHomeHorizontalPadding = 16.0;
+const double kHomeSectionSpacing = 24.0;
+const double kHomeBottomSpacing = 16.0;
+
 /// QuietLine Home screen body.
 ///
 /// NOTE:
@@ -33,7 +37,7 @@ class QuietHomeScreen extends StatelessWidget {
         children: [
           const QuietHomeIngotBackground(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -45,12 +49,12 @@ class QuietHomeScreen extends StatelessWidget {
                   },
                 ),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: kHomeSectionSpacing),
 
                 // Streak row
                 QuietHomeStreakRow(streak: streak),
 
-                const SizedBox(height: 24),
+                const SizedBox(height: kHomeSectionSpacing),
 
                 if (todayAffirmation != null)
                   QuietHomeAffirmationsCard(
@@ -66,7 +70,7 @@ class QuietHomeScreen extends StatelessWidget {
 
                 // Optional microcopy or footer can go here later.
                 // For now, keep it clean.
-                const SizedBox(height: 16),
+                const SizedBox(height: kHomeBottomSpacing),
               ],
             ),
           ),

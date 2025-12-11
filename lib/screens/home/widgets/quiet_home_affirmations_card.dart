@@ -26,21 +26,20 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(4),
       child: Container(
         width: double.infinity,
-        height: 260,
+        height: 200,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(4),
           gradient: const LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF4A5563), // dark slate
-              Color(0xFF1F2933), // deeper bottom
+              Color(0xFF1A2228),
+              Color(0xFF11171D),
             ],
           ),
-          border: Border.all(color: const Color(0xFFD9D9D9), width: 1.5),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         child: Stack(
@@ -81,8 +80,8 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
                 padding: const EdgeInsets.all(12.0),
                 child: SvgPicture.asset(
                   AppAssets.quietlineLogo,
-                  width: 20,
-                  height: 20,
+                  width: 14,
+                  height: 14,
                   colorFilter: const ColorFilter.mode(
                     Colors.white,
                     BlendMode.srcIn,
