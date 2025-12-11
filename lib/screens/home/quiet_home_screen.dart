@@ -4,6 +4,7 @@ import '../home/widgets/quiet_home_app_bar.dart';
 import '../home/widgets/quiet_home_streak_row.dart';
 import '../home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
+import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 
 /// QuietLine Home screen body.
 ///
@@ -28,43 +29,48 @@ class QuietHomeScreen extends StatelessWidget {
     final todayAffirmation = service.getTodayCore();
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top app bar (hamburger)
-            QuietHomeAppBar(
-              onMenuTap: () {
-                // Delegate to shell / parent if provided.
-                onMenu?.call();
-              },
+      child: Stack(
+        children: [
+          const QuietHomeIngotBackground(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top app bar (hamburger)
+                QuietHomeAppBar(
+                  onMenuTap: () {
+                    // Delegate to shell / parent if provided.
+                    onMenu?.call();
+                  },
+                ),
+
+                const SizedBox(height: 24),
+
+                // Streak row
+                QuietHomeStreakRow(streak: streak),
+
+                const SizedBox(height: 24),
+
+                if (todayAffirmation != null)
+                  QuietHomeAffirmationsCard(
+                    title: todayAffirmation.text,
+                    unlockedLabel: 'Unlocked today',
+                    onTap: () {
+                      // TODO: navigate to affirmation detail / library.
+                    },
+                  ),
+
+                // Spacer pushes content up, leaving room for bottom nav
+                const Spacer(),
+
+                // Optional microcopy or footer can go here later.
+                // For now, keep it clean.
+                const SizedBox(height: 16),
+              ],
             ),
-
-            const SizedBox(height: 24),
-
-            // Streak row
-            QuietHomeStreakRow(streak: streak),
-
-            const SizedBox(height: 24),
-
-            if (todayAffirmation != null)
-              QuietHomeAffirmationsCard(
-                title: todayAffirmation.text,
-                unlockedLabel: 'Unlocked today',
-                onTap: () {
-                  // TODO: navigate to affirmation detail / library.
-                },
-              ),
-
-            // Spacer pushes content up, leaving room for bottom nav
-            const Spacer(),
-
-            // Optional microcopy or footer can go here later.
-            // For now, keep it clean.
-            const SizedBox(height: 16),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
