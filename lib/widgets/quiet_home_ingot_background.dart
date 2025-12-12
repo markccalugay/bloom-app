@@ -11,7 +11,7 @@ class QuietHomeIngotBackground extends StatelessWidget {
       child: LayoutBuilder(
         builder: (context, constraints) {
           // Size relative to screen width so it scales nicely
-          final double width = constraints.maxWidth * 0.55;
+          final double width = constraints.maxWidth * 2.0;
           final double height = width * 0.35; // keep your ingot proportions
 
           return Align(

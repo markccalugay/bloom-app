@@ -7,7 +7,8 @@ import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 
 const double kHomeHorizontalPadding = 16.0;
-const double kHomeSectionSpacing = 24.0;
+const double kHomeTopSpacing = 20.0;          // space between app bar and streak
+const double kHomeStreakToCardSpacing = 56.0; // space between streak and affirmation card
 const double kHomeBottomSpacing = 16.0;
 
 /// QuietLine Home screen body.
@@ -32,49 +33,57 @@ class QuietHomeScreen extends StatelessWidget {
     final service = const AffirmationsService();
     final todayAffirmation = service.getTodayCore();
 
+    // Build dynamic "Unlocked on Day X dd-mm-yyyy" label
+    final now = DateTime.now();
+    final String day = streak.toString();
+    final String dd = now.day.toString().padLeft(2, '0');
+    final String mm = now.month.toString().padLeft(2, '0');
+    final String yyyy = now.year.toString();
+    final String unlockedLabel = 'Unlocked on Day $day $dd-$mm-$yyyy';
+
     return SafeArea(
-      child: Stack(
-        children: [
-          const QuietHomeIngotBackground(),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top app bar (hamburger)
-                QuietHomeAppBar(
-                  onMenuTap: () {
-                    // Delegate to shell / parent if provided.
-                    onMenu?.call();
-                  },
-                ),
-
-                const SizedBox(height: kHomeSectionSpacing),
-
-                // Streak row
-                QuietHomeStreakRow(streak: streak),
-
-                const SizedBox(height: kHomeSectionSpacing),
-
-                if (todayAffirmation != null)
-                  QuietHomeAffirmationsCard(
-                    title: todayAffirmation.text,
-                    unlockedLabel: 'Unlocked today',
-                    onTap: () {
-                      // TODO: navigate to affirmation detail / library.
-                    },
-                  ),
-
-                // Spacer pushes content up, leaving room for bottom nav
-                const Spacer(),
-
-                // Optional microcopy or footer can go here later.
-                // For now, keep it clean.
-                const SizedBox(height: kHomeBottomSpacing),
-              ],
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top app bar (hamburger)
+            QuietHomeAppBar(
+              onMenuTap: () {
+                // Delegate to shell / parent if provided.
+                onMenu?.call();
+              },
             ),
-          ),
-        ],
+
+            const SizedBox(height: kHomeTopSpacing),
+
+            // Streak row
+            QuietHomeStreakRow(streak: streak),
+
+            const SizedBox(height: 40.0),
+
+            // Ingot visual between streak and affirmation card
+            const QuietHomeIngotBackground(),
+
+            const SizedBox(height: 32.0),
+
+            if (todayAffirmation != null)
+              QuietHomeAffirmationsCard(
+                title: todayAffirmation.text,
+                unlockedLabel: unlockedLabel,
+                onTap: () {
+                  // TODO: navigate to affirmation detail / library.
+                },
+              ),
+
+            // Spacer pushes content up, leaving room for bottom nav
+            const Spacer(),
+
+            // Optional microcopy or footer can go here later.
+            // For now, keep it clean.
+            const SizedBox(height: kHomeBottomSpacing),
+          ],
+        ),
       ),
     );
   }
