@@ -6,6 +6,7 @@ import 'widgets/mood_checkin_header.dart';
 import 'widgets/mood_checkin_slider.dart';
 import 'widgets/mood_checkin_skip_button.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
+import 'package:quietline_app/core/feature_flags.dart';
 
 import 'package:quietline_app/data/mood/mood_checkin_record.dart';
 import 'package:quietline_app/data/mood/mood_checkin_store.dart';
@@ -52,6 +53,43 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
   @override
   Widget build(BuildContext context) {
     final bool isPre = widget.mode == MoodCheckinMode.pre;
+
+    // Phase 3.2 (Option A): If mood check-ins are disabled for MVP, this screen
+    // should be a harmless dead-end. We immediately route users to the correct
+    // flow without saving mood data or mutating streak.
+    if (!FeatureFlags.moodCheckInsEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+
+        if (isPre) {
+          // Continue the original pre-flow (typically routes into breathing via the shell callback).
+          controller.submit();
+          return;
+        }
+
+        // POST mode: route to OK results as a safe default.
+        int current = 0;
+        try {
+          current = await QuietStreakService.getCurrentStreak();
+        } catch (_) {
+          current = 0;
+        }
+
+        if (!mounted) return;
+
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => QuietResultsOkScreen(
+              streak: current,
+              isNew: false,
+            ),
+          ),
+        );
+      });
+
+      // Render an empty scaffold while we redirect.
+      return const Scaffold(body: SizedBox.shrink());
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -118,7 +156,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                   // POST mode: route to results.
                   if (score >= 3) {
                     // 1. Update streak as usual.
-                    final newStreak = await QuietStreakService.repo
+                    final newStreak = await QuietStreakService
                         .registerSessionCompletedToday();
 
                     // 2. Ensure anonymous user exists.

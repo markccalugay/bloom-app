@@ -11,22 +11,38 @@ class QuietStreakService {
   /// Get the current streak count.
   ///
   /// Delegates to [QuietStreakRepository.getCurrentStreak].
-  static Future<int> getCurrentStreak() {
-    return repo.getCurrentStreak();
+  static Future<int> getCurrentStreak() async {
+    try {
+      return await repo.getCurrentStreak();
+    } catch (_) {
+      // MVP stability: if repo isn't initialized yet or storage fails,
+      // fall back to 0 instead of crashing the UI.
+      return 0;
+    }
   }
 
   /// Register that today’s session was completed.
   ///
   /// Returns the updated streak value. Delegates to
   /// [QuietStreakRepository.registerSessionCompletedToday].
-  static Future<int> registerSessionCompletedToday() {
-    return repo.registerSessionCompletedToday();
+  static Future<int> registerSessionCompletedToday() async {
+    try {
+      return await repo.registerSessionCompletedToday();
+    } catch (_) {
+      // MVP stability: if repo isn't initialized yet or storage fails,
+      // avoid breaking the completion flow.
+      return await getCurrentStreak();
+    }
   }
 
   /// Reset/clear the streak, if you ever need it (e.g., debugging).
   ///
   /// Delegates to [QuietStreakRepository.resetStreak].
-  static Future<void> resetStreak() {
-    return repo.resetStreak();
+  static Future<void> resetStreak() async {
+    try {
+      await repo.resetStreak();
+    } catch (_) {
+      // No-op for MVP stability.
+    }
   }
 }

@@ -7,10 +7,23 @@ import 'widgets/quiet_breath_controls.dart';
 import 'widgets/quiet_breath_timer_title.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
+import 'package:quietline_app/core/feature_flags.dart';
+import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
+import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
-  const QuietBreathScreen({super.key, required this.sessionId});
+
+  /// Current streak count to display on the results screen.
+  /// Optional with a safe default so existing call sites don't break.
+  final int streak;
+
+  const QuietBreathScreen({
+    super.key,
+    required this.sessionId,
+    this.streak = 1,
+  });
+
   @override
   State<QuietBreathScreen> createState() => _QuietBreathScreenState();
 }
@@ -33,13 +46,44 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     super.dispose();
   }
 
-  void _handleSessionComplete() {
+  Future<void> _handleSessionComplete() async {
+    // Keep mood check-ins reconnectable behind a flag.
+    // IMPORTANT: When mood check-ins are enabled, we do NOT increment streak here
+    // to avoid double-incrementing (mood flow currently owns that side-effect).
+    if (FeatureFlags.moodCheckInsEnabled) {
+      if (!mounted) return;
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => MoodCheckinScreen(
+            mode: MoodCheckinMode.post,
+            sessionId: widget.sessionId,
+            onSubmit: (score) {},
+          ),
+        ),
+      );
+      return;
+    }
+
+    // MVP path: increment streak on session completion.
+    int before = 0;
+    int after = 0;
+    try {
+      before = await QuietStreakService.getCurrentStreak();
+      after = await QuietStreakService.registerSessionCompletedToday();
+    } catch (_) {
+      // MVP stability: fall back safely.
+      after = before;
+    }
+
+    if (!mounted) return;
+
+    final bool isNew = after > before;
+
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => MoodCheckinScreen(
-          mode: MoodCheckinMode.post,
-          sessionId: widget.sessionId,
-          onSubmit: (score) {},
+        builder: (_) => QuietResultsOkScreen(
+          streak: after,
+          isNew: isNew,
         ),
       ),
     );

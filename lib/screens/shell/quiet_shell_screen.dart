@@ -11,6 +11,8 @@ import 'package:quietline_app/services/support_call_service.dart';
 import 'package:quietline_app/screens/account/quiet_account_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
+import 'package:quietline_app/core/feature_flags.dart';
+
 /// Root shell that hosts the bottom navigation and top-level tabs.
 class QuietShellScreen extends StatefulWidget {
   const QuietShellScreen({super.key});
@@ -82,10 +84,23 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             currentIndex: _currentIndex,
             onItemSelected: (index) {
               if (index == 1) {
-                // Center QuietLine logo → start a new session flow beginning
-                // at the pre mood check-in screen, with a fresh sessionId.
+                // Center QuietLine logo → start a new session.
                 final sessionId =
                     'session-${DateTime.now().millisecondsSinceEpoch}';
+
+                // MVP: mood check-ins are disabled. Keep the code path behind a flag
+                // so we can reconnect in V2 by flipping FeatureFlags.moodCheckInsEnabled.
+                if (!FeatureFlags.moodCheckInsEnabled) {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => QuietBreathScreen(
+                        sessionId: sessionId,
+                        streak: _streak ?? 0,
+                      ),
+                    ),
+                  );
+                  return;
+                }
 
                 Navigator.of(context).push(
                   MaterialPageRoute(
@@ -95,8 +110,10 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       onSubmit: (_) {
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) =>
-                                QuietBreathScreen(sessionId: sessionId),
+                            builder: (_) => QuietBreathScreen(
+                              sessionId: sessionId,
+                              streak: _streak ?? 0,
+                            ),
                           ),
                         );
                       },
