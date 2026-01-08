@@ -137,28 +137,40 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
             child: Stack(
               children: [
-                // Close button
+                // Close button (quiet + consistent tap target)
                 Align(
                   alignment: Alignment.topLeft,
-                  child: IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close),
-                    color: Colors.white.withValues(alpha: 0.9),
-                    tooltip: 'Close',
+                  child: Material(
+                    color: Colors.transparent,
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close),
+                      color: Colors.white.withValues(alpha: 0.85),
+                      tooltip: 'Close',
+                      splashRadius: 20,
+                      padding: const EdgeInsets.all(10),
+                      constraints: const BoxConstraints(
+                        minWidth: 44,
+                        minHeight: 44,
+                      ),
+                    ),
                   ),
                 ),
 
-                // Centered affirmation text
+                // Centered affirmation text (constrained width + better rhythm)
                 Center(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      text,
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall?.copyWith(
-                        color: onSurface,
-                        fontWeight: FontWeight.w600,
-                        height: 1.25,
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 360),
+                      child: Text(
+                        text,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          height: 1.32,
+                        ),
                       ),
                     ),
                   ),
@@ -168,13 +180,15 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
+                    padding: const EdgeInsets.only(bottom: 24),
                     child: Row(
                       children: [
                         if (unlockedLabel != null)
                           Expanded(
                             child: Text(
                               unlockedLabel!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: Colors.white.withValues(alpha: 0.75),
                               ),
@@ -182,6 +196,8 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
                           )
                         else
                           const Spacer(),
+
+                        const SizedBox(width: 12),
 
                         SvgPicture.asset(
                           AppAssets.quietlineLogo,
