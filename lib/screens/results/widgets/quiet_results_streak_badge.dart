@@ -56,7 +56,10 @@ class QuietResultsStreakBadge extends StatelessWidget {
             ),
 
           // Streak number
-          Text(streak.toString(), style: textStyle),
+          Transform.translate(
+            offset: const Offset(0, 6),
+            child: Text(streak.toString(), style: textStyle),
+          ),
         ],
       ),
     );
