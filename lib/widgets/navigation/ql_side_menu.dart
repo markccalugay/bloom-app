@@ -13,6 +13,9 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onNavigateAffirmations;
   final VoidCallback? onOpenAccount;
 
+  // MVP toggles
+  final bool showBrotherhood;
+
   // Support / info callbacks
   final VoidCallback? onOpenAbout;
   final VoidCallback? onOpenWebsite;
@@ -37,6 +40,7 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenPrivacy,
     this.onOpenTerms,
     this.onOpenAccount,
+    this.showBrotherhood = false,
   });
 
   @override
@@ -133,13 +137,14 @@ class QLSideMenu extends StatelessWidget {
                       textColor: baseTextColor,
                       onTap: onOpenAccount,
                     ),
-                    _MenuItem(
-                      icon: Icons.groups_rounded,
-                      label: 'Brotherhood',
-                      iconColor: iconColor,
-                      textColor: baseTextColor,
-                      onTap: onNavigateBrotherhood,
-                    ),
+                    if (showBrotherhood)
+                      _MenuItem(
+                        icon: Icons.groups_rounded,
+                        label: 'Brotherhood',
+                        iconColor: iconColor,
+                        textColor: baseTextColor,
+                        onTap: onNavigateBrotherhood,
+                      ),
                     _MenuItem(
                       icon: Icons.favorite_outline_rounded,
                       label: 'Affirmations',
