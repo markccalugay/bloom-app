@@ -19,6 +19,31 @@ const allPacks = <AffirmationPack>[corePack];
 /// Core affirmations list (edit freely).
 const coreAffirmations = <Affirmation>[
   Affirmation(
+    id: 'core_001',
+    packId: AffirmationPackIds.core,
+    text: 'Welcome back to yourself.',
+  ),
+  Affirmation(
+    id: 'core_002',
+    packId: AffirmationPackIds.core,
+    text: 'This is a good place to begin.',
+  ),
+  Affirmation(
+    id: 'core_003',
+    packId: AffirmationPackIds.core,
+    text: 'Nothing is required of you right now.',
+  ),
+  Affirmation(
+    id: 'core_004',
+    packId: AffirmationPackIds.core,
+    text: 'Slow is safe. Slow is steady.',
+  ),
+  Affirmation(
+    id: 'core_005',
+    packId: AffirmationPackIds.core,
+    text: 'You’re allowed to start exactly where you are.',
+  ),
+  Affirmation(
     id: 'core_006',
     packId: AffirmationPackIds.core,
     text: 'You showed up. That’s where calm begins.',

@@ -9,7 +9,15 @@ import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 const double kHomeHorizontalPadding = 16.0;
 const double kHomeTopSpacing = 20.0;          // space between app bar and streak
 const double kHomeStreakToCardSpacing = 56.0; // space between streak and affirmation card
-const double kHomeBottomSpacing = 16.0;
+const double kHomeBottomSpacing = 16.0; 
+
+String _formatToday() {
+  final now = DateTime.now();
+  final dd = now.day.toString().padLeft(2, '0');
+  final mm = now.month.toString().padLeft(2, '0');
+  final yyyy = now.year.toString();
+  return '$dd-$mm-$yyyy';
+}
 
 /// QuietLine Home screen body.
 ///
@@ -33,13 +41,8 @@ class QuietHomeScreen extends StatelessWidget {
     final service = const AffirmationsService();
     final todayAffirmation = service.getTodayCore();
 
-    // Build dynamic "Unlocked on Day X dd-mm-yyyy" label
-    final now = DateTime.now();
-    final String day = streak.toString();
-    final String dd = now.day.toString().padLeft(2, '0');
-    final String mm = now.month.toString().padLeft(2, '0');
-    final String yyyy = now.year.toString();
-    final String unlockedLabel = 'Unlocked on Day $day $dd-$mm-$yyyy';
+    final int day = streak <= 0 ? 1 : streak;
+    final String unlockedLabel = 'Unlocked on Day $day ${_formatToday()}';
 
     return SafeArea(
       child: Padding(
