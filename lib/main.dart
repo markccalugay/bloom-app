@@ -99,6 +99,8 @@ class QuietLineApp extends StatelessWidget {
         },
       ),
       */
+      // FTUE: On first install, start with Quiet Time.
+      // After the first completed session, boot into the app shell (Home).
       home: FutureBuilder<bool>(
         future: FirstLaunchService.instance.hasCompletedFirstSession(),
         builder: (context, snapshot) {
@@ -112,6 +114,7 @@ class QuietLineApp extends StatelessWidget {
           final hasCompleted = snapshot.data!;
           final sessionId = DateTime.now().toIso8601String();
 
+          // First launch (FTUE): go straight into Quiet Time.
           if (!hasCompleted) {
             // MVP: mood check-ins are disabled. Keep the original FTUE path behind a flag.
             if (!FeatureFlags.moodCheckInsEnabled) {
@@ -121,24 +124,30 @@ class QuietLineApp extends StatelessWidget {
             return MoodCheckinScreen(
               mode: MoodCheckinMode.pre,
               sessionId: sessionId,
-              onSubmit: (score) {
+              onSubmit: (_) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(sessionId: sessionId, streak: 0),
+                    builder: (_) => QuietBreathScreen(
+                      sessionId: sessionId,
+                      streak: 0,
+                    ),
                   ),
                 );
               },
               onSkip: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(sessionId: sessionId, streak: 0),
+                    builder: (_) => QuietBreathScreen(
+                      sessionId: sessionId,
+                      streak: 0,
+                    ),
                   ),
                 );
               },
             );
           }
 
-          // Post-FTUE: go into the app shell (which currently hosts Home).
+          // Post-FTUE: go into the app shell (Home).
           return const QuietShellScreen();
         },
       ),

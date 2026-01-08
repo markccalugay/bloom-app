@@ -10,6 +10,7 @@ import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/core/feature_flags.dart';
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:quietline_app/services/first_launch_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -70,9 +71,19 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     try {
       before = await QuietStreakService.getCurrentStreak();
       after = await QuietStreakService.registerSessionCompletedToday();
+
+      // Mark FTUE completion (idempotent). This ensures the app boots to Home
+      // on subsequent launches after the first completed session.
+      await FirstLaunchService.instance.markCompleted();
     } catch (_) {
       // MVP stability: fall back safely.
       after = before;
+      try {
+        // Even if streak fails, still attempt to mark FTUE as completed.
+        await FirstLaunchService.instance.markCompleted();
+      } catch (_) {
+        // no-op
+      }
     }
 
     if (!mounted) return;
