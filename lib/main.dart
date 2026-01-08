@@ -6,7 +6,6 @@ import 'screens/mood_checkin/mood_checkin_strings.dart';
 import 'theme/ql_theme.dart';
 
 import 'screens/results/quiet_results_ok_screen.dart';
-import 'screens/results/quiet_results_not_ok_screen.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/streak/quiet_streak_local_store.dart';
@@ -116,7 +115,7 @@ class QuietLineApp extends StatelessWidget {
           if (!hasCompleted) {
             // MVP: mood check-ins are disabled. Keep the original FTUE path behind a flag.
             if (!FeatureFlags.moodCheckInsEnabled) {
-              return QuietBreathScreen(sessionId: sessionId);
+              return QuietBreathScreen(sessionId: sessionId, streak: 0);
             }
 
             return MoodCheckinScreen(
@@ -125,14 +124,14 @@ class QuietLineApp extends StatelessWidget {
               onSubmit: (score) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(sessionId: sessionId),
+                    builder: (_) => QuietBreathScreen(sessionId: sessionId, streak: 0),
                   ),
                 );
               },
               onSkip: () {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(sessionId: sessionId),
+                    builder: (_) => QuietBreathScreen(sessionId: sessionId, streak: 0),
                   ),
                 );
               },
@@ -175,20 +174,6 @@ class DebugResultsEntryScreen extends StatelessWidget {
               child: const Text('Test OK (streak) screen'),
             ),
             const SizedBox(height: 16),
-
-            // Test NOT OK screen (only when mood check-ins are enabled)
-            if (FeatureFlags.moodCheckInsEnabled)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const QuietResultsNotOkScreen(),
-                    ),
-                  );
-                },
-                child: const Text('Test NOT OK screen'),
-              ),
           ],
         ),
       ),

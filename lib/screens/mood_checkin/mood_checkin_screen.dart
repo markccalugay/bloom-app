@@ -14,7 +14,12 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
+
 import 'package:quietline_app/screens/results/quiet_results_not_ok_screen.dart';
+
+// Phase 5 (MVP): Gate the distress / Not OK results variant behind a flag.
+// Keep the screen + wiring intact for V2, but make it unreachable for MVP.
+const bool kDistressResultsEnabled = false;
 
 class MoodCheckinScreen extends StatefulWidget {
   final MoodCheckinMode mode;
@@ -180,6 +185,32 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                       ),
                     );
                   } else {
+                    // Phase 5 (MVP): Distress results are gated. For MVP we always
+                    // route to the standard results flow even if the mood score is low.
+                    if (!kDistressResultsEnabled) {
+                      // Capture navigator before any async gap.
+                      final navigator = Navigator.of(context);
+
+                      int current = 0;
+                      try {
+                        current = await QuietStreakService.getCurrentStreak();
+                      } catch (_) {
+                        current = 0;
+                      }
+
+                      if (!mounted) return;
+
+                      navigator.push(
+                        MaterialPageRoute(
+                          builder: (_) => QuietResultsOkScreen(
+                            streak: current,
+                            isNew: false,
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
                     if (!context.mounted) return;
                     Navigator.of(context).push(
                       MaterialPageRoute(

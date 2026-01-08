@@ -4,6 +4,9 @@ import 'quiet_results_constants.dart';
 import 'quiet_results_strings.dart';
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/services/support_call_service.dart';
+import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
+
+const bool kDistressResultsEnabled = false;
 
 /// Distress results screen shown when mood < 3.
 class QuietResultsNotOkScreen extends StatelessWidget {
@@ -11,6 +14,18 @@ class QuietResultsNotOkScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!kDistressResultsEnabled) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) => const QuietShellScreen(),
+          ),
+        );
+      });
+
+      return const Scaffold(body: SizedBox.shrink());
+    }
+
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
