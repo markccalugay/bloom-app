@@ -82,7 +82,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           body: _buildBody(),
           bottomNavigationBar: QLBottomNav(
             currentIndex: _currentIndex,
-            onItemSelected: (index) {
+            onItemSelected: (index) async {
               if (index == 1) {
                 // Center QuietLine logo → start a new session.
                 final sessionId =
@@ -91,7 +91,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 // MVP: mood check-ins are disabled. Keep the code path behind a flag
                 // so we can reconnect in V2 by flipping FeatureFlags.moodCheckInsEnabled.
                 if (!FeatureFlags.moodCheckInsEnabled) {
-                  Navigator.of(context).push(
+                  await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => QuietBreathScreen(
                         sessionId: sessionId,
@@ -99,10 +99,15 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       ),
                     ),
                   );
+
+                  // When the session flow finishes and we return here, reload streak
+                  // so Home reflects the latest value.
+                  if (!mounted) return;
+                  await _loadStreak();
                   return;
                 }
 
-                Navigator.of(context).push(
+                await Navigator.of(context).push(
                   MaterialPageRoute(
                     builder: (_) => MoodCheckinScreen(
                       mode: MoodCheckinMode.pre,
@@ -122,6 +127,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                     ),
                   ),
                 );
+
+                // When the session flow finishes and we return here, reload streak
+                // so Home reflects the latest value.
+                if (!mounted) return;
+                await _loadStreak();
               } else {
                 // Left and right icons behave as true tabs (Home / Brotherhood).
                 setState(() {
