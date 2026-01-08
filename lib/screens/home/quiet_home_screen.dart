@@ -75,7 +75,14 @@ class QuietHomeScreen extends StatelessWidget {
                 title: todayAffirmation.text,
                 unlockedLabel: unlockedLabel,
                 onTap: () {
-                  // TODO: navigate to affirmation detail / library.
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => QuietAffirmationFullscreenScreen(
+                        text: todayAffirmation.text,
+                        unlockedLabel: unlockedLabel,
+                      ),
+                    ),
+                  );
                 },
               ),
 
