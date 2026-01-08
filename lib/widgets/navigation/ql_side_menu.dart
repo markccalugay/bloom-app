@@ -15,6 +15,7 @@ class QLSideMenu extends StatelessWidget {
 
   // MVP toggles
   final bool showBrotherhood;
+  final bool showJourney;
 
   // Support / info callbacks
   final VoidCallback? onOpenAbout;
@@ -41,6 +42,7 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenTerms,
     this.onOpenAccount,
     this.showBrotherhood = false,
+    this.showJourney = false,
   });
 
   @override
@@ -122,14 +124,15 @@ class QLSideMenu extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const _SectionLabel('Navigation'),
-                    _MenuItem(
-                      icon: Icons.timeline_outlined,
-                      label: 'My journey',
-                      iconColor: iconColor,
-                      textColor: baseTextColor.withValues(alpha: 0.6),
-                      enabled: false,
-                      trailing: _ComingSoonPill(textTheme: textTheme),
-                    ),
+                    if (showJourney)
+                      _MenuItem(
+                        icon: Icons.timeline_outlined,
+                        label: 'My journey',
+                        iconColor: iconColor,
+                        textColor: baseTextColor.withValues(alpha: 0.6),
+                        enabled: false,
+                        trailing: _ComingSoonPill(textTheme: textTheme),
+                      ),
                     _MenuItem(
                       icon: Icons.person_rounded,
                       label: 'Your account',
