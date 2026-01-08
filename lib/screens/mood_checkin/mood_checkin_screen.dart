@@ -67,6 +67,9 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
           return;
         }
 
+        // Capture navigator before any async gap to satisfy `use_build_context_synchronously`.
+        final navigator = Navigator.of(context);
+
         // POST mode: route to OK results as a safe default.
         int current = 0;
         try {
@@ -77,7 +80,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
 
         if (!mounted) return;
 
-        Navigator.of(context).pushReplacement(
+        navigator.pushReplacement(
           MaterialPageRoute(
             builder: (_) => QuietResultsOkScreen(
               streak: current,

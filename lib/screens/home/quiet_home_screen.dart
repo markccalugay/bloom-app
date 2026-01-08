@@ -13,10 +13,26 @@ const double kHomeBottomSpacing = 16.0;
 
 String _formatToday() {
   final now = DateTime.now();
-  final dd = now.day.toString().padLeft(2, '0');
-  final mm = now.month.toString().padLeft(2, '0');
-  final yyyy = now.year.toString();
-  return '$dd-$mm-$yyyy';
+  const months = <String>[
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  final month = months[now.month - 1];
+  final day = now.day; // no leading zero for this style
+  final year = now.year;
+
+  return '$month $day, $year';
 }
 
 /// QuietLine Home screen body.
