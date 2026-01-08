@@ -7,10 +7,9 @@ const double _kNavTotalHeight = 120.0;      // total space reserved for nav + ov
 const double _kCenterButtonSize = 75.0;    // Quiet button diameter
 const double _kCenterButtonBottomOffset = 25.0; // how far above bottom it sits
 
-/// QuietLine bottom navigation
-/// 0 = Home
-/// 1 = Quiet session (center)
-/// 2 = Brotherhood
+/// QuietLine bottom navigation (MVP)
+/// Only the center button is interactive.
+/// onItemSelected(1) starts a Quiet session.
 class QLBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onItemSelected;
@@ -24,8 +23,7 @@ class QLBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const Color dockBackground = Color(0xFFD9D9D9); // updated dock background
-    const Color activeColor = Color(0xFF111827); // near-black for active icons
-    const Color inactiveColor = Color(0xFF6B7280); // muted gray for inactive icons
+    const Color activeColor = Color(0xFF111827); // near-black for the center logo
 
     return SizedBox(
       height: _kNavTotalHeight,
@@ -44,24 +42,10 @@ class QLBottomNav extends StatelessWidget {
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  _NavItem(
-                    icon: Icons.home_rounded,
-                    label: 'Home',
-                    isActive: currentIndex == 0,
-                    activeColor: activeColor,
-                    inactiveColor: inactiveColor,
-                    onTap: () => onItemSelected(0),
-                  ),
-                  const SizedBox(width: _kCenterButtonSize), // gap under center circle
-                  _NavItem(
-                    icon: Icons.groups_rounded,
-                    label: 'Circle',
-                    isActive: currentIndex == 2,
-                    activeColor: activeColor,
-                    inactiveColor: inactiveColor,
-                    onTap: () => onItemSelected(2),
-                  ),
+                children: const [
+                  // MVP: hide left/right items to keep the UI calm and focused.
+                  // Keep the center gap so the floating circle aligns visually.
+                  SizedBox(width: _kCenterButtonSize),
                 ],
               ),
             ),
