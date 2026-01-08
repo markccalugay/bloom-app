@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'screens/quiet_breath/quiet_breath_screen.dart';
-import 'screens/mood_checkin/mood_checkin_screen.dart';
-import 'screens/mood_checkin/mood_checkin_strings.dart';
+// import 'screens/mood_checkin/mood_checkin_screen.dart';
+// import 'screens/mood_checkin/mood_checkin_strings.dart';
 import 'theme/ql_theme.dart';
 
 import 'screens/results/quiet_results_ok_screen.dart';
@@ -117,34 +117,34 @@ class QuietLineApp extends StatelessWidget {
           // First launch (FTUE): go straight into Quiet Time.
           if (!hasCompleted) {
             // MVP: mood check-ins are disabled. Keep the original FTUE path behind a flag.
-            if (!FeatureFlags.moodCheckInsEnabled) {
-              return QuietBreathScreen(sessionId: sessionId, streak: 0);
-            }
-
-            return MoodCheckinScreen(
-              mode: MoodCheckinMode.pre,
-              sessionId: sessionId,
-              onSubmit: (_) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(
-                      sessionId: sessionId,
-                      streak: 0,
-                    ),
-                  ),
-                );
-              },
-              onSkip: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(
-                      sessionId: sessionId,
-                      streak: 0,
-                    ),
-                  ),
-                );
-              },
-            );
+            return QuietBreathScreen(sessionId: sessionId, streak: 0);
+            // V2 (optional): re-enable the original FTUE pre-checkin flow.
+            // if (FeatureFlags.moodCheckInsEnabled) {
+            //   return MoodCheckinScreen(
+            //     mode: MoodCheckinMode.pre,
+            //     sessionId: sessionId,
+            //     onSubmit: (_) {
+            //       Navigator.of(context).push(
+            //         MaterialPageRoute(
+            //           builder: (_) => QuietBreathScreen(
+            //             sessionId: sessionId,
+            //             streak: 0,
+            //           ),
+            //         ),
+            //       );
+            //     },
+            //     onSkip: () {
+            //       Navigator.of(context).push(
+            //         MaterialPageRoute(
+            //           builder: (_) => QuietBreathScreen(
+            //             sessionId: sessionId,
+            //             streak: 0,
+            //           ),
+            //         ),
+            //       );
+            //     },
+            //   );
+            // }
           }
 
           // Post-FTUE: go into the app shell (Home).

@@ -15,8 +15,12 @@ class QuietResultsNotOkScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (!kDistressResultsEnabled) {
+      // MVP: distress results are gated off unless explicitly enabled.
+      // Redirect to the shell/home so this screen is effectively unreachable.
+      final navigator = Navigator.of(context);
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.of(context).pushReplacement(
+        if (!context.mounted) return;
+        navigator.pushReplacement(
           MaterialPageRoute(
             builder: (_) => const QuietShellScreen(),
           ),
