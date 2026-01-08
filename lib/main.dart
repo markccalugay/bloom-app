@@ -16,6 +16,7 @@ import 'data/streak/quiet_streak_service.dart';
 import 'services/first_launch_service.dart';
 //import 'screens/home/quiet_home_screen.dart';
 import 'screens/shell/quiet_shell_screen.dart';
+import 'package:quietline_app/core/feature_flags.dart';
 
 late QuietStreakRepository quietStreakRepo;
 
@@ -113,6 +114,11 @@ class QuietLineApp extends StatelessWidget {
           final sessionId = DateTime.now().toIso8601String();
 
           if (!hasCompleted) {
+            // MVP: mood check-ins are disabled. Keep the original FTUE path behind a flag.
+            if (!FeatureFlags.moodCheckInsEnabled) {
+              return QuietBreathScreen(sessionId: sessionId);
+            }
+
             return MoodCheckinScreen(
               mode: MoodCheckinMode.pre,
               sessionId: sessionId,
@@ -170,18 +176,19 @@ class DebugResultsEntryScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Test NOT OK screen
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const QuietResultsNotOkScreen(),
-                  ),
-                );
-              },
-              child: const Text('Test NOT OK screen'),
-            ),
+            // Test NOT OK screen (only when mood check-ins are enabled)
+            if (FeatureFlags.moodCheckInsEnabled)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const QuietResultsNotOkScreen(),
+                    ),
+                  );
+                },
+                child: const Text('Test NOT OK screen'),
+              ),
           ],
         ),
       ),
