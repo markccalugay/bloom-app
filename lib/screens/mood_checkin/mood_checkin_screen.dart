@@ -19,7 +19,9 @@ import 'package:quietline_app/screens/results/quiet_results_not_ok_screen.dart';
 
 // Phase 5 (MVP): Gate the distress / Not OK results variant behind a flag.
 // Keep the screen + wiring intact for V2, but make it unreachable for MVP.
-const bool kDistressResultsEnabled = false;
+// Use a getter (not a const) so the code path remains compilable/wired for V2
+// without triggering compile-time dead-code analysis.
+bool get kDistressResultsEnabled => false;
 
 class MoodCheckinScreen extends StatefulWidget {
   final MoodCheckinMode mode;
@@ -163,9 +165,12 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                 } else {
                   // POST mode: route to results.
                   if (score >= 3) {
+                    // Capture navigator before any async gap.
+                    final navigator = Navigator.of(context);
+
                     // 1. Update streak as usual.
-                    final newStreak = await QuietStreakService
-                        .registerSessionCompletedToday();
+                    final newStreak =
+                        await QuietStreakService.registerSessionCompletedToday();
 
                     // 2. Ensure anonymous user exists.
                     final user = await UserService.instance.getOrCreateUser();
@@ -174,9 +179,9 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                     // 3. Mark first session completion (idempotent).
                     await FirstLaunchService.instance.markCompleted();
 
-                    // 4. Continue into results.
-                    if (!context.mounted) return;
-                    Navigator.of(context).push(
+                    // 4. Continue into results (replace so back doesn't return to mood screen).
+                    if (!mounted) return;
+                    navigator.pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => QuietResultsOkScreen(
                           streak: newStreak,
@@ -200,7 +205,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
 
                       if (!mounted) return;
 
-                      navigator.push(
+                      navigator.pushReplacement(
                         MaterialPageRoute(
                           builder: (_) => QuietResultsOkScreen(
                             streak: current,
@@ -212,7 +217,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                     }
 
                     if (!context.mounted) return;
-                    Navigator.of(context).push(
+                    Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => const QuietResultsNotOkScreen(),
                       ),
