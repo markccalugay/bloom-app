@@ -216,8 +216,10 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                       return;
                     }
 
-                    if (!context.mounted) return;
-                    Navigator.of(context).pushReplacement(
+                    if (!mounted) return;
+                    final navigator = Navigator.of(context);
+
+                    navigator.pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => const QuietResultsNotOkScreen(),
                       ),
