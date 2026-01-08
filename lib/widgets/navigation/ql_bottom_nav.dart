@@ -68,6 +68,7 @@ class QLBottomNav extends StatelessWidget {
 }
 
 /// Side items: icon + label
+// ignore: unused_element
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final String label;

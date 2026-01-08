@@ -137,6 +137,9 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
             QLPrimaryButton(
               label: isPre ? 'Begin' : 'Continue',
               onPressed: () async {
+                // Capture navigator before any async gap to satisfy `use_build_context_synchronously`.
+                final navigator = Navigator.of(context);
+
                 // 1. Get the current score from the controller (round to int if needed).
                 final int score = controller.value.round();
                 debugPrint(
@@ -166,7 +169,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                   // POST mode: route to results.
                   if (score >= 3) {
                     // Capture navigator before any async gap.
-                    final navigator = Navigator.of(context);
+                    // final navigator = Navigator.of(context);
 
                     // 1. Update streak as usual.
                     final newStreak =
@@ -194,7 +197,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                     // route to the standard results flow even if the mood score is low.
                     if (!kDistressResultsEnabled) {
                       // Capture navigator before any async gap.
-                      final navigator = Navigator.of(context);
+                      // final navigator = Navigator.of(context);
 
                       int current = 0;
                       try {
@@ -217,7 +220,6 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                     }
 
                     if (!mounted) return;
-                    final navigator = Navigator.of(context);
 
                     navigator.pushReplacement(
                       MaterialPageRoute(
