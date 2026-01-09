@@ -96,8 +96,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
   }
 
   void _start() {
-    // Default behavior if no callback is provided.
-    // You can wire this in QuietEntryScreen or main router.
+    // Routed by parent (QuietEntryScreen). If null, do nothing.
     widget.onStart?.call();
   }
 
@@ -137,7 +136,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                       ),
                       const SizedBox(height: 22),
                       Text(
-                        'Welcome to QuietLine',
+                        'A Moment of Quiet',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
@@ -147,7 +146,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'A simple 90-second reset.\nQuiet. Fast. Private.',
+                        'We\'ll guide you through a 90-second breathing reset.\nThere\'s nothing to learn and nothing to get right.',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: Colors.white.withValues(alpha: 0.82),
@@ -180,7 +179,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                       ),
                     ),
                     child: Text(
-                      'You don’t need to “feel ready.”\nJust press start — we’ll guide you.',
+                      'You can stop anytime.',
                       textAlign: TextAlign.center,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.85),
