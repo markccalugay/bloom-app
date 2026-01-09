@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietWelcomeScreen extends StatefulWidget {
   /// Triggered when user taps "Start Quiet Time"
@@ -114,7 +115,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 44),
 
@@ -130,14 +131,14 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                         width: 64,
                         height: 64,
                         colorFilter: const ColorFilter.mode(
-                          Colors.white,
+                          QLColors.primaryTeal,
                           BlendMode.srcIn,
                         ),
                       ),
                       const SizedBox(height: 22),
                       Text(
                         'A Moment of Quiet',
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                         style: theme.textTheme.headlineSmall?.copyWith(
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -147,7 +148,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                       const SizedBox(height: 12),
                       Text(
                         'We\'ll guide you through a 90-second breathing reset.\nThere\'s nothing to learn and nothing to get right.',
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.left,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           color: Colors.white.withValues(alpha: 0.82),
                           height: 1.35,
@@ -165,24 +166,13 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                 opacity: _reassuranceFade,
                 child: SlideTransition(
                   position: _reassuranceSlide,
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.08),
-                      ),
-                    ),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
                     child: Text(
                       'You can stop anytime.',
-                      textAlign: TextAlign.center,
+                      textAlign: TextAlign.left,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.85),
+                        color: Colors.white.withValues(alpha: 0.75),
                         height: 1.35,
                       ),
                     ),
@@ -214,16 +204,33 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                 opacity: _secondaryFade,
                 child: SlideTransition(
                   position: _secondarySlide,
-                  child: TextButton(
-                    onPressed: _learnMore,
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.white.withValues(alpha: 0.85),
+                  child: InkWell(
+                    onTap: _learnMore,
+                    borderRadius: BorderRadius.circular(8),
+                    child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 18,
                         vertical: 12,
                       ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Learn how it works',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.85),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 14,
+                            color: Colors.white.withValues(alpha: 0.7),
+                          ),
+                        ],
+                      ),
                     ),
-                    child: const Text('Learn how it works'),
                   ),
                 ),
               ),
@@ -237,12 +244,15 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                   position: _disclaimerSlide,
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      'QuietLine is not a medical device.\nIf you’re in immediate danger, call your local emergency number.',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.55),
-                        height: 1.3,
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'QuietLine is a wellness and emotional-support app.\nBy continuing, you agree to our Terms and Privacy Policy',
+                        textAlign: TextAlign.left,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.55),
+                          height: 1.3,
+                        ),
                       ),
                     ),
                   ),
