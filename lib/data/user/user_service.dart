@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// attach real auth IDs to it.
 class UserProfile {
   final String id;        // stable internal ID (local for now)
-  final String username;  // e.g. "Quiet Ember 472"
+  final String username;  // e.g. "QuietEmber472"
   final String avatarId;  // e.g. "avatar_3"
 
   const UserProfile({
@@ -53,8 +53,22 @@ class UserService {
     final avatarId = prefs.getString(_keyAvatarId);
 
     if (id != null && username != null && avatarId != null) {
-      _cachedProfile =
-          UserProfile(id: id, username: username, avatarId: avatarId);
+      final normalizedUsername = _normalizeUsername(username);
+
+      // If we previously stored a spaced username (e.g. "Soft Pine 225"),
+      // migrate it once to the no-space format (e.g. "SoftPine225").
+      if (normalizedUsername != username) {
+        final migrated = UserProfile(
+          id: id,
+          username: normalizedUsername,
+          avatarId: avatarId,
+        );
+        await _saveProfile(prefs, migrated);
+        _cachedProfile = migrated;
+        return _cachedProfile!;
+      }
+
+      _cachedProfile = UserProfile(id: id, username: username, avatarId: avatarId);
       return _cachedProfile!;
     }
 
@@ -114,7 +128,7 @@ class UserService {
 
     // You can change this format to kebab-case if you prefer.
     final username =
-        '${_capitalize(adjective)} ${_capitalize(noun)} $number'; // e.g. "Quiet Ember 472"
+        '${_capitalize(adjective)}${_capitalize(noun)}$number'; // e.g. "QuietEmber472"
 
     // Simple avatar ID – later map this to an actual asset.
     final avatarId = 'avatar_${rand.nextInt(6) + 1}'; // avatar_1 .. avatar_6
@@ -133,6 +147,12 @@ class UserService {
     await prefs.setString(_keyId, profile.id);
     await prefs.setString(_keyUsername, profile.username);
     await prefs.setString(_keyAvatarId, profile.avatarId);
+  }
+
+  String _normalizeUsername(String value) {
+    // For assigned usernames we want Reddit-style: no spaces.
+    // (Later, when we add editing, we can allow underscores.)
+    return value.replaceAll(' ', '').trim();
   }
 
   String _capitalize(String value) {

@@ -182,11 +182,15 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           child: QLSideMenu(
             displayName: _displayName,
             onClose: _toggleMenu,
-            onOpenAccount: () {
+            onOpenAccount: () async {
               _toggleMenu();
-              Navigator.of(context).push(
+              await Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const QuietAccountScreen()),
               );
+
+              // If the user updated their display name, refresh it when we return.
+              if (!mounted) return;
+              await _loadDisplayName();
             },
             onNavigateBrotherhood: () {
               setState(() {
