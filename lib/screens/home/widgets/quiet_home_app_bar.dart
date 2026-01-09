@@ -24,8 +24,6 @@ class QuietHomeAppBar extends StatelessWidget {
             color: color,
             onPressed: onMenuTap ?? () {},
           ),
-          const Spacer(),
-          // Space for future avatar or logo if we want it.
         ],
       ),
     );

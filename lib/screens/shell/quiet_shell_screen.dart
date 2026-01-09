@@ -11,6 +11,8 @@ import 'package:quietline_app/services/support_call_service.dart';
 import 'package:quietline_app/screens/account/quiet_account_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
+import 'package:quietline_app/data/user/user_service.dart';
+
 import 'package:quietline_app/core/feature_flags.dart';
 
 /// Root shell that hosts the bottom navigation and top-level tabs.
@@ -25,6 +27,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   int _currentIndex = 0;
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
+  String _displayName = 'Quiet guest';
 
   final _web = WebLaunchService();
 
@@ -32,6 +35,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   void initState() {
     super.initState();
     _loadStreak();
+    _loadDisplayName();
   }
 
   Future<void> _loadStreak() async {
@@ -43,6 +47,22 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       });
     } catch (_) {
       // If anything goes wrong, keep _streak as null/0 silently for MVP.
+    }
+  }
+
+  Future<void> _loadDisplayName() async {
+    try {
+      final user = await UserService.instance.getOrCreateUser();
+      if (!mounted) return;
+      setState(() {
+        _displayName = user.username;
+      });
+    } catch (_) {
+      // Silent fallback for MVP.
+      if (!mounted) return;
+      setState(() {
+        _displayName = 'Quiet guest';
+      });
     }
   }
 
@@ -160,7 +180,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           left: _isMenuOpen ? 0 : -menuWidth,
           width: menuWidth,
           child: QLSideMenu(
-            displayName: 'Quiet guest',
+            displayName: _displayName,
             onClose: _toggleMenu,
             onOpenAccount: () {
               _toggleMenu();

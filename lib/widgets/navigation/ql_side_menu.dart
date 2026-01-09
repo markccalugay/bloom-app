@@ -81,7 +81,9 @@ class QLSideMenu extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          displayName,
+                          displayName.trim().isNotEmpty
+                              ? displayName.trim()
+                              : 'Quiet guest',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.titleMedium?.copyWith(
