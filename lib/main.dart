@@ -4,6 +4,7 @@ import 'screens/quiet_breath/quiet_breath_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_strings.dart';
 import 'theme/ql_theme.dart';
+import 'screens/entry/quiet_entry_screen.dart';
 
 import 'screens/results/quiet_results_ok_screen.dart';
 
@@ -12,8 +13,7 @@ import 'data/streak/quiet_streak_local_store.dart';
 import 'data/streak/quiet_streak_repository.dart';
 import 'data/streak/quiet_streak_service.dart';
 
-import 'services/first_launch_service.dart';
-//import 'screens/home/quiet_home_screen.dart';
+// import 'services/first_launch_service.dart';
 import 'screens/shell/quiet_shell_screen.dart';
 //import 'package:quietline_app/core/feature_flags.dart';
 
@@ -45,60 +45,10 @@ class QuietLineApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: QLTheme.dark,
+      // Entry router: Splash → Welcome → (FTUE Quiet Time once) → Home
+      home: const QuietEntryScreen(),
+
       /*
-      home: Builder(
-        builder: (innerContext) {
-          // One session id per app start; this will be shared across pre + breath + post.
-          final String sessionId = DateTime.now().toIso8601String();
-
-          return Column(
-            children: [
-              // DEBUG BUTTON (temporary)
-              // SafeArea(
-              //   child: ElevatedButton(
-              //     onPressed: () async {
-              //       const store = MoodCheckinStore();
-              //       final records = await store.loadAll();
-              //
-              //       // ignore: avoid_print
-              //       print('=== Mood records (${records.length}) ===');
-              //       for (final r in records) {
-              //         // ignore: avoid_print
-              //         print(
-              //           '${r.timestamp.toIso8601String()} | ${r.mode} | score: ${r.score}',
-              //         );
-              //       }
-              //     },
-              //     child: const Text("DEBUG: Print Moods"),
-              //   ),
-              // ),
-
-              // THE ACTUAL APP FLOW
-              Expanded(
-                child: MoodCheckinScreen(
-                  mode: MoodCheckinMode.pre,
-                  sessionId: sessionId, // pass session id into pre check-in
-                  onSubmit: (score) {
-                    Navigator.of(innerContext).push(
-                      MaterialPageRoute(
-                        builder: (_) => QuietBreathScreen(sessionId: sessionId),
-                      ),
-                    );
-                  },
-                  onSkip: () {
-                    Navigator.of(innerContext).push(
-                      MaterialPageRoute(
-                        builder: (_) => QuietBreathScreen(sessionId: sessionId),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ],
-          );
-        },
-      ),
-      */
       // FTUE: On first install, start with Quiet Time.
       // After the first completed session, boot into the app shell (Home).
       home: FutureBuilder<bool>(
@@ -151,6 +101,7 @@ class QuietLineApp extends StatelessWidget {
           return const QuietShellScreen();
         },
       ),
+      */
       // home: const DebugResultsEntryScreen(),
     );
   }
