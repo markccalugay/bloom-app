@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/screens/splash/quiet_splash_screen.dart';
 import 'package:quietline_app/screens/welcome/quiet_welcome_screen.dart';
+import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
 
 class QuietEntryScreen extends StatefulWidget {
@@ -51,7 +52,24 @@ class _QuietEntryScreenState extends State<QuietEntryScreen> {
         if (!mounted) return;
         final navigator = Navigator.of(context);
         navigator.pushReplacement(
-          MaterialPageRoute(builder: (_) => const QuietWelcomeScreen()),
+          MaterialPageRoute(
+            builder: (_) => QuietWelcomeScreen(
+              onStart: () {
+                // Note: this callback can fire after QuietEntryScreen has been replaced.
+                // Use the captured NavigatorState (root navigator) rather than `mounted`.
+                final sessionId =
+                    'session-${DateTime.now().millisecondsSinceEpoch}';
+                navigator.pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => QuietBreathScreen(
+                      sessionId: sessionId,
+                      streak: 0,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
         );
       },
     );
