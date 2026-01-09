@@ -55,16 +55,11 @@ class _QuietEntryScreenState extends State<QuietEntryScreen> {
           MaterialPageRoute(
             builder: (_) => QuietWelcomeScreen(
               onStart: () {
-                // Note: this callback can fire after QuietEntryScreen has been replaced.
-                // Use the captured NavigatorState (root navigator) rather than `mounted`.
-                final sessionId =
-                    'session-${DateTime.now().millisecondsSinceEpoch}';
+                if (!mounted) return;
+                final sessionId = 'session-${DateTime.now().millisecondsSinceEpoch}';
                 navigator.pushReplacement(
                   MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(
-                      sessionId: sessionId,
-                      streak: 0,
-                    ),
+                    builder: (_) => QuietBreathScreen(sessionId: sessionId, streak: 0),
                   ),
                 );
               },
