@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
+
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietWelcomeScreen extends StatefulWidget {
-  /// Triggered when user taps "Start Quiet Time"
-  final VoidCallback? onStart;
+  /// Current streak to pass into the first session (for consistent UI).
+  final int streak;
+
+  /// Triggered when user taps "Start Quiet Time".
+  /// We pass the *current* BuildContext so the router can navigate safely.
+  final void Function(BuildContext context)? onStart;
 
   /// Triggered when user taps "Learn how it works"
   final VoidCallback? onLearnMore;
 
   const QuietWelcomeScreen({
     super.key,
+    this.streak = 0,
     this.onStart,
     this.onLearnMore,
   });
@@ -97,8 +104,25 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
   }
 
   void _start() {
-    // Routed by parent (QuietEntryScreen). If null, do nothing.
-    widget.onStart?.call();
+    // Prefer parent routing if provided (e.g., Entry screen).
+    // We pass the *current* BuildContext so navigation happens with a live context.
+    if (widget.onStart != null) {
+      widget.onStart!.call(context);
+      return;
+    }
+
+    // Fallback: start Quiet Time directly from this screen.
+    if (!mounted) return;
+
+    final sessionId = 'session-${DateTime.now().millisecondsSinceEpoch}';
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => QuietBreathScreen(
+          sessionId: sessionId,
+          streak: widget.streak,
+        ),
+      ),
+    );
   }
 
   void _learnMore() {

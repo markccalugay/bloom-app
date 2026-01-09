@@ -49,18 +49,6 @@ class _QuietEntryScreenState extends State<QuietEntryScreen> {
     }
   }
 
-  void _startQuietTime() {
-    final sessionId = 'session-${DateTime.now().millisecondsSinceEpoch}';
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => QuietBreathScreen(
-          sessionId: sessionId,
-          streak: _streak,
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     // Loading state (tiny, invisible)
@@ -80,7 +68,21 @@ class _QuietEntryScreenState extends State<QuietEntryScreen> {
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => QuietWelcomeScreen(
-              onStart: _startQuietTime,
+              streak: _streak,
+              onStart: (ctx) {
+                final sessionId =
+                    'session-${DateTime.now().millisecondsSinceEpoch}';
+
+                // Use the Welcome screen's context (ctx) to avoid using a disposed context.
+                Navigator.of(ctx).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => QuietBreathScreen(
+                      sessionId: sessionId,
+                      streak: _streak,
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         );
