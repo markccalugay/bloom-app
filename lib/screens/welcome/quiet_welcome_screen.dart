@@ -51,19 +51,19 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: const Duration(milliseconds: 1400),
     );
 
     Animation<double> fade(double begin, double end) {
       return CurvedAnimation(
         parent: _controller,
-        curve: Interval(begin, end, curve: Curves.easeOut),
+        curve: Interval(begin, end, curve: Curves.easeOutCubic),
       );
     }
 
     Animation<Offset> slide(double begin, double end) {
       return Tween<Offset>(
-        begin: const Offset(0, 0.04),
+        begin: const Offset(0, 0.06),
         end: Offset.zero,
       ).animate(
         CurvedAnimation(
@@ -79,20 +79,20 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
     // 3) Primary button
     // 4) Secondary CTA
     // 5) Disclaimer
-    _logoFade = fade(0.00, 0.35);
-    _logoSlide = slide(0.00, 0.35);
+    _logoFade = fade(0.00, 0.28);
+    _logoSlide = slide(0.00, 0.28);
 
-    _reassuranceFade = fade(0.25, 0.55);
-    _reassuranceSlide = slide(0.25, 0.55);
+    _reassuranceFade = fade(0.20, 0.44);
+    _reassuranceSlide = slide(0.20, 0.44);
 
-    _primaryFade = fade(0.45, 0.75);
-    _primarySlide = slide(0.45, 0.75);
+    _primaryFade = fade(0.38, 0.62);
+    _primarySlide = slide(0.38, 0.62);
 
-    _secondaryFade = fade(0.62, 0.88);
-    _secondarySlide = slide(0.62, 0.88);
+    _secondaryFade = fade(0.56, 0.78);
+    _secondarySlide = slide(0.56, 0.78);
 
-    _disclaimerFade = fade(0.70, 1.00);
-    _disclaimerSlide = slide(0.70, 1.00);
+    _disclaimerFade = fade(0.72, 1.00);
+    _disclaimerSlide = slide(0.72, 1.00);
 
     _controller.forward();
   }
@@ -132,9 +132,11 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final onSurface = cs.onSurface;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: QLColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
@@ -164,7 +166,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                         'A Moment of Quiet',
                         textAlign: TextAlign.left,
                         style: theme.textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
+                          color: onSurface,
                           fontWeight: FontWeight.w700,
                           height: 1.15,
                         ),
@@ -174,7 +176,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                         'We\'ll guide you through a 90-second breathing reset.\nThere\'s nothing to learn and nothing to get right.',
                         textAlign: TextAlign.left,
                         style: theme.textTheme.bodyLarge?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.82),
+                          color: onSurface.withValues(alpha: 0.82),
                           height: 1.35,
                         ),
                       ),
@@ -196,7 +198,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                       'You can stop anytime.',
                       textAlign: TextAlign.left,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.75),
+                        color: onSurface.withValues(alpha: 0.75),
                         height: 1.35,
                       ),
                     ),
@@ -242,7 +244,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                           Text(
                             'Learn how it works',
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.85),
+                              color: onSurface.withValues(alpha: 0.85),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -250,7 +252,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                           Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 14,
-                            color: Colors.white.withValues(alpha: 0.7),
+                            color: onSurface.withValues(alpha: 0.7),
                           ),
                         ],
                       ),
@@ -274,7 +276,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
                         'QuietLine is a wellness and emotional-support app.\nBy continuing, you agree to our Terms and Privacy Policy',
                         textAlign: TextAlign.left,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.55),
+                          color: onSurface.withValues(alpha: 0.55),
                           height: 1.3,
                         ),
                       ),

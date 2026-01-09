@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietSplashScreen extends StatefulWidget {
   final VoidCallback onDone;
@@ -62,8 +63,10 @@ class _QuietSplashScreenState extends State<QuietSplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A), // matches QuietLine tone
+      backgroundColor: QLColors.background,
       body: Center(
         child: FadeTransition(
           opacity: _fade,
@@ -76,19 +79,19 @@ class _QuietSplashScreenState extends State<QuietSplashScreen>
                   AppAssets.quietlineLogo,
                   width: 96,
                   height: 96,
-                  colorFilter: const ColorFilter.mode(
-                    Colors.white,
+                  colorFilter: ColorFilter.mode(
+                    onSurface,
                     BlendMode.srcIn,
                   ),
                 ),
                 const SizedBox(height: 24),
-                const SizedBox(
+                SizedBox(
                   width: 20,
                   height: 20,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.white54,
+                      onSurface.withValues(alpha: 0.55),
                     ),
                   ),
                 ),
