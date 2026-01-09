@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 /// Slide-in side menu used by the shell.
 /// The shell owns the open/close state and passes callbacks down.
+Future<String> _getVersionLabel() async {
+  final info = await PackageInfo.fromPlatform();
+  return 'QuietLine v${info.version} (build ${info.buildNumber})';
+}
 class QLSideMenu extends StatelessWidget {
   final String displayName;
   final VoidCallback onClose;
@@ -209,12 +214,18 @@ class QLSideMenu extends StatelessWidget {
                     const SizedBox(height: 24),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        'QuietLine v0.1.0',
-                        style: textTheme.bodySmall?.copyWith(
-                          color: baseTextColor.withValues(alpha: 0.5),
-                          fontSize: 11,
-                        ),
+                      child: FutureBuilder<String>(
+                        future: _getVersionLabel(),
+                        builder: (context, snapshot) {
+                          final label = snapshot.data ?? 'QuietLine';
+                          return Text(
+                            label,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: baseTextColor.withValues(alpha: 0.5),
+                              fontSize: 11,
+                            ),
+                          );
+                        },
                       ),
                     ),
                     const SizedBox(height: 12),
