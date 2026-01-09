@@ -3,6 +3,9 @@ import 'affirmations_model.dart';
 /// IDs so we don't hardcode strings everywhere.
 class AffirmationPackIds {
   static const core = 'core';
+  static const focus = 'focus';
+  static const sleep = 'sleep';
+  static const strength = 'strength';
 }
 
 /// Core pack definition
@@ -13,8 +16,37 @@ const corePack = AffirmationPack(
   isSeasonal: false,
 );
 
+/// Focus pack definition
+const focusPack = AffirmationPack(
+  id: AffirmationPackIds.focus,
+  name: 'Focus & Work',
+  description: 'Calm focus for work, effort, and attention.',
+  isSeasonal: false,
+);
+
+/// Sleep pack definition
+const sleepPack = AffirmationPack(
+  id: AffirmationPackIds.sleep,
+  name: 'Sleep & Night Reset',
+  description: 'Wind down, release the day, and reset for rest.',
+  isSeasonal: false,
+);
+
+/// Strength pack definition
+const strengthPack = AffirmationPack(
+  id: AffirmationPackIds.strength,
+  name: 'Confidence & Strength',
+  description: 'Quiet strength, steady confidence, no bravado.',
+  isSeasonal: false,
+);
+
 /// All packs (for future library screens).
-const allPacks = <AffirmationPack>[corePack];
+const allPacks = <AffirmationPack>[
+  corePack,
+  focusPack,
+  sleepPack,
+  strengthPack,
+];
 
 /// Core affirmations list (edit freely).
 const coreAffirmations = <Affirmation>[
@@ -520,7 +552,97 @@ const coreAffirmations = <Affirmation>[
   ),
 ];
 
+/// Focus & Work affirmations (25)
+const focusAffirmations = <Affirmation>[
+  Affirmation(id: 'focus_001', packId: AffirmationPackIds.focus, text: 'One task is enough right now.'),
+  Affirmation(id: 'focus_002', packId: AffirmationPackIds.focus, text: 'I can begin before I feel ready.'),
+  Affirmation(id: 'focus_003', packId: AffirmationPackIds.focus, text: 'Focus grows when I remove urgency.'),
+  Affirmation(id: 'focus_004', packId: AffirmationPackIds.focus, text: 'I don’t need momentum to start.'),
+  Affirmation(id: 'focus_005', packId: AffirmationPackIds.focus, text: 'Small progress still counts.'),
+  Affirmation(id: 'focus_006', packId: AffirmationPackIds.focus, text: 'I can work calmly and still be effective.'),
+  Affirmation(id: 'focus_007', packId: AffirmationPackIds.focus, text: 'My attention is something I can choose.'),
+  Affirmation(id: 'focus_008', packId: AffirmationPackIds.focus, text: 'I return to the task without judgment.'),
+  Affirmation(id: 'focus_009', packId: AffirmationPackIds.focus, text: 'Clarity comes from doing, not thinking.'),
+  Affirmation(id: 'focus_010', packId: AffirmationPackIds.focus, text: 'I can finish this one step at a time.'),
+  Affirmation(id: 'focus_011', packId: AffirmationPackIds.focus, text: 'Discomfort doesn’t mean danger.'),
+  Affirmation(id: 'focus_012', packId: AffirmationPackIds.focus, text: 'I don’t need perfect conditions to begin.'),
+  Affirmation(id: 'focus_013', packId: AffirmationPackIds.focus, text: 'I can slow down and still move forward.'),
+  Affirmation(id: 'focus_014', packId: AffirmationPackIds.focus, text: 'Focus is built, not forced.'),
+  Affirmation(id: 'focus_015', packId: AffirmationPackIds.focus, text: 'I’m allowed to work without pressure.'),
+  Affirmation(id: 'focus_016', packId: AffirmationPackIds.focus, text: 'One clear action is enough for now.'),
+  Affirmation(id: 'focus_017', packId: AffirmationPackIds.focus, text: 'I release distraction and return gently.'),
+  Affirmation(id: 'focus_018', packId: AffirmationPackIds.focus, text: 'Progress beats intensity.'),
+  Affirmation(id: 'focus_019', packId: AffirmationPackIds.focus, text: 'I can stay with this moment.'),
+  Affirmation(id: 'focus_020', packId: AffirmationPackIds.focus, text: 'Calm attention creates better results.'),
+  Affirmation(id: 'focus_021', packId: AffirmationPackIds.focus, text: 'I don’t need to rush to be productive.'),
+  Affirmation(id: 'focus_022', packId: AffirmationPackIds.focus, text: 'My work improves when my breath steadies.'),
+  Affirmation(id: 'focus_023', packId: AffirmationPackIds.focus, text: 'I can reset my focus at any time.'),
+  Affirmation(id: 'focus_024', packId: AffirmationPackIds.focus, text: 'This task does not define my worth.'),
+  Affirmation(id: 'focus_025', packId: AffirmationPackIds.focus, text: 'I finish what I can, and that’s enough.'),
+];
+
+/// Sleep & Night Reset affirmations (25)
+const sleepAffirmations = <Affirmation>[
+  Affirmation(id: 'sleep_001', packId: AffirmationPackIds.sleep, text: 'The day is allowed to end here.'),
+  Affirmation(id: 'sleep_002', packId: AffirmationPackIds.sleep, text: 'I don’t need to solve everything tonight.'),
+  Affirmation(id: 'sleep_003', packId: AffirmationPackIds.sleep, text: 'Rest is productive for tomorrow.'),
+  Affirmation(id: 'sleep_004', packId: AffirmationPackIds.sleep, text: 'My body knows how to power down.'),
+  Affirmation(id: 'sleep_005', packId: AffirmationPackIds.sleep, text: 'I release today without replaying it.'),
+  Affirmation(id: 'sleep_006', packId: AffirmationPackIds.sleep, text: 'Nothing else is required of me right now.'),
+  Affirmation(id: 'sleep_007', packId: AffirmationPackIds.sleep, text: 'I can let my thoughts slow naturally.'),
+  Affirmation(id: 'sleep_008', packId: AffirmationPackIds.sleep, text: 'Tomorrow can wait until morning.'),
+  Affirmation(id: 'sleep_009', packId: AffirmationPackIds.sleep, text: 'I’m allowed to stop holding everything.'),
+  Affirmation(id: 'sleep_010', packId: AffirmationPackIds.sleep, text: 'Sleep comes easier when I stop trying.'),
+  Affirmation(id: 'sleep_011', packId: AffirmationPackIds.sleep, text: 'My breath signals safety to my body.'),
+  Affirmation(id: 'sleep_012', packId: AffirmationPackIds.sleep, text: 'I can soften without losing control.'),
+  Affirmation(id: 'sleep_013', packId: AffirmationPackIds.sleep, text: 'The night is a reset, not an escape.'),
+  Affirmation(id: 'sleep_014', packId: AffirmationPackIds.sleep, text: 'I don’t need answers to rest.'),
+  Affirmation(id: 'sleep_015', packId: AffirmationPackIds.sleep, text: 'My nervous system is allowed to calm.'),
+  Affirmation(id: 'sleep_016', packId: AffirmationPackIds.sleep, text: 'I can let this moment be quiet.'),
+  Affirmation(id: 'sleep_017', packId: AffirmationPackIds.sleep, text: 'I trust my body to rest when it’s ready.'),
+  Affirmation(id: 'sleep_018', packId: AffirmationPackIds.sleep, text: 'The work of today is complete enough.'),
+  Affirmation(id: 'sleep_019', packId: AffirmationPackIds.sleep, text: 'I can put the day down now.'),
+  Affirmation(id: 'sleep_020', packId: AffirmationPackIds.sleep, text: 'Calm arrives when I stop resisting it.'),
+  Affirmation(id: 'sleep_021', packId: AffirmationPackIds.sleep, text: 'I don’t need to carry tomorrow tonight.'),
+  Affirmation(id: 'sleep_022', packId: AffirmationPackIds.sleep, text: 'Rest repairs more than effort ever could.'),
+  Affirmation(id: 'sleep_023', packId: AffirmationPackIds.sleep, text: 'I am safe to slow all the way down.'),
+  Affirmation(id: 'sleep_024', packId: AffirmationPackIds.sleep, text: 'My breath prepares me for sleep.'),
+  Affirmation(id: 'sleep_025', packId: AffirmationPackIds.sleep, text: 'I allow the night to hold me.'),
+];
+
+/// Confidence & Strength affirmations (25)
+const strengthAffirmations = <Affirmation>[
+  Affirmation(id: 'strength_001', packId: AffirmationPackIds.strength, text: 'Calm is a form of strength.'),
+  Affirmation(id: 'strength_002', packId: AffirmationPackIds.strength, text: 'I can handle what’s in front of me.'),
+  Affirmation(id: 'strength_003', packId: AffirmationPackIds.strength, text: 'I don’t need to react to stay powerful.'),
+  Affirmation(id: 'strength_004', packId: AffirmationPackIds.strength, text: 'Steady beats aggressive.'),
+  Affirmation(id: 'strength_005', packId: AffirmationPackIds.strength, text: 'I trust myself to respond well.'),
+  Affirmation(id: 'strength_006', packId: AffirmationPackIds.strength, text: 'I can stay grounded under pressure.'),
+  Affirmation(id: 'strength_007', packId: AffirmationPackIds.strength, text: 'Strength doesn’t require tension.'),
+  Affirmation(id: 'strength_008', packId: AffirmationPackIds.strength, text: 'I don’t need to prove anything right now.'),
+  Affirmation(id: 'strength_009', packId: AffirmationPackIds.strength, text: 'I hold my ground without force.'),
+  Affirmation(id: 'strength_010', packId: AffirmationPackIds.strength, text: 'I can pause and still be capable.'),
+  Affirmation(id: 'strength_011', packId: AffirmationPackIds.strength, text: 'Confidence grows when I stay present.'),
+  Affirmation(id: 'strength_012', packId: AffirmationPackIds.strength, text: 'I’m allowed to move at my own pace.'),
+  Affirmation(id: 'strength_013', packId: AffirmationPackIds.strength, text: 'I don’t lose power by staying calm.'),
+  Affirmation(id: 'strength_014', packId: AffirmationPackIds.strength, text: 'I choose clarity over impulse.'),
+  Affirmation(id: 'strength_015', packId: AffirmationPackIds.strength, text: 'I can be firm without being harsh.'),
+  Affirmation(id: 'strength_016', packId: AffirmationPackIds.strength, text: 'My composure is reliable.'),
+  Affirmation(id: 'strength_017', packId: AffirmationPackIds.strength, text: 'I don’t need approval to trust myself.'),
+  Affirmation(id: 'strength_018', packId: AffirmationPackIds.strength, text: 'I stay steady even when things are uncertain.'),
+  Affirmation(id: 'strength_019', packId: AffirmationPackIds.strength, text: 'I can lead myself through this moment.'),
+  Affirmation(id: 'strength_020', packId: AffirmationPackIds.strength, text: 'Strength looks quiet from the outside.'),
+  Affirmation(id: 'strength_021', packId: AffirmationPackIds.strength, text: 'I am capable without rushing.'),
+  Affirmation(id: 'strength_022', packId: AffirmationPackIds.strength, text: 'I meet challenges without tightening.'),
+  Affirmation(id: 'strength_023', packId: AffirmationPackIds.strength, text: 'I don’t need chaos to feel alive.'),
+  Affirmation(id: 'strength_024', packId: AffirmationPackIds.strength, text: 'I carry myself with intention.'),
+  Affirmation(id: 'strength_025', packId: AffirmationPackIds.strength, text: 'I am harder to shake than I used to be.'),
+];
+
 /// Map pack → affirmations
 final Map<String, List<Affirmation>> affirmationsByPack = {
   AffirmationPackIds.core: coreAffirmations,
+  AffirmationPackIds.focus: focusAffirmations,
+  AffirmationPackIds.sleep: sleepAffirmations,
+  AffirmationPackIds.strength: strengthAffirmations,
 };
