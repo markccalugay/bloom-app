@@ -14,11 +14,19 @@ import 'widgets/quiet_results_streak_row.dart';
 /// “You showed up again” results screen shown when mood >= 3.
 class QuietResultsOkScreen extends StatelessWidget {
   final int streak;
+
+  /// Previous streak value BEFORE this results screen.
+  /// If provided, we'll compute whether the streak increased.
+  final int? previousStreak;
+
+  /// Backwards-compat: older call sites may still pass this.
+  /// Prefer passing `previousStreak`.
   final bool isNew; // pass true when streak just increased
 
   const QuietResultsOkScreen({
     super.key,
     required this.streak,
+    this.previousStreak,
     this.isNew = false,
   });
 
@@ -26,6 +34,15 @@ class QuietResultsOkScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
+
+    // Decide if this screen represents a newly earned streak day.
+    // - Prefer comparing against `previousStreak` when available.
+    // - Fall back to `isNew` for older callers.
+    // - FTUE safety: if someone forgets to pass flags on Day 1, we still animate.
+    final int prevStreak = (previousStreak ?? (isNew ? (streak - 1) : streak)).clamp(0, 999999);
+    final bool streakIncreased = previousStreak != null
+        ? streak > previousStreak!
+        : (isNew || streak == 1);
 
     return Scaffold(
       body: SafeArea(
@@ -82,8 +99,8 @@ class QuietResultsOkScreen extends StatelessWidget {
                     // Big SVG flame badge
                     QuietResultsStreakBadge(
                       streak: streak,
-                      previousStreak: isNew ? (streak - 1).clamp(0, 999999) : streak,
-                      animate: isNew,
+                      previousStreak: prevStreak,
+                      animate: streakIncreased,
                     ),
 
                     const SizedBox(
@@ -93,8 +110,8 @@ class QuietResultsOkScreen extends StatelessWidget {
                     // Small flame row
                     QuietResultsStreakRow(
                       streak: streak,
-                      previousStreak: isNew ? (streak - 1).clamp(0, 999999) : streak,
-                      animate: isNew,
+                      previousStreak: prevStreak,
+                      animate: streakIncreased,
                     ),
                   ],
                 ),
@@ -106,7 +123,7 @@ class QuietResultsOkScreen extends StatelessWidget {
               QLPrimaryButton(
                 label: QuietResultsStrings.continueButton,
                 onPressed: () async {
-                  if (isNew) {
+                  if (streakIncreased) {
                     final unlockService = AffirmationsUnlockService.instance;
                     await unlockService.unlockIfEligibleForToday(streak);
                     if (!context.mounted) return;

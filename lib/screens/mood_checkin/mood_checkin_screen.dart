@@ -85,12 +85,15 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
           current = 0;
         }
 
+        final previousStreak = current;
+
         if (!mounted) return;
 
         navigator.pushReplacement(
           MaterialPageRoute(
             builder: (_) => QuietResultsOkScreen(
               streak: current,
+              previousStreak: previousStreak,
               isNew: false,
             ),
           ),
@@ -169,9 +172,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                   // POST mode: route to results.
                   if (score >= 3) {
                     // Capture navigator before any async gap.
-                    // final navigator = Navigator.of(context);
-
-                    // 1. Update streak as usual.
+                    final previousStreak = await QuietStreakService.getCurrentStreak();
                     final newStreak =
                         await QuietStreakService.registerSessionCompletedToday();
 
@@ -188,6 +189,7 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                       MaterialPageRoute(
                         builder: (_) => QuietResultsOkScreen(
                           streak: newStreak,
+                          previousStreak: previousStreak,
                           isNew: true,
                         ),
                       ),
@@ -206,12 +208,15 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                         current = 0;
                       }
 
+                      final previousStreak = current;
+
                       if (!mounted) return;
 
                       navigator.pushReplacement(
                         MaterialPageRoute(
                           builder: (_) => QuietResultsOkScreen(
                             streak: current,
+                            previousStreak: previousStreak,
                             isNew: false,
                           ),
                         ),

@@ -22,7 +22,7 @@ class QuietBreathScreen extends StatefulWidget {
   const QuietBreathScreen({
     super.key,
     required this.sessionId,
-    this.streak = 1,
+    this.streak = 0,
   });
 
   @override
@@ -66,9 +66,12 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     }
 
     // MVP path: increment streak on session completion.
-    int before = 0;
-    int after = 0;
+    // Use the passed-in streak as a stable fallback (FTUE Day 0 -> Day 1).
+    int before = widget.streak;
+    int after = before;
+
     try {
+      // Prefer the persisted value if available.
       before = await QuietStreakService.getCurrentStreak();
       after = await QuietStreakService.registerSessionCompletedToday();
 
@@ -94,6 +97,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       MaterialPageRoute(
         builder: (_) => QuietResultsOkScreen(
           streak: after,
+          previousStreak: before,
           isNew: isNew,
         ),
       ),

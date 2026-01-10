@@ -32,7 +32,13 @@ class QuietResultsStreakRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final prev = previousStreak ?? (streak - 1);
+    // Be forgiving: if the caller accidentally passes the same value for
+    // previousStreak and streak, we still want newly-earned flames to animate.
+    // Clamp to 0 so Day 1 can animate from Day 0.
+    final int prevRaw =
+        (previousStreak == null) ? (streak - 1) : previousStreak!;
+    final int prev = (prevRaw >= streak) ? (streak - 1) : prevRaw;
+    final int prevClamped = prev < 0 ? 0 : prev;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -42,7 +48,7 @@ class QuietResultsStreakRow extends StatelessWidget {
         final isActive = streak >= step;
 
         // Newly earned if it crossed this step during this session.
-        final animateIn = animate && isActive && prev < step;
+        final animateIn = animate && isActive && prevClamped < step;
 
         // Stagger each newly-earned flame.
         final delay = Duration(milliseconds: 120 * index);
