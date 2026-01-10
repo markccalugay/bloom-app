@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/data/affirmations/affirmations_model.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 class AffirmationGridTile extends StatelessWidget {
   final Affirmation affirmation;
