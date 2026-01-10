@@ -10,7 +10,6 @@ import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/core/feature_flags.dart';
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
-import 'package:quietline_app/services/first_launch_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -65,19 +64,19 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       return;
     }
 
-    // FTUE-safe path:
-    // Do NOT persist streak here.
-    // Results screen owns the 0 -> 1 animation + persistence.
-    final int before = widget.streak; // should be 0 on FTUE
+    // Increment streak here — this is the moment the user earns it.
+    // FTUE flow: 0 -> 1 happens exactly once.
+    final int previous = widget.streak; // 0 on first install
+    final int current = await QuietStreakService.registerSessionCompletedToday();
 
     if (!mounted) return;
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => QuietResultsOkScreen(
-          streak: before,          // always 0 on first install
-          previousStreak: before,  // 0 -> animation target handled in results
-          isNew: true,             // explicitly signal FTUE animation
+          previousStreak: previous,   // 0
+          streak: current,            // 1
+          isNew: current == 1,         // FTUE animation trigger
         ),
       ),
     );
