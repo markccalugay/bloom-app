@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
-import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
+import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
+import 'package:quietline_app/data/affirmations/affirmations_model.dart';
 
 import 'quiet_results_constants.dart';
 import 'quiet_results_strings.dart';
@@ -97,8 +98,11 @@ class QuietResultsOkScreen extends StatelessWidget {
               // Bottom primary button, matching design
               QLPrimaryButton(
                 label: QuietResultsStrings.continueButton,
-                onPressed: () {
+                onPressed: () async {
                   if (isNew) {
+                    final unlockService = AffirmationsUnlockService.instance;
+                    await unlockService.unlockIfEligibleForToday(streak);
+                    if (!context.mounted) return;
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => QuietAffirmationUnlockedScreen(streak: streak),
@@ -150,6 +154,8 @@ class _QuietAffirmationUnlockedScreenState
   late final Animation<double> _fade;
   late final Animation<double> _scale;
 
+  late final Future<Affirmation?> _affirmationFuture;
+
   @override
   void initState() {
     super.initState();
@@ -161,6 +167,8 @@ class _QuietAffirmationUnlockedScreenState
     _scale = Tween<double>(begin: 0.98, end: 1.0).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
     );
+
+    _affirmationFuture = AffirmationsUnlockService.instance.getUnlockedForStreak(widget.streak);
 
     // Start animation on first frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -198,12 +206,6 @@ class _QuietAffirmationUnlockedScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-
-    final core = affirmationsByPack[AffirmationPackIds.core] ?? const [];
-    final index = (widget.streak <= 0) ? 0 : (widget.streak - 1);
-    final String affirmationText = (index >= 0 && index < core.length)
-        ? core[index].text
-        : 'You showed up today.';
 
     final unlockedLabel =
         'Unlocked on Day ${widget.streak} ${_formatMonthDayYear(DateTime.now())}';
@@ -245,13 +247,21 @@ class _QuietAffirmationUnlockedScreenState
                     scale: _scale,
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 460),
-                      child: Text(
-                        affirmationText,
-                        textAlign: TextAlign.center,
-                        style: textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                          height: 1.25,
-                        ),
+                      child: FutureBuilder<Affirmation?>
+                          (
+                        future: _affirmationFuture,
+                        builder: (context, snapshot) {
+                          final text = snapshot.data?.text ?? 'You showed up today.';
+
+                          return Text(
+                            text,
+                            textAlign: TextAlign.center,
+                            style: textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              height: 1.25,
+                            ),
+                          );
+                        },
                       ),
                     ),
                   ),

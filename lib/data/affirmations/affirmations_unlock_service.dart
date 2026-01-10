@@ -92,4 +92,33 @@ class AffirmationsUnlockService {
 
     return affirmation;
   }
+
+  /// Alias used by results routing: unlock one core affirmation for the given streak day
+  /// (only once per local calendar day).
+  Future<Affirmation?> unlockIfEligibleForToday(int streakDay) {
+    return unlockCoreOncePerDay(streakDay: streakDay);
+  }
+
+  /// Backwards-compatible alias (older call sites).
+  Future<Affirmation?> unlockTodayIfEligible(int streakDay) {
+    return unlockCoreOncePerDay(streakDay: streakDay);
+  }
+
+  /// Returns the core affirmation for the given streak day ONLY if it is already unlocked.
+  /// (Does not unlock anything.)
+  Future<Affirmation?> getUnlockedForStreak(int streakDay) async {
+    final unlockedIds = await getUnlockedIds();
+    final targetId = 'core_${streakDay.toString().padLeft(3, '0')}';
+    if (!unlockedIds.contains(targetId)) return null;
+
+    return _firstWhereOrNull(
+      coreAffirmations,
+      (a) => a.id == targetId,
+    );
+  }
+
+  /// Backwards-compatible alias (older call sites).
+  Future<Affirmation?> getUnlockedForDay(int streakDay) {
+    return getUnlockedForStreak(streakDay);
+  }
 }
