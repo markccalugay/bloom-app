@@ -72,7 +72,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
     try {
       // Prefer the persisted value if available.
-      before = await QuietStreakService.getCurrentStreak();
       after = await QuietStreakService.registerSessionCompletedToday();
 
       // Mark FTUE completion (idempotent). This ensures the app boots to Home

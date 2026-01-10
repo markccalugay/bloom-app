@@ -22,10 +22,10 @@ class QuietStreakLogic {
     // Work with date-only (no time component).
     final todayDate = _stripTime(today);
 
-    // No previous record → start at 1.
+    // No previous record → FTUE starts at 0, first completion moves to 1.
     if (lastDate == null) {
       return QuietStreakLogicResult(
-        newStreak: 1,
+        newStreak: currentStreak <= 0 ? 1 : currentStreak,
         newDate: todayDate,
       );
     }
