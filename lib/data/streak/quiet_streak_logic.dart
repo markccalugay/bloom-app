@@ -22,10 +22,11 @@ class QuietStreakLogic {
     // Work with date-only (no time component).
     final todayDate = _stripTime(today);
 
-    // No previous record → FTUE starts at 0, first completion moves to 1.
+    // No previous record → FTUE stays at 0.
+    // First completion should ANIMATE 0 → 1 in the UI, then be persisted.
     if (lastDate == null) {
       return QuietStreakLogicResult(
-        newStreak: currentStreak <= 0 ? 1 : currentStreak,
+        newStreak: 0,
         newDate: todayDate,
       );
     }
@@ -34,21 +35,19 @@ class QuietStreakLogic {
     final diffDays = todayDate.difference(lastDateOnly).inDays;
 
     if (diffDays == 0) {
-      // Same calendar day → keep current streak.
-      final streak = currentStreak <= 0 ? 1 : currentStreak;
+      // Same calendar day → no change.
       return QuietStreakLogicResult(
-        newStreak: streak,
+        newStreak: currentStreak,
         newDate: todayDate,
       );
     } else if (diffDays == 1) {
       // Yesterday → continue streak.
-      final base = currentStreak <= 0 ? 1 : currentStreak + 1;
       return QuietStreakLogicResult(
-        newStreak: base,
+        newStreak: currentStreak + 1,
         newDate: todayDate,
       );
     } else {
-      // Missed one or more days → reset to 1.
+      // Missed one or more days → reset to 0 (will animate again on next completion).
       return QuietStreakLogicResult(
         newStreak: 1,
         newDate: todayDate,

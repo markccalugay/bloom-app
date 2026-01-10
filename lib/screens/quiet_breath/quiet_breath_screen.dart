@@ -65,39 +65,19 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       return;
     }
 
-    // MVP path: increment streak on session completion.
-    // Use the passed-in streak as a stable fallback (FTUE Day 0 -> Day 1).
-    int before = widget.streak;
-    int after = before;
-
-    try {
-      // Prefer the persisted value if available.
-      after = await QuietStreakService.registerSessionCompletedToday();
-
-      // Mark FTUE completion (idempotent). This ensures the app boots to Home
-      // on subsequent launches after the first completed session.
-      await FirstLaunchService.instance.markCompleted();
-    } catch (_) {
-      // MVP stability: fall back safely.
-      after = before;
-      try {
-        // Even if streak fails, still attempt to mark FTUE as completed.
-        await FirstLaunchService.instance.markCompleted();
-      } catch (_) {
-        // no-op
-      }
-    }
+    // FTUE-safe path:
+    // Do NOT persist streak here.
+    // Results screen owns the 0 -> 1 animation + persistence.
+    final int before = widget.streak; // should be 0 on FTUE
 
     if (!mounted) return;
-
-    final bool isNew = after > before;
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (_) => QuietResultsOkScreen(
-          streak: after,
-          previousStreak: before,
-          isNew: isNew,
+          streak: before,          // always 0 on first install
+          previousStreak: before,  // 0 -> animation target handled in results
+          isNew: true,             // explicitly signal FTUE animation
         ),
       ),
     );
