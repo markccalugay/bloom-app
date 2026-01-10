@@ -28,19 +28,13 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   late final AnimationController _scaleController;
   late final Animation<double> _scale;
 
-  static const List<int> _milestones = [5, 10, 15, 20, 25];
-
   bool get _isActive => widget.streak > 0;
 
-  bool get _hitMilestone {
+  bool get _shouldAnimate {
     if (!widget.animate) return false;
     if (widget.previousStreak == null) return false;
 
-    return _milestones.any(
-      (m) =>
-          widget.previousStreak! < m &&
-          widget.streak >= m,
-    );
+    return widget.streak > widget.previousStreak!;
   }
 
   @override
@@ -52,16 +46,37 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
       duration: const Duration(milliseconds: 420),
     );
 
-    _scale = Tween<double>(begin: 0.85, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.90, end: 1.0).animate(
       CurvedAnimation(
         parent: _scaleController,
         curve: Curves.elasticOut,
       ),
     );
 
-    if (_hitMilestone) {
+    if (_shouldAnimate) {
+      _scaleController.value = 0.0;
       _scaleController.forward();
     } else {
+      _scaleController.value = 1.0;
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant QuietResultsStreakBadge oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Animate only when the streak increases.
+    final shouldAnimate = widget.animate &&
+        widget.previousStreak != null &&
+        widget.streak > widget.previousStreak!;
+
+    if (shouldAnimate) {
+      _scaleController
+        ..stop()
+        ..value = 0.0
+        ..forward();
+    } else {
+      // Ensure we don't remain shrunken if the widget updates without an increase.
       _scaleController.value = 1.0;
     }
   }
