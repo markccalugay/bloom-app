@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
@@ -48,59 +49,71 @@ class AffirmationGridTile extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              // Content
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top: small QL mark (subtle)
-                    Align(
-                      alignment: Alignment.topRight,
-                      child: SvgPicture.asset(
-                        AppAssets.quietlineLogo,
-                        width: 14,
-                        height: 14,
-                        colorFilter: ColorFilter.mode(
-                          Colors.white.withValues(alpha: 0.85),
-                          BlendMode.srcIn,
-                        ),
-                      ),
+              // Content (blurred when locked)
+              ClipRRect(
+                borderRadius: radius,
+                child: Opacity(
+                  opacity: isUnlocked ? 1.0 : 0.35,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(
+                      sigmaX: isUnlocked ? 0 : 6,
+                      sigmaY: isUnlocked ? 0 : 6,
                     ),
-
-                    const SizedBox(height: 8),
-
-                    // Center-ish affirmation text (trimmed for tile size)
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          affirmation.text,
-                          maxLines: 4,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: baseTextColor.withValues(alpha: 0.95),
-                            height: 1.25,
-                            fontWeight: FontWeight.w600,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Top: small QL mark (subtle)
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: SvgPicture.asset(
+                              AppAssets.quietlineLogo,
+                              width: 14,
+                              height: 14,
+                              colorFilter: ColorFilter.mode(
+                                Colors.white.withValues(alpha: 0.85),
+                                BlendMode.srcIn,
+                              ),
+                            ),
                           ),
-                        ),
+
+                          const SizedBox(height: 8),
+
+                          // Center-ish affirmation text (trimmed for tile size)
+                          Expanded(
+                            child: Center(
+                              child: Text(
+                                affirmation.text,
+                                maxLines: 4,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: TextAlign.center,
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: baseTextColor.withValues(alpha: 0.95),
+                                  height: 1.25,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          // Bottom-left unlocked label (only when unlocked)
+                          if (isUnlocked && unlockedLabel != null) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              unlockedLabel!,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.65),
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                     ),
-
-                    // Bottom-left unlocked label (only when unlocked)
-                    if (isUnlocked && unlockedLabel != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        unlockedLabel!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.65),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
               ),
 

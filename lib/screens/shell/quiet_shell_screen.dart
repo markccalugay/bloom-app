@@ -9,6 +9,7 @@ import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
 import 'package:quietline_app/services/web_launch_service.dart';
 import 'package:quietline_app/services/support_call_service.dart';
 import 'package:quietline_app/screens/account/quiet_account_screen.dart';
+import 'package:quietline_app/screens/affirmations/quiet_affirmations_library_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 import 'package:quietline_app/data/user/user_service.dart';
@@ -198,11 +199,20 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 _isMenuOpen = false;
               });
             },
-            onNavigateAffirmations: () {
-              setState(() {
-                _currentIndex = 0;
-                _isMenuOpen = false;
-              });
+            onNavigateAffirmations: () async {
+              // Close the menu first.
+              if (_isMenuOpen) {
+                setState(() {
+                  _isMenuOpen = false;
+                });
+              }
+
+              // Open the Affirmations Library as a pushed screen.
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => QuietAffirmationsLibraryScreen(),
+                ),
+              );
             },
             onOpenAbout: _web.openAbout,
             onOpenWebsite: _web.openWebsite,
