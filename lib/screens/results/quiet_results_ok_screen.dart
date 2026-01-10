@@ -1,4 +1,6 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
@@ -80,7 +82,6 @@ class QuietResultsOkScreen extends StatelessWidget {
                     // Big SVG flame badge
                     QuietResultsStreakBadge(
                       streak: streak,
-                      isNew: isNew,
                     ),
 
                     const SizedBox(
@@ -149,10 +150,18 @@ class QuietAffirmationUnlockedScreen extends StatefulWidget {
 
 class _QuietAffirmationUnlockedScreenState
     extends State<QuietAffirmationUnlockedScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<double> _scale;
+  late final Animation<double> _flip;
+
+  late final AnimationController _confettiController;
+  late final Animation<double> _confettiProgress;
+  final List<_ConfettiPiece> _confettiPieces = [];
+  bool _showConfetti = false;
+
+  bool _showContinue = false;
 
   late final Future<Affirmation?> _affirmationFuture;
 
@@ -161,18 +170,100 @@ class _QuietAffirmationUnlockedScreenState
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 380),
-    );
-    _fade = CurvedAnimation(parent: _controller, curve: Curves.easeOut);
-    _scale = Tween<double>(begin: 0.98, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+      duration: const Duration(milliseconds: 1600),
     );
 
-    _affirmationFuture = AffirmationsUnlockService.instance.getUnlockedForStreak(widget.streak);
+    _fade = CurvedAnimation(
+      parent: _controller,
+      curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
+    );
+
+    // Slight pop at the end (the "burst")
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.98, end: 1.02)
+            .chain(CurveTween(curve: const Interval(0.0, 0.35, curve: Curves.easeOut))),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.02, end: 1.0)
+            .chain(CurveTween(curve: const Interval(0.75, 1.0, curve: Curves.easeOutBack))),
+        weight: 65,
+      ),
+    ]).animate(_controller);
+
+    // Card flip reveal: 3 full flips (0 -> 3π) between 35% and 85%.
+    _flip = Tween<double>(begin: 0.0, end: 3.0 * 3.141592653589793).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.35, 0.85, curve: Curves.easeInOutCubic),
+      ),
+    );
+
+    _confettiController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    _confettiProgress = CurvedAnimation(
+      parent: _confettiController,
+      curve: Curves.easeOut,
+    );
+
+    // Pre-generate confetti pieces (stable, deterministic).
+    final rng = math.Random(42);
+    for (int i = 0; i < 44; i++) {
+      _confettiPieces.add(
+        _ConfettiPiece(
+          // Emit from roughly the card center.
+          x0: (rng.nextDouble() - 0.5) * 220,
+          y0: (rng.nextDouble() - 0.5) * 40,
+          angle: rng.nextDouble() * math.pi * 2,
+          speed: 160 + rng.nextDouble() * 220,
+          size: 4 + rng.nextDouble() * 6,
+          spin: (rng.nextDouble() - 0.5) * 10,
+          // Keep colors on-brand: mostly white with a hint of teal.
+          color: i % 7 == 0
+              ? const Color(0xFF3E8F87)
+              : Colors.white.withValues(alpha: 0.9),
+        ),
+      );
+    }
+
+    _affirmationFuture =
+        AffirmationsUnlockService.instance.getUnlockedForStreak(widget.streak);
+
+    _controller.addStatusListener((status) {
+      if (status == AnimationStatus.completed && mounted) {
+        // Confetti burst after the card finishes the slam.
+        setState(() => _showConfetti = true);
+        _confettiController.forward(from: 0.0).whenComplete(() {
+          if (!mounted) return;
+          setState(() => _showConfetti = false);
+        });
+
+        // Give the user a moment to read before showing Continue.
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (!mounted) return;
+          setState(() => _showContinue = true);
+        });
+      }
+    });
 
     // Start animation on first frame.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+
+      // Haptics: small "tap" then a bigger "pop".
+      HapticFeedback.lightImpact();
+      Future.delayed(const Duration(milliseconds: 520), () {
+        if (!mounted) return;
+        HapticFeedback.mediumImpact();
+      });
+      Future.delayed(const Duration(milliseconds: 1180), () {
+        if (!mounted) return;
+        HapticFeedback.heavyImpact();
+      });
+
       _controller.forward();
     });
   }
@@ -180,6 +271,7 @@ class _QuietAffirmationUnlockedScreenState
   @override
   void dispose() {
     _controller.dispose();
+    _confettiController.dispose();
     super.dispose();
   }
 
@@ -247,19 +339,105 @@ class _QuietAffirmationUnlockedScreenState
                     scale: _scale,
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 460),
-                      child: FutureBuilder<Affirmation?>
-                          (
+                      child: FutureBuilder<Affirmation?>(
                         future: _affirmationFuture,
                         builder: (context, snapshot) {
-                          final text = snapshot.data?.text ?? 'You showed up today.';
+                          final affirmationText =
+                              snapshot.data?.text ?? 'You showed up today.';
 
-                          return Text(
-                            text,
-                            textAlign: TextAlign.center,
-                            style: textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              height: 1.25,
-                            ),
+                          // Wiggle during the first 35%.
+                          final t = _controller.value;
+                          final wigglePhase = (t <= 0.35) ? (t / 0.35) : 0.0;
+                          final wiggle = (wigglePhase == 0.0)
+                              ? 0.0
+                              : (0.06 * (1.0 - wigglePhase) *
+                                  math.sin(wigglePhase * 14.0));
+
+                          return AnimatedBuilder(
+                            animation: _controller,
+                            builder: (context, _) {
+                              final flip = _flip.value;
+
+                              // Normalize to [0, 2π) so front/back decision stays correct across multiple flips.
+                              const twoPi = 2.0 * 3.141592653589793;
+                              final normalized = flip % twoPi;
+                              final showFront =
+                                  (normalized <= 1.5707963267948966) ||
+                                      (normalized >= 4.71238898038469);
+
+                              final front = _AffirmationUnlockCard(
+                                title: 'Unlocked',
+                                subtitle: unlockedLabel,
+                                body: null,
+                                isFront: true,
+                              );
+
+                              final back = _AffirmationUnlockCard(
+                                title: 'Unlocked',
+                                subtitle: unlockedLabel,
+                                body: affirmationText,
+                                isFront: false,
+                              );
+
+                              // “Slam” at the end: quick punch + settle.
+                              final t = _controller.value;
+                              double slamScale = 1.0;
+                              double slamRotateZ = 0.0;
+                              double slamTranslateY = 0.0;
+                              if (t > 0.85) {
+                                final p = ((t - 0.85) / 0.15).clamp(0.0, 1.0);
+                                // Ease in then slight overshoot back.
+                                final punch = Curves.easeInOut.transform(p);
+                                slamScale = 1.0 - (0.06 * punch);
+                                // slamRotateZ = -0.02 * punch; // REMOVE tilt so card ends straight
+                                slamTranslateY = 10.0 * punch;
+                              }
+
+                              final card = showFront
+                                  ? front
+                                  // Rotate the back by π so text is readable (not mirrored)
+                                  : Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.identity()
+                                        ..rotateY(3.141592653589793),
+                                      child: back,
+                                    );
+
+                              final transformedCard = Transform(
+                                alignment: Alignment.center,
+                                transform: Matrix4.identity()
+                                  ..setEntry(3, 2, 0.0015)
+                                  ..translateByDouble(0.0, slamTranslateY, 0.0, 1.0)
+                                  ..scaleByDouble(slamScale, slamScale, slamScale, 1.0)
+                                  ..rotateZ(wiggle + slamRotateZ)
+                                  ..rotateY(flip),
+                                child: card,
+                              );
+
+                              return Stack(
+                                alignment: Alignment.center,
+                                clipBehavior: Clip.none,
+                                children: [
+                                  transformedCard,
+                                  if (_showConfetti)
+                                    Positioned.fill(
+                                      child: IgnorePointer(
+                                        child: AnimatedBuilder(
+                                          animation: _confettiProgress,
+                                          builder: (context, _) {
+                                            return CustomPaint(
+                                              painter: _ConfettiPainter(
+                                                progress: _confettiProgress.value,
+                                                pieces: _confettiPieces,
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
                           );
                         },
                       ),
@@ -270,26 +448,194 @@ class _QuietAffirmationUnlockedScreenState
 
               const Spacer(),
 
-              QLPrimaryButton(
-                label: QuietResultsStrings.continueButton,
-                onPressed: () {
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (_) => const QuietShellScreen(),
-                    ),
-                    (route) => false,
-                  );
-                },
-                margin: const EdgeInsets.only(
-                  left: 40,
-                  right: 40,
-                  bottom: 32,
-                ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 220),
+                child: _showContinue
+                    ? QLPrimaryButton(
+                        label: QuietResultsStrings.continueButton,
+                        onPressed: () {
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (_) => const QuietShellScreen(),
+                            ),
+                            (route) => false,
+                          );
+                        },
+                        margin: const EdgeInsets.only(
+                          left: 40,
+                          right: 40,
+                          bottom: 32,
+                        ),
+                      )
+                    : const SizedBox(height: 72),
               ),
             ],
           ),
         ),
       ),
     );
+  }
+}
+
+class _AffirmationUnlockCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String? body;
+  final bool isFront;
+
+  const _AffirmationUnlockCard({
+    required this.title,
+    required this.subtitle,
+    required this.body,
+    required this.isFront,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(18),
+        color: theme.cardColor.withValues(alpha: 0.18),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.10),
+        ),
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 22,
+            offset: const Offset(0, 12),
+            color: Colors.black.withValues(alpha: 0.22),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Small header row
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isFront ? Icons.lock_open_rounded : Icons.auto_awesome_rounded,
+                size: 18,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.2,
+                  color: Colors.white.withValues(alpha: 0.92),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: textTheme.bodySmall?.copyWith(
+              color: Colors.white.withValues(alpha: 0.72),
+              height: 1.2,
+            ),
+          ),
+
+          const SizedBox(height: 18),
+
+          // Front: teaser. Back: actual affirmation.
+          Text(
+            body ?? 'Tap into stillness.',
+            textAlign: TextAlign.center,
+            style: textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.w700,
+              height: 1.25,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+// Confetti helpers
+
+class _ConfettiPiece {
+  final double x0;
+  final double y0;
+  final double angle;
+  final double speed;
+  final double size;
+  final double spin;
+  final Color color;
+
+  const _ConfettiPiece({
+    required this.x0,
+    required this.y0,
+    required this.angle,
+    required this.speed,
+    required this.size,
+    required this.spin,
+    required this.color,
+  });
+}
+
+class _ConfettiPainter extends CustomPainter {
+  final double progress; // 0..1
+  final List<_ConfettiPiece> pieces;
+
+  _ConfettiPainter({
+    required this.progress,
+    required this.pieces,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+
+    // Simple physics.
+    final t = progress;
+    final gravity = 520.0;
+
+    for (final p in pieces) {
+      final vx = math.cos(p.angle) * p.speed;
+      final vy = math.sin(p.angle) * p.speed;
+
+      // Emit from center-ish of the card area.
+      final x = center.dx + p.x0 + vx * t;
+      final y = center.dy + p.y0 + vy * t + 0.5 * gravity * t * t;
+
+      // Fade out near the end.
+      final alpha = (1.0 - t).clamp(0.0, 1.0);
+      final paint = Paint()..color = p.color.withValues(alpha: alpha);
+
+      // Spin as it falls.
+      final rotation = p.spin * t;
+
+      canvas.save();
+      canvas.translate(x, y);
+      canvas.rotate(rotation);
+
+      final r = RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset.zero,
+          width: p.size * 1.4,
+          height: p.size,
+        ),
+        const Radius.circular(2),
+      );
+      canvas.drawRRect(r, paint);
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ConfettiPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.pieces != pieces;
   }
 }
