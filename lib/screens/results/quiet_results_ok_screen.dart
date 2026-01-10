@@ -82,6 +82,8 @@ class QuietResultsOkScreen extends StatelessWidget {
                     // Big SVG flame badge
                     QuietResultsStreakBadge(
                       streak: streak,
+                      previousStreak: isNew ? (streak - 1).clamp(0, 999999) : streak,
+                      animate: isNew,
                     ),
 
                     const SizedBox(
@@ -89,7 +91,11 @@ class QuietResultsOkScreen extends StatelessWidget {
                     ),
 
                     // Small flame row
-                    QuietResultsStreakRow(streak: streak),
+                    QuietResultsStreakRow(
+                      streak: streak,
+                      previousStreak: isNew ? (streak - 1).clamp(0, 999999) : streak,
+                      animate: isNew,
+                    ),
                   ],
                 ),
               ),
