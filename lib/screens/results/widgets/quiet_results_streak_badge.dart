@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -44,6 +45,7 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   late final AnimationController _animController;
   late final Animation<double> _scale;
   late final Animation<double> _gradientT;
+  late final Animation<double> _glow;
 
   late final LinearGradientTween _gradientTween;
 
@@ -59,23 +61,49 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   @override
   void initState() {
     super.initState();
-
     _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 650),
+      duration: const Duration(milliseconds: 1100),
     );
 
-    _scale = Tween<double>(begin: 0.92, end: 1.0).animate(
-      CurvedAnimation(
-        parent: _animController,
-        curve: Curves.elasticOut,
+    // Dramatic punch: dip -> overshoot -> settle.
+    _scale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 0.90)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 18,
       ),
-    );
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.90, end: 1.18)
+            .chain(CurveTween(curve: Curves.easeOutBack)),
+        weight: 32,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.18, end: 1.0)
+            .chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 50,
+      ),
+    ]).animate(_animController);
 
+    // Gradient fade: dark -> teal.
     _gradientT = CurvedAnimation(
       parent: _animController,
-      curve: Curves.easeOutCubic,
+      curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic),
     );
+
+    // Glow burst: on -> off.
+    _glow = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.0, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeOut)),
+        weight: 35,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.0, end: 0.0)
+            .chain(CurveTween(curve: Curves.easeIn)),
+        weight: 65,
+      ),
+    ]).animate(_animController);
 
     _gradientTween = LinearGradientTween(
       begin: QuietResultsConstants.inactiveGradient,
@@ -125,15 +153,37 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
             builder: (_, child) {
               final gradient = _gradientTween.lerp(_gradientT.value);
 
-              return Transform.scale(
-                scale: _scale.value,
-                child: ShaderMask(
-                  shaderCallback: (bounds) => gradient.createShader(bounds),
-                  blendMode: BlendMode.srcIn,
-                  child: SvgPicture.asset(
-                    AppAssets.flame,
-                    width: QuietResultsConstants.streakBadgeSize,
-                    height: QuietResultsConstants.streakBadgeSize,
+              // Decaying shake so it starts dramatic then settles.
+              final t = _animController.value;
+              final decay = (1.0 - t).clamp(0.0, 1.0);
+              final shake = 0.18 * decay * math.sin(t * 22.0 * math.pi);
+              final glow = _glow.value;
+
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..scaleByDouble(_scale.value, _scale.value, 1.0, 1.0)
+                  ..rotateZ(shake),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    boxShadow: [
+                      BoxShadow(
+                        blurRadius: 28 + (22 * glow),
+                        spreadRadius: 2 + (6 * glow),
+                        offset: const Offset(0, 10),
+                        color: const Color(0xFF3E8F87)
+                            .withValues(alpha: 0.22 + 0.28 * glow),
+                      ),
+                    ],
+                  ),
+                  child: ShaderMask(
+                    shaderCallback: (bounds) => gradient.createShader(bounds),
+                    blendMode: BlendMode.srcIn,
+                    child: SvgPicture.asset(
+                      AppAssets.flame,
+                      width: QuietResultsConstants.streakBadgeSize,
+                      height: QuietResultsConstants.streakBadgeSize,
+                    ),
                   ),
                 ),
               );

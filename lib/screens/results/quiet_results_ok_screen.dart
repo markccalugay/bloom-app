@@ -38,10 +38,14 @@ class QuietResultsOkScreen extends StatefulWidget {
 }
 
 class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
-  bool _playStreakAnimation = false;
   bool _shouldAnimateStreak = false;
   bool _debugForceAnimate = false;
-  bool _screenIsVisible = false;
+
+  // Forces the flame widgets to rebuild their internal animation controllers.
+  int _animationSeed = 0;
+
+  // Prevents auto-play from retriggering on rebuilds.
+  bool _didAutoPlay = false;
 
   @override
   void initState() {
@@ -50,13 +54,24 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
-      // Screen is now guaranteed to be on-screen
-      _screenIsVisible = true;
-      await Future.delayed(const Duration(milliseconds: 1200));
-
+      // Guaranteed: first frame has been laid out and painted.
+      await Future.delayed(const Duration(milliseconds: 650));
       if (!mounted) return;
+
+      final int streak = widget.streak;
+      final int prevStreak = (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+          .clamp(0, 999999);
+      final bool streakIncreased = widget.previousStreak != null
+          ? (streak > prevStreak)
+          : widget.isNew;
+
+      if (!streakIncreased) return;
+      if (_didAutoPlay) return;
+
       setState(() {
+        _didAutoPlay = true;
         _shouldAnimateStreak = true;
+        _animationSeed++;
       });
     });
   }
@@ -77,8 +92,8 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
             .clamp(0, 999999);
 
     final bool streakIncreased = widget.previousStreak != null
-        ? streak > widget.previousStreak!
-        : (widget.isNew || streak == 1);
+        ? (streak > prevStreak)
+        : widget.isNew;
 
     return Scaffold(
       body: SafeArea(
@@ -134,6 +149,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
 
                     // Big SVG flame badge
                     QuietResultsStreakBadge(
+                      key: ValueKey('streak_badge_$_animationSeed'),
                       streak: streak,
                       previousStreak: prevStreak,
                       animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak,
@@ -145,6 +161,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
 
                     // Small flame row
                     QuietResultsStreakRow(
+                      key: ValueKey('streak_row_$_animationSeed'),
                       streak: streak,
                       previousStreak: prevStreak,
                       animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak,
@@ -161,6 +178,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
                   setState(() {
                     _debugForceAnimate = true;
                     _shouldAnimateStreak = false;
+                    _animationSeed++;
                   });
 
                   WidgetsBinding.instance.addPostFrameCallback((_) {
