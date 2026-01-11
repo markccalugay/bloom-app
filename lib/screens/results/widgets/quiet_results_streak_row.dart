@@ -40,9 +40,15 @@ class QuietResultsStreakRow extends StatelessWidget {
     final int prev = (prevRaw >= streak) ? (streak - 1) : prevRaw;
     final int prevClamped = prev < 0 ? 0 : prev;
 
+    // FTUE: show 3 flames initially. After Day 3 is reached, expand to 5.
+    // Keep this widget future-proof by still allowing a caller-provided maxFlames
+    // to cap the display.
+    final int targetFlames = streak >= 3 ? 5 : 3;
+    final int effectiveMaxFlames = maxFlames < targetFlames ? maxFlames : targetFlames;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(maxFlames, (index) {
+      children: List.generate(effectiveMaxFlames, (index) {
         // Streak step labels: 1,2,3,... (up to maxFlames)
         final step = index + 1;
         final isActive = streak >= step;

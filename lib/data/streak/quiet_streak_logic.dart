@@ -22,11 +22,11 @@ class QuietStreakLogic {
     // Work with date-only (no time component).
     final todayDate = _stripTime(today);
 
-    // No previous record → FTUE stays at 0.
-    // First completion should ANIMATE 0 → 1 in the UI, then be persisted.
+    // No previous record → first-ever completion.
+    // UI can animate 0 → 1, and we persist 1 as the new streak.
     if (lastDate == null) {
       return QuietStreakLogicResult(
-        newStreak: 0,
+        newStreak: 1,
         newDate: todayDate,
       );
     }
@@ -34,8 +34,10 @@ class QuietStreakLogic {
     final lastDateOnly = _stripTime(lastDate);
     final diffDays = todayDate.difference(lastDateOnly).inDays;
 
-    if (diffDays == 0) {
-      // Same calendar day → no change.
+    // Defensive guard: if device clock/timezone shifts make lastDate appear "in the future",
+    // treat it as the same day and do not change the streak.
+    if (diffDays <= 0) {
+      // Same calendar day (or clock skew) → no change.
       return QuietStreakLogicResult(
         newStreak: currentStreak,
         newDate: todayDate,
@@ -47,7 +49,8 @@ class QuietStreakLogic {
         newDate: todayDate,
       );
     } else {
-      // Missed one or more days → reset to 0 (will animate again on next completion).
+      // Missed one or more days → reset streak to 1 on the next completion.
+      // (The UI can still animate 0 → 1 if the stored streak was 0.)
       return QuietStreakLogicResult(
         newStreak: 1,
         newDate: todayDate,

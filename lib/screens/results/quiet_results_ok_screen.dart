@@ -12,7 +12,10 @@ import 'widgets/quiet_results_streak_badge.dart';
 import 'widgets/quiet_results_streak_row.dart';
 
 /// “You showed up again” results screen shown when mood >= 3.
-class QuietResultsOkScreen extends StatelessWidget {
+///
+/// IMPORTANT: The streak animation should start only after this screen is
+/// fully on-screen (post-frame), so the user actually sees it.
+class QuietResultsOkScreen extends StatefulWidget {
   final int streak;
 
   /// Previous streak value BEFORE this results screen.
@@ -31,6 +34,24 @@ class QuietResultsOkScreen extends StatelessWidget {
   });
 
   @override
+  State<QuietResultsOkScreen> createState() => _QuietResultsOkScreenState();
+}
+
+class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
+  bool _playStreakAnimation = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Delay the animation until the first frame is rendered.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      setState(() => _playStreakAnimation = true);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
@@ -39,10 +60,15 @@ class QuietResultsOkScreen extends StatelessWidget {
     // - Prefer comparing against `previousStreak` when available.
     // - Fall back to `isNew` for older callers.
     // - FTUE safety: if someone forgets to pass flags on Day 1, we still animate.
-    final int prevStreak = (previousStreak ?? (isNew ? (streak - 1) : streak)).clamp(0, 999999);
-    final bool streakIncreased = previousStreak != null
-        ? streak > previousStreak!
-        : (isNew || streak == 1);
+    final int streak = widget.streak;
+
+    final int prevStreak =
+        (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+            .clamp(0, 999999);
+
+    final bool streakIncreased = widget.previousStreak != null
+        ? streak > widget.previousStreak!
+        : (widget.isNew || streak == 1);
 
     return Scaffold(
       body: SafeArea(
@@ -100,7 +126,7 @@ class QuietResultsOkScreen extends StatelessWidget {
                     QuietResultsStreakBadge(
                       streak: streak,
                       previousStreak: prevStreak,
-                      animate: streakIncreased,
+                      animate: streakIncreased && _playStreakAnimation,
                     ),
 
                     const SizedBox(
@@ -111,7 +137,7 @@ class QuietResultsOkScreen extends StatelessWidget {
                     QuietResultsStreakRow(
                       streak: streak,
                       previousStreak: prevStreak,
-                      animate: streakIncreased,
+                      animate: streakIncreased && _playStreakAnimation,
                     ),
                   ],
                 ),
