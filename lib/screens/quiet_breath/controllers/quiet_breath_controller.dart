@@ -180,6 +180,34 @@ class QuietBreathController extends ChangeNotifier {
 
   void toggle() => _isPlaying ? pause() : play();
 
+  /// DEBUG: Immediately completes the session without waiting for timers.
+  /// Used only for development/testing.
+  void completeSessionImmediately() {
+    if (_sessionCompleted) return;
+
+    _sessionCompleted = true;
+
+    // Stop all running animations/timers
+    _countdown?.cancel();
+    _countdown = null;
+
+    _isPlaying = false;
+
+    _waveCtrl.stop();
+    _riseCtrl.stop();
+    _introCtrl.stop();
+    _boxCtrl.stop();
+
+    // Jump progress to the end to simulate a finished session
+    _riseCtrl.value = 1.0;
+    _secondsLeft = 0;
+
+    notifyListeners();
+
+    final cb = onSessionComplete;
+    if (cb != null) cb();
+  }
+
   /// Update the target number of box-breath cycles for a session.
   void setTargetCycles(int n) {
     final clamped = n.clamp(1, 12);

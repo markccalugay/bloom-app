@@ -4,6 +4,22 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../quiet_results_constants.dart';
 import 'package:quietline_app/core/app_assets.dart';
 
+class LinearGradientTween extends Tween<LinearGradient> {
+  LinearGradientTween({required super.begin, required super.end});
+
+  @override
+  LinearGradient lerp(double t) {
+    return LinearGradient(
+      begin: begin!.begin,
+      end: begin!.end,
+      colors: List.generate(
+        begin!.colors.length,
+        (i) => Color.lerp(begin!.colors[i], end!.colors[i], t)!,
+      ),
+    );
+  }
+}
+
 /// Big central streak badge with the day number.
 /// Uses the flame SVG + a teal gradient via ShaderMask when active.
 class QuietResultsStreakBadge extends StatefulWidget {
@@ -25,8 +41,11 @@ class QuietResultsStreakBadge extends StatefulWidget {
 
 class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     with TickerProviderStateMixin {
-  late final AnimationController _scaleController;
+  late final AnimationController _animController;
   late final Animation<double> _scale;
+  late final Animation<double> _gradientT;
+
+  late final LinearGradientTween _gradientTween;
 
   bool get _isActive => widget.streak > 0;
 
@@ -41,23 +60,32 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   void initState() {
     super.initState();
 
-    _scaleController = AnimationController(
+    _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 420),
+      duration: const Duration(milliseconds: 650),
     );
 
-    _scale = Tween<double>(begin: 0.90, end: 1.0).animate(
+    _scale = Tween<double>(begin: 0.92, end: 1.0).animate(
       CurvedAnimation(
-        parent: _scaleController,
+        parent: _animController,
         curve: Curves.elasticOut,
       ),
     );
 
+    _gradientT = CurvedAnimation(
+      parent: _animController,
+      curve: Curves.easeOutCubic,
+    );
+
+    _gradientTween = LinearGradientTween(
+      begin: QuietResultsConstants.inactiveGradient,
+      end: QuietResultsConstants.streakGradient as LinearGradient,
+    );
+
     if (_shouldAnimate) {
-      _scaleController.value = 0.0;
-      _scaleController.forward();
+      _animController.forward(from: 0);
     } else {
-      _scaleController.value = 1.0;
+      _animController.value = _isActive ? 1.0 : 0.0;
     }
   }
 
@@ -65,25 +93,16 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   void didUpdateWidget(covariant QuietResultsStreakBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Animate only when the streak increases.
-    final shouldAnimate = widget.animate &&
-        widget.previousStreak != null &&
-        widget.streak > widget.previousStreak!;
-
-    if (shouldAnimate) {
-      _scaleController
-        ..stop()
-        ..value = 0.0
-        ..forward();
+    if (_shouldAnimate) {
+      _animController.forward(from: 0);
     } else {
-      // Ensure we don't remain shrunken if the widget updates without an increase.
-      _scaleController.value = 1.0;
+      _animController.value = _isActive ? 1.0 : 0.0;
     }
   }
 
   @override
   void dispose() {
-    _scaleController.dispose();
+    _animController.dispose();
     super.dispose();
   }
 
@@ -95,45 +114,38 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
           color: Colors.white,
         );
 
-    return ScaleTransition(
-      scale: _scale,
-      child: SizedBox(
-        width: QuietResultsConstants.streakBadgeSize,
-        height: QuietResultsConstants.streakBadgeSize,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Flame SVG background
-            if (_isActive)
-              ShaderMask(
-                shaderCallback: (bounds) =>
-                    QuietResultsConstants.streakGradient
-                        .createShader(bounds),
-                blendMode: BlendMode.srcIn,
-                child: SvgPicture.asset(
-                  AppAssets.flame,
-                  width: QuietResultsConstants.streakBadgeSize,
-                  height: QuietResultsConstants.streakBadgeSize,
-                ),
-              )
-            else
-              SvgPicture.asset(
-                AppAssets.flame,
-                width: QuietResultsConstants.streakBadgeSize,
-                height: QuietResultsConstants.streakBadgeSize,
-                colorFilter: const ColorFilter.mode(
-                  QuietResultsConstants.inactiveFlame,
-                  BlendMode.srcIn,
-                ),
-              ),
+    return SizedBox(
+      width: QuietResultsConstants.streakBadgeSize,
+      height: QuietResultsConstants.streakBadgeSize,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          AnimatedBuilder(
+            animation: _animController,
+            builder: (_, child) {
+              final gradient = _gradientTween.lerp(_gradientT.value);
 
-            // Streak number
-            Transform.translate(
-              offset: const Offset(0, 6),
-              child: Text(widget.streak.toString(), style: textStyle),
-            ),
-          ],
-        ),
+              return Transform.scale(
+                scale: _scale.value,
+                child: ShaderMask(
+                  shaderCallback: (bounds) => gradient.createShader(bounds),
+                  blendMode: BlendMode.srcIn,
+                  child: SvgPicture.asset(
+                    AppAssets.flame,
+                    width: QuietResultsConstants.streakBadgeSize,
+                    height: QuietResultsConstants.streakBadgeSize,
+                  ),
+                ),
+              );
+            },
+          ),
+
+          // Streak number
+          Transform.translate(
+            offset: const Offset(0, 6),
+            child: Text(widget.streak.toString(), style: textStyle),
+          ),
+        ],
       ),
     );
   }

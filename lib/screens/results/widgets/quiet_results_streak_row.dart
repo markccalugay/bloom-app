@@ -159,24 +159,30 @@ class _SmallFlameState extends State<_SmallFlame> {
               blendMode: BlendMode.srcIn,
               child: SvgPicture.asset(AppAssets.flame),
             )
-          : SvgPicture.asset(
-              AppAssets.flame,
-              colorFilter: const ColorFilter.mode(
-                QuietResultsConstants.inactiveFlame,
-                BlendMode.srcIn,
-              ),
+          : ShaderMask(
+              shaderCallback: (bounds) =>
+                  const LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Color(0xFF5E6874),
+                      Color(0xFF313841),
+                    ],
+                  ).createShader(bounds),
+              blendMode: BlendMode.srcIn,
+              child: SvgPicture.asset(AppAssets.flame),
             ),
     );
 
     // Pop/fade when a newly-earned flame appears.
     if (widget.animateIn && widget.isActive) {
       flame = AnimatedScale(
-        scale: showTeal ? 1.0 : 0.85,
-        duration: const Duration(milliseconds: 260),
+        scale: showTeal ? 1.0 : 0.8,
+        duration: const Duration(milliseconds: 320),
         curve: Curves.easeOutBack,
         child: AnimatedOpacity(
           opacity: showTeal ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 180),
+          duration: const Duration(milliseconds: 240),
           curve: Curves.easeOut,
           child: flame,
         ),

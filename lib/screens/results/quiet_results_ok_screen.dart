@@ -39,15 +39,25 @@ class QuietResultsOkScreen extends StatefulWidget {
 
 class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
   bool _playStreakAnimation = false;
+  bool _shouldAnimateStreak = false;
+  bool _debugForceAnimate = false;
+  bool _screenIsVisible = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Delay the animation until the first frame is rendered.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
-      setState(() => _playStreakAnimation = true);
+
+      // Screen is now guaranteed to be on-screen
+      _screenIsVisible = true;
+      await Future.delayed(const Duration(milliseconds: 1200));
+
+      if (!mounted) return;
+      setState(() {
+        _shouldAnimateStreak = true;
+      });
     });
   }
 
@@ -126,7 +136,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
                     QuietResultsStreakBadge(
                       streak: streak,
                       previousStreak: prevStreak,
-                      animate: streakIncreased && _playStreakAnimation,
+                      animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak,
                     ),
 
                     const SizedBox(
@@ -137,13 +147,34 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
                     QuietResultsStreakRow(
                       streak: streak,
                       previousStreak: prevStreak,
-                      animate: streakIncreased && _playStreakAnimation,
+                      animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak,
                     ),
                   ],
                 ),
               ),
 
               const Spacer(),
+
+              // DEBUG BUTTON (TEMPORARY)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    _debugForceAnimate = true;
+                    _shouldAnimateStreak = false;
+                  });
+
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!mounted) return;
+                    setState(() {
+                      _shouldAnimateStreak = true;
+                    });
+                  });
+                },
+                child: const Text(
+                  'DEBUG: Play Streak Animation',
+                  style: TextStyle(color: Colors.redAccent),
+                ),
+              ),
 
               // Bottom primary button, matching design
               QLPrimaryButton(

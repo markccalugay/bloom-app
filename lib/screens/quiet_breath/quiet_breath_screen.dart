@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'controllers/quiet_breath_controller.dart';
 import 'quiet_breath_constants.dart';
 import 'widgets/quiet_breath_circle.dart';
@@ -95,6 +96,19 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
             ),
             Expanded(child: QuietBreathCircle(controller: controller)),
             QuietBreathControls(controller: controller),
+            if (kDebugMode)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: TextButton(
+                  onPressed: () {
+                    controller.completeSessionImmediately();
+                  },
+                  child: const Text(
+                    'DEBUG: Skip Session',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
+                ),
+              ),
             const SizedBox(height: 12),
           ],
         ),

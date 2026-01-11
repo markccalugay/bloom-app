@@ -19,6 +19,16 @@ class QuietResultsConstants {
   static const Color inactiveFlame = Color(0xFF4A4F54);    // muted gray
   static const Color softWaveColor = Color(0x26FFFFFF);    // very subtle white (15% alpha)
 
+  // Gradient for inactive streak flames (big + small)
+  static const LinearGradient inactiveGradient = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color(0xFF5E6874), // top
+      Color(0xFF313841), // bottom
+    ],
+  );
+
   // Gradient for active streak flames (big + small)
   static const Gradient streakGradient = LinearGradient(
     begin: Alignment.topCenter,
