@@ -140,14 +140,27 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
     // - Fall back to `isNew` for older callers.
     // - FTUE safety: if someone forgets to pass flags on Day 1, we still animate.
     final int streak = widget.streak;
-
     final int prevStreak =
         (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
             .clamp(0, 999999);
-
     final bool streakIncreased = widget.previousStreak != null
         ? (streak > prevStreak)
         : widget.isNew;
+
+    // Compute displayStreakNow for the Day X label (see instructions)
+    int displayStreakNow;
+    if (!streakIncreased) {
+      displayStreakNow = streak;
+    } else if (!_shouldAnimateStreak) {
+      displayStreakNow = prevStreak;
+    } else if (!_animateBadge) {
+      displayStreakNow = prevStreak;
+    } else {
+      // During badge animation, show the count-up value (see AnimatedBuilder logic below)
+      final t = _countController.value;
+      final eased = Curves.easeOutCubic.transform(t);
+      displayStreakNow = (_countFrom + ((_countTo - _countFrom) * eased).round()).clamp(_countFrom, _countTo);
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -188,9 +201,9 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // Day X of your quiet streak.
+                    // Day X of your quiet streak (updated to use displayStreakNow)
                     Text(
-                      QuietResultsStrings.dayOfStreak(streak),
+                      QuietResultsStrings.dayOfStreak(displayStreakNow),
                       style: textTheme.bodyMedium?.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
@@ -205,21 +218,31 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                     AnimatedBuilder(
                       animation: _countController,
                       builder: (context, _) {
-                        final t = _countController.value;
-                        final eased = Curves.easeOutCubic.transform(t);
-                        final int displayStreak = (_animateBadge && _shouldAnimateStreak)
-                            ? (_countFrom + ((_countTo - _countFrom) * eased).round())
-                            : streak;
+                        int displayStreak;
+                        if (!streakIncreased) {
+                          displayStreak = streak;
+                        } else if (!_shouldAnimateStreak || !_animateBadge) {
+                          displayStreak = prevStreak;
+                        } else {
+                          final t = _countController.value;
+                          final eased = Curves.easeOutCubic.transform(t);
+                          displayStreak = (_countFrom + ((_countTo - _countFrom) * eased).round()).clamp(_countFrom, _countTo);
+                        }
+
+                        final bool badgeShouldAnimate =
+                            (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge;
 
                         return QuietResultsStreakBadge(
                           key: ValueKey('streak_badge_$_animationSeed'),
-                          streak: streak,
+                          // IMPORTANT: drive the badge's visual state from the displayed value so it
+                          // starts inactive (gray) on FTUE and only turns teal when the count-up begins.
+                          streak: displayStreak,
                           previousStreak: prevStreak,
-                          // NEW: the badge renders this number (0->1, 1->2, etc)
+                          // the badge renders this number (0->1, 1->2, etc)
                           displayStreak: displayStreak,
                           // Badge only animates in step 2
-                          animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge,
-                          // NEW: badge should start immediately when step 2 flips true
+                          animate: badgeShouldAnimate,
+                          // badge should start immediately when step 2 flips true
                           startDelay: Duration.zero,
                         );
                       },
@@ -232,11 +255,13 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                     // Small flame row
                     QuietResultsStreakRow(
                       key: ValueKey('streak_row_$_animationSeed'),
-                      streak: streak,
+                      streak: (!streakIncreased)
+                          ? streak
+                          : ((_shouldAnimateStreak && _animateRow) ? streak : prevStreak),
                       previousStreak: prevStreak,
                       // Row only animates in step 1
                       animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateRow,
-                      // NEW: row starts immediately when step 1 flips true
+                      // row starts immediately when step 1 flips true
                       startDelay: Duration.zero,
                     ),
                   ],

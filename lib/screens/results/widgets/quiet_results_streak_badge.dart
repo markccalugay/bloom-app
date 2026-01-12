@@ -28,6 +28,11 @@ class QuietResultsStreakBadge extends StatefulWidget {
   final int? previousStreak; // used to detect milestone crossing
   final bool animate;
 
+  /// Force the badge to start in the inactive (gray) state on first paint.
+  /// Useful when the parent orchestrates a count-up (e.g., show 0 then animate to 1)
+  /// and wants to avoid a brief teal flash before the animation begins.
+  final bool startInactive;
+
   /// Optional delay before playing the activation animation.
   final Duration startDelay;
 
@@ -35,13 +40,19 @@ class QuietResultsStreakBadge extends StatefulWidget {
   /// If null, the widget displays `streak`.
   final int? displayStreak;
 
+  /// Optional explicit start value for the count-up animation.
+  /// If null, we fall back to `previousStreak` (when provided).
+  final int? fromStreak;
+
   const QuietResultsStreakBadge({
     super.key,
     required this.streak,
     this.previousStreak,
     this.animate = true,
+    this.startInactive = false,
     this.startDelay = Duration.zero,
     this.displayStreak,
+    this.fromStreak,
   });
 
   @override
@@ -58,7 +69,37 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
 
   late final LinearGradientTween _gradientTween;
 
+  /// Whether the badge should be shown as "active" (teal) at rest.
+  /// Note: during orchestrated count-up (e.g. displayStreak=0 while streak=1),
+  /// we intentionally start inactive and animate to active.
   bool get _isActive => widget.streak > 0;
+
+  /// When true, we should start the badge in the inactive (gray) state even if
+  /// `streak > 0`, because the UI is intentionally displaying a lower number
+  /// first and we want the activation to animate on-screen.
+  bool get _startInactiveForOrchestratedCount {
+    if (!widget.animate) return false;
+
+    // Explicit override from parent to avoid initial teal flash.
+    if (widget.startInactive) return true;
+
+    // If the parent is controlling the displayed number and it's behind the
+    // real streak, we should start inactive and animate to active.
+    final display = widget.displayStreak;
+    if (display != null && display < widget.streak) return true;
+
+    // If an explicit fromStreak is provided and it's behind the real streak,
+    // we should start inactive and animate to active.
+    final from = widget.fromStreak;
+    if (from != null && from < widget.streak) return true;
+
+    // Or if we have previousStreak and this is an increment.
+    if (widget.previousStreak != null && widget.streak > widget.previousStreak!) {
+      return true;
+    }
+
+    return false;
+  }
 
   bool get _shouldAnimate {
     if (!widget.animate) return false;
@@ -67,16 +108,27 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     return widget.streak > widget.previousStreak!;
   }
 
+  int get _countFrom {
+    if (widget.fromStreak != null) return widget.fromStreak!;
+    if (widget.previousStreak != null) return widget.previousStreak!;
+    return widget.streak;
+  }
+
   void _startAnimation() {
     final delay = widget.startDelay;
+
+    // Always reset to the beginning so the badge starts in the inactive (gray)
+    // state before animating to teal.
+    _animController.value = 0.0;
+
     if (delay == Duration.zero) {
-      _animController.forward(from: 0);
+      _animController.forward(from: 0.0);
       return;
     }
 
     Future.delayed(delay, () {
       if (!mounted) return;
-      _animController.forward(from: 0);
+      _animController.forward(from: 0.0);
     });
   }
 
@@ -107,10 +159,12 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
       ),
     ]).animate(_animController);
 
-    // Gradient fade: dark -> teal.
+    // Gradient fade: hold inactive briefly, then dark -> teal.
+    // This ensures the badge visibly starts in the inactive (gray) state
+    // before the activation sequence kicks in.
     _gradientT = CurvedAnimation(
       parent: _animController,
-      curve: const Interval(0.0, 0.55, curve: Curves.easeOutCubic),
+      curve: const Interval(0.12, 0.70, curve: Curves.easeOutCubic),
     );
 
     // Glow burst: on -> off.
@@ -132,7 +186,9 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
       end: QuietResultsConstants.streakGradient as LinearGradient,
     );
 
-    if (_shouldAnimate) {
+    if (_startInactiveForOrchestratedCount) {
+      // Ensure we never paint the active (teal) state before the activation animation.
+      _animController.value = 0.0;
       _startAnimation();
     } else {
       _animController.value = _isActive ? 1.0 : 0.0;
@@ -143,7 +199,9 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   void didUpdateWidget(covariant QuietResultsStreakBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (_shouldAnimate) {
+    if (_startInactiveForOrchestratedCount) {
+      // Prevent any intermediate active paint before we restart the sequence.
+      _animController.value = 0.0;
       _startAnimation();
     } else {
       _animController.value = _isActive ? 1.0 : 0.0;
@@ -212,10 +270,34 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
             },
           ),
 
-          // Streak number
+          // Streak number (counts up during the same animation as the flame)
           Transform.translate(
             offset: const Offset(0, 6),
-            child: Text((widget.displayStreak ?? widget.streak).toString(), style: textStyle),
+            child: AnimatedBuilder(
+              animation: _animController,
+              builder: (_, _) {
+                // If an external displayStreak is provided, respect it (orchestrator-controlled).
+                if (widget.displayStreak != null) {
+                  return Text(widget.displayStreak!.toString(), style: textStyle);
+                }
+
+                // Default behavior: count from previous -> current while animating.
+                if (_shouldAnimate) {
+                  final start = _countFrom;
+                  final end = widget.streak;
+
+                  // Drive the number mostly during the first part of the animation.
+                  final t = Curves.easeOutCubic.transform(
+                    (_animController.value / 0.70).clamp(0.0, 1.0),
+                  );
+
+                  final value = (start + ((end - start) * t)).round();
+                  return Text(value.toString(), style: textStyle);
+                }
+
+                return Text(widget.streak.toString(), style: textStyle);
+              },
+            ),
           ),
         ],
       ),

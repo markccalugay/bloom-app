@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../quiet_results_constants.dart';
@@ -95,8 +96,9 @@ class _SmallFlame extends StatefulWidget {
   State<_SmallFlame> createState() => _SmallFlameState();
 }
 
-class _SmallFlameState extends State<_SmallFlame> {
+class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderStateMixin {
   bool _showActive = false;
+  AnimationController? _revealController;
 
   @override
   void initState() {
@@ -108,12 +110,18 @@ class _SmallFlameState extends State<_SmallFlame> {
       return;
     }
 
+    _revealController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 520),
+    );
+
     // Staggered reveal for newly-earned flame.
     Future.delayed(widget.delay, () {
       if (!mounted) return;
       setState(() {
         _showActive = true;
       });
+      _revealController!.forward(from: 0.0);
     });
   }
 
@@ -127,12 +135,18 @@ class _SmallFlameState extends State<_SmallFlame> {
       if (!widget.animateIn) {
         _showActive = true;
       } else {
+        _revealController ??= AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 520),
+        );
+
         _showActive = false;
         Future.delayed(widget.delay, () {
           if (!mounted) return;
           setState(() {
             _showActive = true;
           });
+          _revealController!.forward(from: 0.0);
         });
       }
     }
@@ -141,6 +155,12 @@ class _SmallFlameState extends State<_SmallFlame> {
     if (oldWidget.isActive && !widget.isActive) {
       _showActive = false;
     }
+  }
+
+  @override
+  void dispose() {
+    _revealController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -191,6 +211,20 @@ class _SmallFlameState extends State<_SmallFlame> {
           curve: Curves.easeOut,
           child: flame,
         ),
+      );
+      // Wiggle during the reveal so the flame feels "earned".
+      flame = AnimatedBuilder(
+        animation: _revealController ?? kAlwaysDismissedAnimation,
+        builder: (context, child) {
+          final t = _revealController?.value ?? 0.0;
+          // Wiggle decays as the animation finishes.
+          final wiggle = 0.12 * (1.0 - t) * math.sin(t * 18.0);
+          return Transform.rotate(
+            angle: wiggle,
+            child: child,
+          );
+        },
+        child: flame,
       );
     }
 
