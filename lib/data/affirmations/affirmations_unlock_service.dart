@@ -11,6 +11,9 @@ class AffirmationsUnlockService {
   static const _kUnlockedIdsKey = 'unlocked_affirmation_ids';
   static const _kLastUnlockDateKey = 'last_affirmation_unlock_date';
 
+  // Prevent double-unlocks when multiple screens call unlock during the same transition.
+  Future<Affirmation?>? _inFlightUnlock;
+
   /// Returns the local calendar date as YYYY-MM-DD
   String _todayKey() {
     final now = DateTime.now();
@@ -43,54 +46,71 @@ class AffirmationsUnlockService {
   Future<Affirmation?> unlockCoreOncePerDay({
     required int streakDay,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
+    // FTUE safety: we only unlock after the user has actually earned Day 1+.
+    if (streakDay < 1) return null;
 
-    final today = _todayKey();
-    final lastUnlockDate = prefs.getString(_kLastUnlockDateKey);
+    // If an unlock is already running, return the same result instead of unlocking twice.
+    final existing = _inFlightUnlock;
+    if (existing != null) return existing;
 
-    // Already unlocked today → do nothing
-    if (lastUnlockDate == today) {
-      return null;
-    }
+    _inFlightUnlock = () async {
+      final prefs = await SharedPreferences.getInstance();
 
-    final unlockedIds =
-        (prefs.getStringList(_kUnlockedIdsKey) ?? []).toSet();
+      final today = _todayKey();
+      final lastUnlockDate = prefs.getString(_kLastUnlockDateKey);
 
-    // Determine the primary target ID by day
-    final targetId = 'core_${streakDay.toString().padLeft(3, '0')}';
+      // Already unlocked today → do nothing
+      if (lastUnlockDate == today) {
+        return null;
+      }
 
-    // Pull core list once so we don't re-fetch it.
-    final core = coreAffirmations;
+      final unlockedIds =
+          (prefs.getStringList(_kUnlockedIdsKey) ?? []).toSet();
 
-    Affirmation? affirmation;
+      // Mark today's unlock immediately to avoid double-unlock in rare edge cases.
+      await prefs.setString(_kLastUnlockDateKey, today);
 
-    // Try the ideal ordered ID first
-    if (!unlockedIds.contains(targetId)) {
-      affirmation = _firstWhereOrNull(
+      // Determine the primary target ID by day
+      final targetId = 'core_${streakDay.toString().padLeft(3, '0')}';
+
+      // Pull core list once so we don't re-fetch it.
+      final core = coreAffirmations;
+
+      Affirmation? affirmation;
+
+      // Try the ideal ordered ID first
+      if (!unlockedIds.contains(targetId)) {
+        affirmation = _firstWhereOrNull(
+          core,
+          (a) => a.id == targetId,
+        );
+      }
+
+      // Fallback: next locked core affirmation in order
+      affirmation ??= _firstWhereOrNull(
         core,
-        (a) => a.id == targetId,
+        (a) => !unlockedIds.contains(a.id),
       );
+
+      if (affirmation == null) {
+        return null; // nothing left to unlock
+      }
+
+      // Persist unlock
+      unlockedIds.add(affirmation.id);
+      await prefs.setStringList(
+        _kUnlockedIdsKey,
+        unlockedIds.toList(),
+      );
+
+      return affirmation;
+    }();
+
+    try {
+      return await _inFlightUnlock;
+    } finally {
+      _inFlightUnlock = null;
     }
-
-    // Fallback: next locked core affirmation in order
-    affirmation ??= _firstWhereOrNull(
-      core,
-      (a) => !unlockedIds.contains(a.id),
-    );
-
-    if (affirmation == null) {
-      return null; // nothing left to unlock
-    }
-
-    // Persist unlock
-    unlockedIds.add(affirmation.id);
-    await prefs.setStringList(
-      _kUnlockedIdsKey,
-      unlockedIds.toList(),
-    );
-    await prefs.setString(_kLastUnlockDateKey, today);
-
-    return affirmation;
   }
 
   /// Alias used by results routing: unlock one core affirmation for the given streak day

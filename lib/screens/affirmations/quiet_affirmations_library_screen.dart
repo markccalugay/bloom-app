@@ -18,8 +18,8 @@ class _QuietAffirmationsLibraryScreenState
   bool _loading = true;
   int _streak = 0;
 
-  late final List allAffirmations = affirmationsByPack.values
-      .expand((list) => list)
+  late final List<dynamic> allAffirmations = affirmationsByPack.entries
+      .expand((entry) => entry.value.map((a) => {'packId': entry.key, 'a': a}))
       .toList(growable: false);
 
   @override
@@ -115,12 +115,19 @@ class _QuietAffirmationsLibraryScreenState
                   childAspectRatio: 0.9,
                 ),
                 itemBuilder: (context, index) {
-                  final a = allAffirmations[index];
-                  final unlocked = _isUnlocked(a.id);
+                  final item = allAffirmations[index] as Map;
+                  final a = item['a'];
+                  final String packId = item['packId'] as String;
+
+                  // MVP: only CORE affirmations are free/unlockable.
+                  final bool isPremiumLocked = packId != AffirmationPackIds.core;
+                  final bool unlocked = !isPremiumLocked && _isUnlocked(a.id);
 
                   return AffirmationGridTile(
                     affirmation: a,
                     isUnlocked: unlocked,
+                    isPremiumLocked: isPremiumLocked,
+                    lockedLabel: isPremiumLocked ? 'Premium' : 'Locked',
                     unlockedLabel: unlocked ? unlockedLabel : null,
                     onTap: unlocked
                         ? () {
@@ -134,6 +141,15 @@ class _QuietAffirmationsLibraryScreenState
                             );
                           }
                         : null,
+                    onLockedTap: () {
+                      // MVP: simple placeholder until paywall/subs exist.
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Premium packs are coming soon.'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
                   );
                 },
               ),
