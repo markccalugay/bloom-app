@@ -28,11 +28,20 @@ class QuietResultsStreakBadge extends StatefulWidget {
   final int? previousStreak; // used to detect milestone crossing
   final bool animate;
 
+  /// Optional delay before playing the activation animation.
+  final Duration startDelay;
+
+  /// Optional number to display (useful for counting animations).
+  /// If null, the widget displays `streak`.
+  final int? displayStreak;
+
   const QuietResultsStreakBadge({
     super.key,
     required this.streak,
     this.previousStreak,
     this.animate = true,
+    this.startDelay = Duration.zero,
+    this.displayStreak,
   });
 
   @override
@@ -56,6 +65,19 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     if (widget.previousStreak == null) return false;
 
     return widget.streak > widget.previousStreak!;
+  }
+
+  void _startAnimation() {
+    final delay = widget.startDelay;
+    if (delay == Duration.zero) {
+      _animController.forward(from: 0);
+      return;
+    }
+
+    Future.delayed(delay, () {
+      if (!mounted) return;
+      _animController.forward(from: 0);
+    });
   }
 
   @override
@@ -111,7 +133,7 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     );
 
     if (_shouldAnimate) {
-      _animController.forward(from: 0);
+      _startAnimation();
     } else {
       _animController.value = _isActive ? 1.0 : 0.0;
     }
@@ -122,7 +144,7 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     super.didUpdateWidget(oldWidget);
 
     if (_shouldAnimate) {
-      _animController.forward(from: 0);
+      _startAnimation();
     } else {
       _animController.value = _isActive ? 1.0 : 0.0;
     }
@@ -193,7 +215,7 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
           // Streak number
           Transform.translate(
             offset: const Offset(0, 6),
-            child: Text(widget.streak.toString(), style: textStyle),
+            child: Text((widget.displayStreak ?? widget.streak).toString(), style: textStyle),
           ),
         ],
       ),

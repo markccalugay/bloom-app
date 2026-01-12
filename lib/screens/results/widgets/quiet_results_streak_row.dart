@@ -19,6 +19,10 @@ class QuietResultsStreakRow extends StatelessWidget {
   /// Whether to animate newly-earned flames.
   final bool animate;
 
+  /// Optional delay before the first flame begins animating.
+  /// Useful when the results screen needs to settle before playing the sequence.
+  final Duration startDelay;
+
   /// Number of flames shown.
   final int maxFlames;
 
@@ -27,6 +31,7 @@ class QuietResultsStreakRow extends StatelessWidget {
     required this.streak,
     this.previousStreak,
     this.animate = false,
+    this.startDelay = Duration.zero,
     this.maxFlames = 5,
   });
 
@@ -57,7 +62,7 @@ class QuietResultsStreakRow extends StatelessWidget {
         final animateIn = animate && isActive && prevClamped < step;
 
         // Stagger each newly-earned flame.
-        final delay = Duration(milliseconds: 120 * index);
+        final delay = startDelay + Duration(milliseconds: 120 * index);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6.0),

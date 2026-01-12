@@ -37,8 +37,12 @@ class QuietResultsOkScreen extends StatefulWidget {
   State<QuietResultsOkScreen> createState() => _QuietResultsOkScreenState();
 }
 
-class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
-  bool _shouldAnimateStreak = false;
+class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
+    with SingleTickerProviderStateMixin {
+  // Sequence orchestration
+  bool _shouldAnimateStreak = false; // global gate (screen is ready)
+  bool _animateRow = false;          // small flames step
+  bool _animateBadge = false;        // big flame step
   bool _debugForceAnimate = false;
 
   // Forces the flame widgets to rebuild their internal animation controllers.
@@ -47,20 +51,36 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
   // Prevents auto-play from retriggering on rebuilds.
   bool _didAutoPlay = false;
 
+  // Number count-up (0 -> 1, 1 -> 2, etc)
+  late final AnimationController _countController;
+  int _countFrom = 0;
+  int _countTo = 0;
+
+  // Tunable timings
+  static const Duration _screenSettleDelay = Duration(milliseconds: 650);
+  static const Duration _rowStartDelay = Duration(milliseconds: 200);
+  static const Duration _badgeStartAfterRow = Duration(milliseconds: 850);
+  static const Duration _countDuration = Duration(milliseconds: 520);
+
   @override
   void initState() {
     super.initState();
+    _countController = AnimationController(
+      vsync: this,
+      duration: _countDuration,
+    );
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
-      // Guaranteed: first frame has been laid out and painted.
-      await Future.delayed(const Duration(milliseconds: 650));
+      // First frame has been painted.
+      await Future.delayed(_screenSettleDelay);
       if (!mounted) return;
 
       final int streak = widget.streak;
       final int prevStreak = (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
           .clamp(0, 999999);
+
       final bool streakIncreased = widget.previousStreak != null
           ? (streak > prevStreak)
           : widget.isNew;
@@ -68,12 +88,46 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
       if (!streakIncreased) return;
       if (_didAutoPlay) return;
 
+      _didAutoPlay = true;
+
+      // Gate opens: this screen is fully visible.
+      if (!mounted) return;
       setState(() {
-        _didAutoPlay = true;
         _shouldAnimateStreak = true;
-        _animationSeed++;
+        _animationSeed++; // rebuild children so their internal controllers restart
+
+        // Sequence state
+        _animateRow = false;
+        _animateBadge = false;
+
+        // Count-up config
+        _countFrom = prevStreak;
+        _countTo = streak;
       });
+
+      // Step 1: animate the small flame row first.
+      await Future.delayed(_rowStartDelay);
+      if (!mounted) return;
+      setState(() {
+        _animateRow = true;
+      });
+
+      // Step 2: after the row has had time to play, animate the badge + number.
+      await Future.delayed(_badgeStartAfterRow);
+      if (!mounted) return;
+      setState(() {
+        _animateBadge = true;
+      });
+
+      // Start number count-up alongside the badge slam.
+      _countController.forward(from: 0.0);
     });
+  }
+
+  @override
+  void dispose() {
+    _countController.dispose();
+    super.dispose();
   }
 
   @override
@@ -148,11 +202,27 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
                     ),
 
                     // Big SVG flame badge
-                    QuietResultsStreakBadge(
-                      key: ValueKey('streak_badge_$_animationSeed'),
-                      streak: streak,
-                      previousStreak: prevStreak,
-                      animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak,
+                    AnimatedBuilder(
+                      animation: _countController,
+                      builder: (context, _) {
+                        final t = _countController.value;
+                        final eased = Curves.easeOutCubic.transform(t);
+                        final int displayStreak = (_animateBadge && _shouldAnimateStreak)
+                            ? (_countFrom + ((_countTo - _countFrom) * eased).round())
+                            : streak;
+
+                        return QuietResultsStreakBadge(
+                          key: ValueKey('streak_badge_$_animationSeed'),
+                          streak: streak,
+                          previousStreak: prevStreak,
+                          // NEW: the badge renders this number (0->1, 1->2, etc)
+                          displayStreak: displayStreak,
+                          // Badge only animates in step 2
+                          animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge,
+                          // NEW: badge should start immediately when step 2 flips true
+                          startDelay: Duration.zero,
+                        );
+                      },
                     ),
 
                     const SizedBox(
@@ -164,7 +234,10 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
                       key: ValueKey('streak_row_$_animationSeed'),
                       streak: streak,
                       previousStreak: prevStreak,
-                      animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak,
+                      // Row only animates in step 1
+                      animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateRow,
+                      // NEW: row starts immediately when step 1 flips true
+                      startDelay: Duration.zero,
                     ),
                   ],
                 ),
@@ -174,19 +247,40 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen> {
 
               // DEBUG BUTTON (TEMPORARY)
               TextButton(
-                onPressed: () {
+                onPressed: () async {
+                  final int streak = widget.streak;
+                  final int prevStreak = (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+                      .clamp(0, 999999);
+
                   setState(() {
                     _debugForceAnimate = true;
-                    _shouldAnimateStreak = false;
+                    _shouldAnimateStreak = true;
+
+                    // reset sequence
+                    _animateRow = false;
+                    _animateBadge = false;
+
+                    // reset number
+                    _countFrom = prevStreak;
+                    _countTo = streak;
+                    _countController.stop();
+                    _countController.value = 0.0;
+
+                    // restart child controllers
                     _animationSeed++;
                   });
 
-                  WidgetsBinding.instance.addPostFrameCallback((_) {
-                    if (!mounted) return;
-                    setState(() {
-                      _shouldAnimateStreak = true;
-                    });
-                  });
+                  // Row first
+                  await Future.delayed(_rowStartDelay);
+                  if (!mounted) return;
+                  setState(() => _animateRow = true);
+
+                  // Badge second
+                  await Future.delayed(_badgeStartAfterRow);
+                  if (!mounted) return;
+                  setState(() => _animateBadge = true);
+
+                  _countController.forward(from: 0.0);
                 },
                 child: const Text(
                   'DEBUG: Play Streak Animation',
