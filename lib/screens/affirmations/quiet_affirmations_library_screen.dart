@@ -79,6 +79,19 @@ class _QuietAffirmationsLibraryScreenState
     return n <= _unlockedDay;
   }
 
+  String _packHeader(String packId) {
+    switch (packId) {
+      case AffirmationPackIds.focus:
+        return 'FOCUS';
+      case AffirmationPackIds.sleep:
+        return 'SLEEP';
+      case AffirmationPackIds.strength:
+        return 'STRENGTH';
+      default:
+        return packId.toUpperCase();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -104,57 +117,178 @@ class _QuietAffirmationsLibraryScreenState
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: GridView.builder(
-                itemCount: allAffirmations.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 0.9,
+          : CustomScrollView(
+              slivers: [
+                // --- CORE HEADER ---
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Daily Affirmations',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: baseTextColor,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'Unlocked one day at a time through quiet practice.',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: baseTextColor.withValues(alpha: 0.7),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-                itemBuilder: (context, index) {
-                  final item = allAffirmations[index] as Map;
-                  final a = item['a'];
-                  final String packId = item['packId'] as String;
 
-                  // MVP: only CORE affirmations are free/unlockable.
-                  final bool isPremiumLocked = packId != AffirmationPackIds.core;
-                  final bool unlocked = !isPremiumLocked && _isUnlocked(a.id);
+                // --- CORE GRID ---
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  sliver: SliverGrid(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final coreItems = allAffirmations
+                            .where((x) => (x as Map)['packId'] == AffirmationPackIds.core)
+                            .toList(growable: false);
 
-                  return AffirmationGridTile(
-                    affirmation: a,
-                    isUnlocked: unlocked,
-                    isPremiumLocked: isPremiumLocked,
-                    lockedLabel: isPremiumLocked ? 'Premium' : 'Locked',
-                    unlockedLabel: unlocked ? unlockedLabel : null,
-                    onTap: unlocked
-                        ? () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => QuietAffirmationFullscreenScreen(
-                                  text: a.text,
-                                  unlockedLabel: unlockedLabel,
-                                ),
+                        final item = coreItems[index] as Map;
+                        final a = item['a'];
+
+                        final bool isPremiumLocked = false;
+                        final bool unlocked = _isUnlocked(a.id);
+
+                        return AffirmationGridTile(
+                          affirmation: a,
+                          isUnlocked: unlocked,
+                          isPremiumLocked: isPremiumLocked,
+                          lockedLabel: 'Locked',
+                          unlockedLabel: unlocked ? unlockedLabel : null,
+                          onTap: unlocked
+                              ? () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => QuietAffirmationFullscreenScreen(
+                                        text: a.text,
+                                        unlockedLabel: unlockedLabel,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              : null,
+                          onLockedTap: () {
+                            const message =
+                                'Complete a quiet session tomorrow to unlock this.';
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(message),
+                                duration: Duration(seconds: 2),
                               ),
                             );
-                          }
-                        : null,
-                    onLockedTap: () {
-                      final message = isPremiumLocked
-                          ? 'Premium packs are coming soon.'
-                          : 'Complete a quiet session tomorrow to unlock this.';
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(message),
-                          duration: const Duration(seconds: 2),
+                          },
+                        );
+                      },
+                      childCount: allAffirmations
+                          .where((x) => (x as Map)['packId'] == AffirmationPackIds.core)
+                          .length,
+                    ),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.9,
+                    ),
+                  ),
+                ),
+
+                // --- DIVIDER ---
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                  sliver: SliverToBoxAdapter(
+                    child: Divider(color: baseTextColor.withValues(alpha: 0.12)),
+                  ),
+                ),
+
+                // --- PREMIUM HEADER ---
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                  sliver: SliverToBoxAdapter(
+                    child: Text(
+                      'Premium Packs',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: baseTextColor,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // --- PREMIUM SECTIONS ---
+                ...[AffirmationPackIds.focus, AffirmationPackIds.sleep, AffirmationPackIds.strength]
+                    .where((id) => affirmationsByPack.containsKey(id))
+                    .map((id) => MapEntry(id, affirmationsByPack[id]!))
+                    .expand((entry) {
+                  final packId = entry.key;
+                  final items = entry.value;
+
+                  return <Widget>[
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      sliver: SliverToBoxAdapter(
+                        child: Text(
+                          _packHeader(packId),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: baseTextColor.withValues(alpha: 0.85),
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                          ),
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
+                    ),
+                    SliverPadding(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      sliver: SliverGrid(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final a = items[index];
+                            const bool isPremiumLocked = true;
+                            const bool unlocked = false;
+
+                            return AffirmationGridTile(
+                              affirmation: a,
+                              isUnlocked: unlocked,
+                              isPremiumLocked: isPremiumLocked,
+                              lockedLabel: 'Premium',
+                              unlockedLabel: null,
+                              onTap: null,
+                              onLockedTap: () {
+                                const message = 'Premium packs are coming soon.';
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(message),
+                                    duration: Duration(seconds: 2),
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                          childCount: items.length,
+                        ),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 0.9,
+                        ),
+                      ),
+                    ),
+                  ];
+                }),
+              ],
             ),
     );
   }
