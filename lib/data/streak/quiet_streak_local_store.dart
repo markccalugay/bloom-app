@@ -27,6 +27,16 @@ class QuietStreakLocalStore {
     }
   }
 
+  /// Returns true if the last completed streak date matches `today` (local date-only).
+  Future<bool> hasCompletedToday(DateTime today) async {
+    final last = await getLastDate();
+    if (last == null) return false;
+
+    final a = DateTime(last.year, last.month, last.day);
+    final b = DateTime(today.year, today.month, today.day);
+    return a == b;
+  }
+
   /// Saves both streak count and last date together.
   Future<void> saveStreak({
     required int count,

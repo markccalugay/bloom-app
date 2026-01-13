@@ -27,11 +27,15 @@ class QuietResultsOkScreen extends StatefulWidget {
   /// Prefer passing `previousStreak`.
   final bool isNew; // pass true when streak just increased
 
+  /// Whether the user has completed a quiet session today (data-layer signal).
+  final bool completedToday;
+
   const QuietResultsOkScreen({
     super.key,
     required this.streak,
     this.previousStreak,
     this.isNew = false,
+    this.completedToday = true,
   });
 
   @override
@@ -257,6 +261,9 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                           startInactive: !continuedStreak,
                           // Play wiggle only on continued streaks (no color transition)
                           wiggleOnly: continuedStreak,
+                          completedToday: streakIncreased
+                              ? (_shouldAnimateStreak && _animateBadge)
+                              : widget.completedToday,
                         );
                       },
                     ),

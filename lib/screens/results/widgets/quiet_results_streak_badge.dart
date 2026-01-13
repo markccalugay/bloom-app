@@ -47,6 +47,9 @@ class QuietResultsStreakBadge extends StatefulWidget {
   /// If true, only play the wiggle animation (no gray->teal gradient transition).
   final bool wiggleOnly;
 
+  /// Whether the user has completed a quiet session today (data-layer signal).
+  final bool completedToday;
+
   const QuietResultsStreakBadge({
     super.key,
     required this.streak,
@@ -57,6 +60,7 @@ class QuietResultsStreakBadge extends StatefulWidget {
     this.displayStreak,
     this.fromStreak,
     this.wiggleOnly = false,
+    this.completedToday = false,
   });
 
   @override
@@ -74,9 +78,8 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   late final LinearGradientTween _gradientTween;
 
   /// Whether the badge should be shown as "active" (teal) at rest.
-  /// Note: during orchestrated count-up (e.g. displayStreak=0 while streak=1),
-  /// we intentionally start inactive and animate to active.
-  bool get _isActive => widget.streak > 0;
+  /// Note: driven by completedToday (data-layer signal).
+  bool get _isActive => widget.completedToday;
 
   /// When true, we should start the badge in the inactive (gray) state even if
   /// `streak > 0`, because the UI is intentionally displaying a lower number

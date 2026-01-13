@@ -77,6 +77,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
         builder: (_) => QuietResultsOkScreen(
           previousStreak: previous,   // 0
           streak: current,            // 1
+          completedToday: true,
           isNew: current == 1,         // FTUE animation trigger
         ),
       ),
