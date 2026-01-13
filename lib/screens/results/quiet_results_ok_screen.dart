@@ -256,6 +256,8 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                           animate: badgeShouldAnimate,
                           // badge should start immediately when step 2 flips true
                           startDelay: Duration.zero,
+                          // Prevent gray->teal on continued streaks, only FTUE
+                          startInactive: !continuedStreak,
                         );
                       },
                     ),

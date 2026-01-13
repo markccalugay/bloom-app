@@ -93,8 +93,10 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     final from = widget.fromStreak;
     if (from != null && from < widget.streak) return true;
 
-    // Or if we have previousStreak and this is an increment.
-    if (widget.previousStreak != null && widget.streak > widget.previousStreak!) {
+    // Only FTUE (0 -> 1) should animate gray -> teal, not continued streaks.
+    if (widget.previousStreak != null &&
+        widget.streak > widget.previousStreak! &&
+        widget.previousStreak == 0) {
       return true;
     }
 

@@ -52,6 +52,9 @@ class QuietResultsStreakRow extends StatelessWidget {
     final int targetFlames = streak >= 3 ? 5 : 3;
     final int effectiveMaxFlames = maxFlames < targetFlames ? maxFlames : targetFlames;
 
+    final bool didIncrement = animate && (streak > prevClamped);
+    final bool isCapped = prevClamped >= effectiveMaxFlames;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(effectiveMaxFlames, (index) {
@@ -61,6 +64,8 @@ class QuietResultsStreakRow extends StatelessWidget {
 
         // Newly earned if it crossed this step during this session.
         final animateIn = animate && isActive && prevClamped < step;
+
+        final bool wiggleOnly = didIncrement && isCapped && index == effectiveMaxFlames - 1;
 
         // Stagger each newly-earned flame.
         final delay = startDelay + Duration(milliseconds: 120 * index);
@@ -72,6 +77,7 @@ class QuietResultsStreakRow extends StatelessWidget {
             isActive: isActive,
             animateIn: animateIn,
             delay: delay,
+            wiggleOnly: wiggleOnly,
           ),
         );
       }),
@@ -84,12 +90,14 @@ class _SmallFlame extends StatefulWidget {
   final bool isActive;
   final bool animateIn;
   final Duration delay;
+  final bool wiggleOnly;
 
   const _SmallFlame({
     required this.label,
     required this.isActive,
     required this.animateIn,
     required this.delay,
+    this.wiggleOnly = false,
   });
 
   @override
@@ -103,6 +111,19 @@ class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderState
   @override
   void initState() {
     super.initState();
+
+    if (widget.wiggleOnly) {
+      _showActive = widget.isActive;
+      _revealController = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 520),
+      );
+      Future.delayed(widget.delay, () {
+        if (!mounted) return;
+        _revealController!.forward(from: 0.0);
+      });
+      return;
+    }
 
     // If we're not animating-in, show immediately.
     if (!widget.isActive || !widget.animateIn) {
@@ -128,6 +149,17 @@ class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderState
   @override
   void didUpdateWidget(covariant _SmallFlame oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    if (!oldWidget.wiggleOnly && widget.wiggleOnly) {
+      _revealController ??= AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 520),
+      );
+      Future.delayed(widget.delay, () {
+        if (!mounted) return;
+        _revealController!.forward(from: 0.0);
+      });
+    }
 
     // If a flame becomes newly active later, animate it in.
     final becameActive = !oldWidget.isActive && widget.isActive;
@@ -200,18 +232,20 @@ class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderState
     );
 
     // Pop/fade when a newly-earned flame appears.
-    if (widget.animateIn && widget.isActive) {
-      flame = AnimatedScale(
-        scale: showTeal ? 1.0 : 0.8,
-        duration: const Duration(milliseconds: 320),
-        curve: Curves.easeOutBack,
-        child: AnimatedOpacity(
-          opacity: showTeal ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 240),
-          curve: Curves.easeOut,
-          child: flame,
-        ),
-      );
+    if ((widget.animateIn && widget.isActive) || widget.wiggleOnly) {
+      if (widget.animateIn && widget.isActive) {
+        flame = AnimatedScale(
+          scale: showTeal ? 1.0 : 0.8,
+          duration: const Duration(milliseconds: 320),
+          curve: Curves.easeOutBack,
+          child: AnimatedOpacity(
+            opacity: showTeal ? 1.0 : 0.0,
+            duration: const Duration(milliseconds: 240),
+            curve: Curves.easeOut,
+            child: flame,
+          ),
+        );
+      }
       // Wiggle during the reveal so the flame feels "earned".
       flame = AnimatedBuilder(
         animation: _revealController ?? kAlwaysDismissedAnimation,
