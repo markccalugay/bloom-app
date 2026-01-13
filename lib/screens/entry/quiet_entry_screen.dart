@@ -36,7 +36,10 @@ class _QuietEntryScreenState extends State<QuietEntryScreen> {
 
       if (!mounted) return;
       setState(() {
-        _ftueComplete = done;
+        // FTUE should only ever run once. If the user has a persisted streak
+        // of 1+ (i.e., they've completed at least one session), treat FTUE as complete
+        // even if the FTUE flag fails to persist for any reason.
+        _ftueComplete = done || streak >= 1;
         _streak = streak;
       });
     } catch (_) {
