@@ -56,10 +56,9 @@ class QuietHomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final service = const AffirmationsService();
 
-    // IMPORTANT: Home should not "pretend" an affirmation is unlocked.
-    // Until we wire Home into the same unlock-source-of-truth as the Library,
-    // we only show the card once the user has a real streak (i.e., after FTUE).
-    final todayAffirmation = (streak > 0) ? service.getTodayCore() : null;
+    // Home should not "pretend" an affirmation is unlocked.
+    // Day 0 (FTUE) should return null; Day 1 -> core_001, etc.
+    final todayAffirmation = service.getHomeCoreForStreakDay(streak);
 
     final int day = streak < 0 ? 0 : streak;
     final String unlockedLabel = 'Unlocked on Day $day ${_formatToday()}';
@@ -90,7 +89,7 @@ class QuietHomeScreen extends StatelessWidget {
 
             const SizedBox(height: 32.0),
 
-            if (todayAffirmation != null && streak > 0)
+            if (todayAffirmation != null)
               QuietHomeAffirmationsCard(
                 title: todayAffirmation.text,
                 unlockedLabel: unlockedLabel,

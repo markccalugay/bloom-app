@@ -73,6 +73,31 @@ class AffirmationsService {
     return getTodayForPack(AffirmationPackIds.core);
   }
 
+  /// Home should NOT use date-based selection for MVP.
+  ///
+  /// This returns the *earned* Core affirmation based on the user's streak day.
+  /// - Day 0 (FTUE) => null (nothing earned yet)
+  /// - Day 1 => core_001
+  /// - Day 2 => core_002, etc.
+  ///
+  /// By default we do NOT wrap (once you exceed the list length, you stay on the last one)
+  /// so we don't accidentally surface "future" affirmations.
+  Affirmation? getHomeCoreForStreakDay(int streakDay, {bool wrap = false}) {
+    if (streakDay <= 0) return null;
+    return getCoreForDay(streakDay, wrap: wrap);
+  }
+
+  /// Generic helper for other packs when we later support them.
+  /// Mirrors the Home/Core behavior: Day 0 => null, Day 1 => first item.
+  Affirmation? getHomeForPackStreakDay(
+    String packId,
+    int streakDay, {
+    bool wrap = false,
+  }) {
+    if (streakDay <= 0) return null;
+    return getForPackDay(packId, streakDay, wrap: wrap);
+  }
+
   /// Random affirmation (non-deterministic).
   Affirmation? getRandomFromPack(String packId) {
     final list = getAffirmationsForPack(packId);
