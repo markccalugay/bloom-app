@@ -44,6 +44,9 @@ class QuietResultsStreakBadge extends StatefulWidget {
   /// If null, we fall back to `previousStreak` (when provided).
   final int? fromStreak;
 
+  /// If true, only play the wiggle animation (no gray->teal gradient transition).
+  final bool wiggleOnly;
+
   const QuietResultsStreakBadge({
     super.key,
     required this.streak,
@@ -53,6 +56,7 @@ class QuietResultsStreakBadge extends StatefulWidget {
     this.startDelay = Duration.zero,
     this.displayStreak,
     this.fromStreak,
+    this.wiggleOnly = false,
   });
 
   @override
@@ -78,6 +82,7 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   /// `streak > 0`, because the UI is intentionally displaying a lower number
   /// first and we want the activation to animate on-screen.
   bool get _startInactiveForOrchestratedCount {
+    if (widget.wiggleOnly == true) return false;
     if (!widget.animate) return false;
 
     // Explicit override from parent to avoid initial teal flash.
@@ -105,8 +110,8 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
 
   bool get _shouldAnimate {
     if (!widget.animate) return false;
+    if (widget.wiggleOnly == true) return true;
     if (widget.previousStreak == null) return false;
-
     return widget.streak > widget.previousStreak!;
   }
 
@@ -118,7 +123,18 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
 
   void _startAnimation() {
     final delay = widget.startDelay;
-
+    if (widget.wiggleOnly == true) {
+      // Do not reset to 0.0, keep gradientT at 1.0 (teal), just play the wiggle.
+      if (delay == Duration.zero) {
+        _animController.forward(from: 1.0);
+        return;
+      }
+      Future.delayed(delay, () {
+        if (!mounted) return;
+        _animController.forward(from: 1.0);
+      });
+      return;
+    }
     // Always reset to the beginning so the badge starts in the inactive (gray)
     // state before animating to teal.
     _animController.value = 0.0;
@@ -188,7 +204,11 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
       end: QuietResultsConstants.streakGradient as LinearGradient,
     );
 
-    if (_startInactiveForOrchestratedCount) {
+    if (widget.wiggleOnly == true) {
+      // Immediately set to teal (gradientT=1.0), but play wiggle on demand.
+      _animController.value = 1.0;
+      _startAnimation();
+    } else if (_startInactiveForOrchestratedCount) {
       // Ensure we never paint the active (teal) state before the activation animation.
       _animController.value = 0.0;
       _startAnimation();
@@ -201,7 +221,10 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
   void didUpdateWidget(covariant QuietResultsStreakBadge oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (_startInactiveForOrchestratedCount) {
+    if (widget.wiggleOnly == true) {
+      _animController.value = 1.0;
+      _startAnimation();
+    } else if (_startInactiveForOrchestratedCount) {
       // Prevent any intermediate active paint before we restart the sequence.
       _animController.value = 0.0;
       _startAnimation();

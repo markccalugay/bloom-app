@@ -35,7 +35,13 @@ class AffirmationGridTile extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: isUnlocked ? onTap : onLockedTap,
+        onTap: isUnlocked
+            ? onTap
+            : () {
+                if (onLockedTap != null) {
+                  onLockedTap!();
+                }
+              },
         borderRadius: radius,
         child: Ink(
           decoration: BoxDecoration(
@@ -160,7 +166,9 @@ class AffirmationGridTile extends StatelessWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  isPremiumLocked ? 'Premium' : lockedLabel,
+                                  isPremiumLocked
+                                      ? 'Premium'
+                                      : 'Locked',
                                   style: theme.textTheme.labelSmall?.copyWith(
                                     color: Colors.white.withValues(alpha: 0.85),
                                     fontWeight: FontWeight.w600,
@@ -170,16 +178,6 @@ class AffirmationGridTile extends StatelessWidget {
                               ],
                             ),
                           ),
-                          if (isPremiumLocked) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              'Unlock this pack',
-                              style: theme.textTheme.labelSmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.70),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
                         ],
                       ),
                     ),

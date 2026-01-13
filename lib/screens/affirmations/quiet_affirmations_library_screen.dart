@@ -142,11 +142,13 @@ class _QuietAffirmationsLibraryScreenState
                           }
                         : null,
                     onLockedTap: () {
-                      // MVP: simple placeholder until paywall/subs exist.
+                      final message = isPremiumLocked
+                          ? 'Premium packs are coming soon.'
+                          : 'Complete a quiet session tomorrow to unlock this.';
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Premium packs are coming soon.'),
-                          duration: Duration(seconds: 2),
+                        SnackBar(
+                          content: Text(message),
+                          duration: const Duration(seconds: 2),
                         ),
                       );
                     },

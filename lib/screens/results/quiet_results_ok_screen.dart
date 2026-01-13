@@ -151,23 +151,21 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
     final bool streakIncreased = widget.previousStreak != null
         ? (streak > prevStreak)
         : widget.isNew;
-    // If the streak is continuing (e.g., 1 -> 2, 2 -> 3), the badge/flames should
-    // already be in the active (teal) state. Only FTUE (0 -> 1) should animate gray -> teal.
     final bool continuedStreak = streakIncreased && prevStreak > 0;
 
-    // Compute displayStreakNow for the Day X label (see instructions)
+    // Compute displayStreakNow for the Day X label.
+    // This must never show Day 0 and must match the big flame number.
     int displayStreakNow;
     if (!streakIncreased) {
-      displayStreakNow = streak;
-    } else if (!_shouldAnimateStreak) {
-      displayStreakNow = prevStreak;
-    } else if (!_animateBadge) {
-      displayStreakNow = prevStreak;
+      displayStreakNow = math.max(1, streak);
+    } else if (!_shouldAnimateStreak || !_animateBadge) {
+      displayStreakNow = math.max(1, prevStreak);
     } else {
-      // During badge animation, show the count-up value (see AnimatedBuilder logic below)
       final t = _countController.value;
       final eased = Curves.easeOutCubic.transform(t);
-      displayStreakNow = (_countFrom + ((_countTo - _countFrom) * eased).round()).clamp(_countFrom, _countTo);
+      displayStreakNow = (_countFrom +
+              ((_countTo - _countFrom) * eased).round())
+          .clamp(1, _countTo);
     }
 
     return Scaffold(
@@ -243,7 +241,6 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                         // For continued streaks, treat the badge as already active by setting
                         // its previousStreak equal to the current streak.
                         final int badgePreviousStreak = continuedStreak ? streak : prevStreak;
-
                         return QuietResultsStreakBadge(
                           key: ValueKey('streak_badge_$_animationSeed'),
                           // IMPORTANT: drive the badge's visual state from the displayed value so it
@@ -258,6 +255,8 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                           startDelay: Duration.zero,
                           // Prevent gray->teal on continued streaks, only FTUE
                           startInactive: !continuedStreak,
+                          // Play wiggle only on continued streaks (no color transition)
+                          wiggleOnly: continuedStreak,
                         );
                       },
                     ),
