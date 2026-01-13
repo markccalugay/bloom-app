@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
@@ -45,6 +46,10 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   bool _animateBadge = false;        // big flame step
   bool _debugForceAnimate = false;
 
+  // Debug-only: allows simulating streak progression without touching persistence.
+  int? _debugStreakOverride;
+  int? _debugPrevOverride;
+
   // Forces the flame widgets to rebuild their internal animation controllers.
   int _animationSeed = 0;
 
@@ -77,8 +82,8 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
       await Future.delayed(_screenSettleDelay);
       if (!mounted) return;
 
-      final int streak = widget.streak;
-      final int prevStreak = (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+      final int streak = _debugStreakOverride ?? widget.streak;
+      final int prevStreak = (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
           .clamp(0, 999999);
 
       final bool streakIncreased = widget.previousStreak != null
@@ -139,13 +144,16 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
     // - Prefer comparing against `previousStreak` when available.
     // - Fall back to `isNew` for older callers.
     // - FTUE safety: if someone forgets to pass flags on Day 1, we still animate.
-    final int streak = widget.streak;
+    final int streak = _debugStreakOverride ?? widget.streak;
     final int prevStreak =
-        (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+        (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
             .clamp(0, 999999);
     final bool streakIncreased = widget.previousStreak != null
         ? (streak > prevStreak)
         : widget.isNew;
+    // If the streak is continuing (e.g., 1 -> 2, 2 -> 3), the badge/flames should
+    // already be in the active (teal) state. Only FTUE (0 -> 1) should animate gray -> teal.
+    final bool continuedStreak = streakIncreased && prevStreak > 0;
 
     // Compute displayStreakNow for the Day X label (see instructions)
     int displayStreakNow;
@@ -231,13 +239,17 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
 
                         final bool badgeShouldAnimate =
                             (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge;
+                        // Prevent teal -> gray -> teal flicker on continued streak days.
+                        // For continued streaks, treat the badge as already active by setting
+                        // its previousStreak equal to the current streak.
+                        final int badgePreviousStreak = continuedStreak ? streak : prevStreak;
 
                         return QuietResultsStreakBadge(
                           key: ValueKey('streak_badge_$_animationSeed'),
                           // IMPORTANT: drive the badge's visual state from the displayed value so it
                           // starts inactive (gray) on FTUE and only turns teal when the count-up begins.
                           streak: displayStreak,
-                          previousStreak: prevStreak,
+                          previousStreak: badgePreviousStreak,
                           // the badge renders this number (0->1, 1->2, etc)
                           displayStreak: displayStreak,
                           // Badge only animates in step 2
@@ -258,7 +270,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                       streak: (!streakIncreased)
                           ? streak
                           : ((_shouldAnimateStreak && _animateRow) ? streak : prevStreak),
-                      previousStreak: prevStreak,
+                      previousStreak: continuedStreak ? streak : prevStreak,
                       // Row only animates in step 1
                       animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateRow,
                       // row starts immediately when step 1 flips true
@@ -270,48 +282,120 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
 
               const Spacer(),
 
-              // DEBUG BUTTON (TEMPORARY)
-              TextButton(
-                onPressed: () async {
-                  final int streak = widget.streak;
-                  final int prevStreak = (widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
-                      .clamp(0, 999999);
+              // DEBUG BUTTONS (TEMPORARY)
+              if (kDebugMode) ...[
+                TextButton(
+                  onPressed: () async {
+                    final int streak = _debugStreakOverride ?? widget.streak;
+                    final int prevStreak = (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+                        .clamp(0, 999999);
 
-                  setState(() {
-                    _debugForceAnimate = true;
-                    _shouldAnimateStreak = true;
+                    setState(() {
+                      _debugForceAnimate = true;
+                      _shouldAnimateStreak = true;
 
-                    // reset sequence
-                    _animateRow = false;
-                    _animateBadge = false;
+                      // reset sequence
+                      _animateRow = false;
+                      _animateBadge = false;
 
-                    // reset number
-                    _countFrom = prevStreak;
-                    _countTo = streak;
-                    _countController.stop();
-                    _countController.value = 0.0;
+                      // reset number
+                      _countFrom = prevStreak;
+                      _countTo = streak;
+                      _countController.stop();
+                      _countController.value = 0.0;
 
-                    // restart child controllers
-                    _animationSeed++;
-                  });
+                      // restart child controllers
+                      _animationSeed++;
+                    });
 
-                  // Row first
-                  await Future.delayed(_rowStartDelay);
-                  if (!mounted) return;
-                  setState(() => _animateRow = true);
+                    // Row first
+                    await Future.delayed(_rowStartDelay);
+                    if (!mounted) return;
+                    setState(() => _animateRow = true);
 
-                  // Badge second
-                  await Future.delayed(_badgeStartAfterRow);
-                  if (!mounted) return;
-                  setState(() => _animateBadge = true);
+                    // Badge second
+                    await Future.delayed(_badgeStartAfterRow);
+                    if (!mounted) return;
+                    setState(() => _animateBadge = true);
 
-                  _countController.forward(from: 0.0);
-                },
-                child: const Text(
-                  'DEBUG: Play Streak Animation',
-                  style: TextStyle(color: Colors.redAccent),
+                    _countController.forward(from: 0.0);
+                  },
+                  child: const Text(
+                    'DEBUG: Play Streak Animation',
+                    style: TextStyle(color: Colors.redAccent),
+                  ),
                 ),
-              ),
+
+                TextButton(
+                  onPressed: () async {
+                    final int current = _debugStreakOverride ?? widget.streak;
+                    final int next = (current + 1).clamp(0, 999999);
+
+                    setState(() {
+                      _debugForceAnimate = true;
+                      _shouldAnimateStreak = true;
+
+                      // Simulate a clean day-to-day increment
+                      _debugPrevOverride = current;
+                      _debugStreakOverride = next;
+
+                      // reset sequence
+                      _animateRow = false;
+                      _animateBadge = false;
+
+                      // number animation
+                      _countFrom = current;
+                      _countTo = next;
+                      _countController.stop();
+                      _countController.value = 0.0;
+
+                      // restart child controllers
+                      _animationSeed++;
+                    });
+
+                    // Row first
+                    await Future.delayed(_rowStartDelay);
+                    if (!mounted) return;
+                    setState(() => _animateRow = true);
+
+                    // Badge second
+                    await Future.delayed(_badgeStartAfterRow);
+                    if (!mounted) return;
+                    setState(() => _animateBadge = true);
+
+                    _countController.forward(from: 0.0);
+                  },
+                  child: const Text(
+                    'DEBUG: Next Day (+1)',
+                    style: TextStyle(color: Colors.orangeAccent),
+                  ),
+                ),
+
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      // Reset to FTUE scenario: 0 -> 1
+                      _debugPrevOverride = 0;
+                      _debugStreakOverride = 1;
+
+                      _debugForceAnimate = false;
+                      _shouldAnimateStreak = false;
+                      _animateRow = false;
+                      _animateBadge = false;
+
+                      _countController.stop();
+                      _countController.value = 0.0;
+
+                      _animationSeed++;
+                      _didAutoPlay = false;
+                    });
+                  },
+                  child: const Text(
+                    'DEBUG: Reset FTUE (0→1)',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
 
               // Bottom primary button, matching design
               QLPrimaryButton(
