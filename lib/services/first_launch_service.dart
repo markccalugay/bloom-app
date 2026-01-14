@@ -72,4 +72,15 @@ class FirstLaunchService {
     await prefs.remove(_keyHomeHintSeen);
     await prefs.remove(_keyHasCompletedFirstSession);
   }
+
+  /// Debug helper: returns a snapshot of FTUE-related flags.
+  Future<Map<String, bool>> debugStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    return {
+      'ftueCompleted': prefs.getBool(_keyFtueCompleted) ?? false,
+      'hasSeenHomeHint': prefs.getBool(_keyHomeHintSeen) ?? false,
+      'hasCompletedFirstSession':
+          prefs.getBool(_keyHasCompletedFirstSession) ?? false,
+    };
+  }
 }

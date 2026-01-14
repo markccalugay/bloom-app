@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../home/widgets/quiet_home_app_bar.dart';
@@ -142,6 +143,52 @@ class _QuietHomeScreenState extends State<QuietHomeScreen> {
 
             // Spacer pushes content up, leaving room for bottom nav
             const Spacer(),
+
+            // DEBUG controls (dev-only): lets us force/show/reload the home hint.
+            if (kDebugMode) ...[
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Wrap(
+                  spacing: 12,
+                  runSpacing: 6,
+                  children: [
+                    TextButton(
+                      onPressed: () async {
+                        // Force show the overlay (doesn't touch persistence).
+                        if (!mounted) return;
+                        setState(() {
+                          _hintLoaded = true;
+                          _showHomeHint = true;
+                        });
+                      },
+                      child: const Text('DEBUG: Show Home Hint'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        // Re-read persisted state from FirstLaunchService.
+                        await _loadHomeHintState();
+                      },
+                      child: const Text('DEBUG: Reload Hint State'),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        // Dismiss overlay + persist "seen".
+                        await _dismissHomeHint();
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Home hint marked as seen.'),
+                            duration: Duration(seconds: 2),
+                          ),
+                        );
+                      },
+                      child: const Text('DEBUG: Mark Hint Seen'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
 
             // Optional microcopy or footer can go here later.
             // For now, keep it clean.
