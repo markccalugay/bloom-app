@@ -22,6 +22,9 @@ import 'package:quietline_app/services/first_launch_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:flutter/foundation.dart';
+
+
 /// Root shell that hosts the bottom navigation and top-level tabs.
 class QuietShellScreen extends StatefulWidget {
   const QuietShellScreen({super.key});
@@ -31,6 +34,8 @@ class QuietShellScreen extends StatefulWidget {
 }
 
 class _QuietShellScreenState extends State<QuietShellScreen> {
+  // Ownership of the Quiet Time button key (non-static)
+  final GlobalKey _quietTimeButtonKey = GlobalKey();
   int _currentIndex = 0;
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
@@ -43,9 +48,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _homeHintLoaded = false;
   bool _showHomeHint = false;
 
-  bool _reminderPromptEligible = false;
-  bool _checkedReminderEligibility = false;
-
   bool _showReminderPrompt = false;
 
   final _web = WebLaunchService();
@@ -55,9 +57,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     super.initState();
     _loadStreak();
     _loadDisplayName();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measureQuietTimeButtonIfNeeded();
-    });
   }
 
   Future<void> _loadStreak() async {
@@ -95,10 +94,20 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     });
   }
 
+  void _maybeMeasureQuietTimeButton() {
+    if (_didMeasureQuietTimeButton) return;
+    if (_currentIndex != 0) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _measureQuietTimeButtonIfNeeded();
+    });
+  }
+
   void _measureQuietTimeButtonIfNeeded() {
     if (_didMeasureQuietTimeButton) return;
 
-    final context = QLBottomNav.quietTimeButtonKey.currentContext;
+    final context = _quietTimeButtonKey.currentContext;
     if (context == null) return;
 
     final renderBox = context.findRenderObject() as RenderBox?;
@@ -126,32 +135,30 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       _showHomeHint = (_streak ?? 0) >= 1 && !hasSeen;
     });
 
-    // After home hint logic settles, check reminder eligibility if needed.
-    if (!_checkedReminderEligibility && !_showHomeHint) {
-      final prefs = await SharedPreferences.getInstance();
-      final reminderService = ReminderService(prefs);
-
-      final eligible = reminderService.shouldShowReminderPrompt(
-        ftueCompleted: true,
-        quietTimeSessionCount: _streak ?? 0,
-      );
-      if (!mounted) return;
-      setState(() {
-        _reminderPromptEligible = eligible;
-        _checkedReminderEligibility = true;
-      });
-
-      if (_reminderPromptEligible) {
-        Future.delayed(const Duration(milliseconds: 2200), () {
-          if (!mounted) return;
-          // Do not show if Home hint is visible or already dismissed today
-          if (_showHomeHint) return;
-          setState(() {
-            _showReminderPrompt = true;
-          });
-        });
-      }
+    if (!_showHomeHint) {
+      _maybeScheduleReminderPrompt();
     }
+  }
+
+  Future<void> _maybeScheduleReminderPrompt() async {
+    // Only schedule if home hint is not showing and prompt isn't already shown.
+    if (_showHomeHint || _showReminderPrompt) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+    final eligible = reminderService.shouldShowReminderPrompt(
+      ftueCompleted: true,
+      quietTimeSessionCount: _streak ?? 0,
+    );
+    if (!eligible) return;
+    Future.delayed(const Duration(milliseconds: 2200), () {
+      if (!mounted) return;
+      if (_showHomeHint) return;
+      setState(() {
+        _showReminderPrompt = true;
+      });
+    });
   }
 
   Future<void> _dismissHomeHint() async {
@@ -280,89 +287,97 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     );
   }
 
-  Widget _buildReminderPrompt() {
-    if (!_showReminderPrompt) return const SizedBox.shrink();
-
-    return Positioned(
-      left: 16,
-      right: 16,
-      bottom: 96,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: const Color(0xFF0F141A),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFF2A3340)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Build a quiet habit',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                decoration: TextDecoration.none,
-              ),
+  // Card for the reminder prompt (no Positioned wrapper)
+  Widget _buildInlineReminderCard() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F141A),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFF2A3340)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Build a quiet habit',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              decoration: TextDecoration.none,
             ),
-            const SizedBox(height: 8),
-            const Text(
-              'A short daily reminder can help you return to Quiet Time when you need it most.',
-              style: TextStyle(
-                fontSize: 14,
-                height: 1.35,
-                color: Color(0xFFB9C3CF),
-                decoration: TextDecoration.none,
-              ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'A short daily reminder can help you return to Quiet Time when you need it most.',
+            style: TextStyle(
+              fontSize: 14,
+              height: 1.35,
+              color: Color(0xFFB9C3CF),
+              decoration: TextDecoration.none,
             ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final reminderService = ReminderService(prefs);
-                    await reminderService.markReminderPromptSeen();
-                    if (!mounted) return;
-                    setState(() {
-                      _showReminderPrompt = false;
-                    });
-                  },
-                  child: const Text(
-                    'Later',
-                    style: TextStyle(color: Color(0xFF7F8A99)),
-                  ),
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              TextButton(
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final reminderService = ReminderService(prefs);
+                  await reminderService.markReminderPromptSeen();
+                  if (!mounted) return;
+                  setState(() {
+                    _showReminderPrompt = false;
+                  });
+                },
+                child: const Text(
+                  'Later',
+                  style: TextStyle(color: Color(0xFF7F8A99)),
                 ),
-                const Spacer(),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2FE6D2),
-                    foregroundColor: Colors.black,
-                  ),
-                  onPressed: () async {
-                    final prefs = await SharedPreferences.getInstance();
-                    final reminderService = ReminderService(prefs);
-                    await reminderService.markReminderEnabled();
-                    if (!mounted) return;
-                    setState(() {
-                      _showReminderPrompt = false;
-                    });
-                  },
-                  child: const Text('Set a reminder'),
+              ),
+              const Spacer(),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2FE6D2),
+                  foregroundColor: Colors.black,
                 ),
-              ],
-            ),
-          ],
-        ),
+                onPressed: () async {
+                  final prefs = await SharedPreferences.getInstance();
+                  final reminderService = ReminderService(prefs);
+                  await reminderService.markReminderEnabled();
+                  if (!mounted) return;
+                  setState(() {
+                    _showReminderPrompt = false;
+                  });
+                },
+                child: const Text('Set a reminder'),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
+  // Inline wrapper for reminder prompt
+  Widget _buildInlineReminderPrompt() {
+    if (!_showReminderPrompt) {
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      child: _buildInlineReminderCard(),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     const double menuWidth = 280.0;
+
+    _maybeMeasureQuietTimeButton();
 
     return Stack(
       children: [
@@ -370,6 +385,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
         Scaffold(
           body: _buildBody(),
           bottomNavigationBar: QLBottomNav(
+            quietTimeButtonKey: _quietTimeButtonKey,
             currentIndex: _currentIndex,
             onItemSelected: (index) async {
               if (index == 1) {
@@ -380,6 +396,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 // MVP: mood check-ins are disabled. Keep the code path behind a flag
                 // so we can reconnect in V2 by flipping FeatureFlags.moodCheckInsEnabled.
                 if (!FeatureFlags.moodCheckInsEnabled) {
+                  if (kDebugMode) {
+                    debugPrint(
+                      '[QuietTime] Session started | ${DateTime.now().toIso8601String()}',
+                    );
+                  }
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => QuietBreathScreen(
@@ -393,6 +414,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                   // so Home reflects the latest value.
                   if (!mounted) return;
                   await _loadStreak();
+                  if (kDebugMode) {
+                    debugPrint(
+                      '[QuietTime] Session ended | streak=${_streak ?? "unknown"} | ${DateTime.now().toIso8601String()}',
+                    );
+                  }
                   return;
                 }
 
@@ -402,6 +428,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       mode: MoodCheckinMode.pre,
                       sessionId: sessionId,
                       onSubmit: (_) {
+                        if (kDebugMode) {
+                          debugPrint(
+                            '[QuietTime] Session started | ${DateTime.now().toIso8601String()}',
+                          );
+                        }
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => QuietBreathScreen(
@@ -421,6 +452,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 // so Home reflects the latest value.
                 if (!mounted) return;
                 await _loadStreak();
+                if (kDebugMode) {
+                  debugPrint(
+                    '[QuietTime] Session ended | streak=${_streak ?? "unknown"} | ${DateTime.now().toIso8601String()}',
+                  );
+                }
               } else {
                 // Left and right icons behave as true tabs (Home / Brotherhood).
                 setState(() {
@@ -431,9 +467,19 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           ),
         ),
 
-        _buildHomeHintOverlay(),
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: false,
+            child: _buildHomeHintOverlay(),
+          ),
+        ),
 
-        _buildReminderPrompt(),
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: false,
+            child: _buildInlineReminderPrompt(),
+          ),
+        ),
 
         // Dimmed scrim when menu is open; tap to close
         if (_isMenuOpen)

@@ -11,17 +11,15 @@ const double _kCenterButtonBottomOffset = 25.0; // how far above bottom it sits
 /// Only the center button is interactive.
 /// onItemSelected(1) starts a Quiet session.
 class QLBottomNav extends StatelessWidget {
-  /// GlobalKey used to measure the on-screen position of the center Quiet Time button.
-  /// Used by FTUE overlays to perfectly align guidance UI.
-  static final GlobalKey quietTimeButtonKey = GlobalKey();
-
   final int currentIndex;
   final ValueChanged<int> onItemSelected;
+  final GlobalKey quietTimeButtonKey;
 
   const QLBottomNav({
     super.key,
     required this.currentIndex,
     required this.onItemSelected,
+    required this.quietTimeButtonKey,
   });
 
   @override
@@ -59,7 +57,7 @@ class QLBottomNav extends StatelessWidget {
           Positioned(
             bottom: _kCenterButtonBottomOffset,
             child: _PrimaryNavItem(
-              containerKey: QLBottomNav.quietTimeButtonKey,
+              containerKey: quietTimeButtonKey,
               isActive: currentIndex == 1,
               activeColor: activeColor,
               dockBackground: dockBackground,
@@ -124,21 +122,24 @@ class _PrimaryNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        key: containerKey,
-        width: _kCenterButtonSize,
-        height: _kCenterButtonSize,
-        decoration: BoxDecoration(
-          color: dockBackground,
-          shape: BoxShape.circle,
-        ),
-        child: Center(
-          child: SvgPicture.asset(
-            AppAssets.quietlineLogo,
-            width: 45,
-            height: 45,
+    return SizedBox(
+      width: _kCenterButtonSize,
+      height: _kCenterButtonSize,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          key: containerKey,
+          decoration: BoxDecoration(
+            color: dockBackground,
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              AppAssets.quietlineLogo,
+              width: 45,
+              height: 45,
+            ),
           ),
         ),
       ),
