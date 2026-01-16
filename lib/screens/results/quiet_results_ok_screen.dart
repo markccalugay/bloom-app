@@ -505,7 +505,7 @@ class _QuietAffirmationUnlockedScreenState
     _flip = Tween<double>(begin: 0.0, end: 3.0 * 3.141592653589793).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.35, 0.85, curve: Curves.easeInOutCubic),
+        curve: const Interval(0.55, 0.90, curve: Curves.easeInOutCubic),
       ),
     );
 
@@ -558,11 +558,10 @@ class _QuietAffirmationUnlockedScreenState
       }
     });
 
-    // Start animation on first frame.
+    // Start animation on first frame, card renders immediately, then dwell before flip/twirl.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      // Haptics: small "tap" then a bigger "pop".
       HapticFeedback.lightImpact();
       Future.delayed(const Duration(milliseconds: 520), () {
         if (!mounted) return;
