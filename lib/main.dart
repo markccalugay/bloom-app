@@ -15,12 +15,15 @@ import 'data/streak/quiet_streak_service.dart';
 
 // import 'services/first_launch_service.dart';
 // import 'screens/shell/quiet_shell_screen.dart';
-//import 'package:quietline_app/core/feature_flags.dart';
+// import 'package:quietline_app/core/feature_flags.dart';
+
+import 'package:timezone/data/latest.dart' as tz;
 
 late QuietStreakRepository quietStreakRepo;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tz.initializeTimeZones();
 
   final prefs = await SharedPreferences.getInstance();
   quietStreakRepo = QuietStreakRepository(

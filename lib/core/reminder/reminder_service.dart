@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'reminder_state.dart';
+import '../notifications/notification_service.dart';
+
+enum ReminderEnableResult {
+  enabled,
+  denied,
+}
 
 /// Central authority for reminder eligibility and persistence.
 /// This service contains NO UI logic and NO OS-level notification logic.
@@ -96,6 +102,41 @@ class ReminderService {
       _kLastReminderPromptDate,
       _normalizeDate(DateTime.now()).toIso8601String(),
     );
+  }
+
+  /// Attempts to enable reminders.
+  ///
+  /// Phase 3 responsibility:
+  /// - Ask OS for permission (later)
+  /// - Schedule notification (later)
+  /// - Persist state on success
+  ///
+  /// For now, this method only records intent and returns a placeholder result.
+  Future<ReminderEnableResult> enableReminder({
+    required TimeOfDay time,
+  }) async {
+    final notificationService = NotificationService();
+
+    // Initialize notification plugin (safe to call multiple times)
+    await notificationService.initialize();
+
+    // Ask OS for permission
+    final bool granted = await notificationService.requestPermission();
+
+    if (!granted) {
+      // User explicitly denied permission — respect it
+      await markReminderPromptSeen();
+      return ReminderEnableResult.denied;
+    }
+
+    // Permission granted — persist time + schedule notification
+    await saveReminderTime(time);
+    await notificationService.scheduleDaily(time: time);
+
+    // Mark reminder as enabled only after successful scheduling
+    await markReminderEnabled();
+
+    return ReminderEnableResult.enabled;
   }
 
   /// Marks that the user successfully enabled reminders.
