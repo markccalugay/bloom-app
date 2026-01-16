@@ -4,6 +4,89 @@ import '../home/widgets/quiet_home_app_bar.dart';
 import '../home/widgets/quiet_home_streak_row.dart';
 import '../home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
+import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
+
+const double kHomeHorizontalPadding = 16.0;
+const double kHomeTopSpacing = 20.0;          // space between app bar and streak
+const double kHomeStreakToCardSpacing = 56.0; // space between streak and affirmation card
+const double kHomeBottomSpacing = 16.0; 
+
+String _formatToday() {
+  final now = DateTime.now();
+  const months = <String>[
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+
+  final month = months[now.month - 1];
+  final day = now.day; // no leading zero for this style
+  final year = now.year;
+
+  return '$month $day, $year';
+}
+
+Widget _buildHomeBody({
+  required BuildContext context,
+  required int streak,
+  required String unlockedLabel,
+  required String? affirmationText,
+  required VoidCallback? onMenu,
+}) {
+  return SafeArea(
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          QuietHomeAppBar(
+            onMenuTap: () {
+              onMenu?.call();
+            },
+          ),
+
+          const SizedBox(height: kHomeTopSpacing),
+
+          QuietHomeStreakRow(streak: streak),
+
+          const SizedBox(height: 40.0),
+
+          const QuietHomeIngotBackground(),
+
+          const SizedBox(height: 32.0),
+
+          if (affirmationText != null)
+            QuietHomeAffirmationsCard(
+              title: affirmationText,
+              unlockedLabel: unlockedLabel,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => QuietAffirmationFullscreenScreen(
+                      text: affirmationText,
+                      unlockedLabel: unlockedLabel,
+                    ),
+                  ),
+                );
+              },
+            ),
+
+          const Spacer(),
+          const SizedBox(height: kHomeBottomSpacing),
+        ],
+      ),
+    ),
+  );
+}
 
 /// QuietLine Home screen body.
 ///
@@ -12,7 +95,7 @@ import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 ///   That lives in `QuietShellScreen` with `QLBottomNav`.
 /// - For now it only needs the current streak; affirmations
 ///   are stubbed with a placeholder string.
-class QuietHomeScreen extends StatelessWidget {
+class QuietHomeScreen extends StatefulWidget {
   final int streak;
   final VoidCallback? onMenu;
 
@@ -23,49 +106,28 @@ class QuietHomeScreen extends StatelessWidget {
   });
 
   @override
+  State<QuietHomeScreen> createState() => _QuietHomeScreenState();
+}
+
+class _QuietHomeScreenState extends State<QuietHomeScreen> {
+
+  @override
   Widget build(BuildContext context) {
     final service = const AffirmationsService();
-    final todayAffirmation = service.getTodayCore();
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Top app bar (hamburger)
-            QuietHomeAppBar(
-              onMenuTap: () {
-                // Delegate to shell / parent if provided.
-                onMenu?.call();
-              },
-            ),
+    // Home should not "pretend" an affirmation is unlocked.
+    // Day 0 (FTUE) should return null; Day 1 -> core_001, etc.
+    final todayAffirmation = service.getHomeCoreForStreakDay(widget.streak);
 
-            const SizedBox(height: 24),
+    final int day = widget.streak < 0 ? 0 : widget.streak;
+    final String unlockedLabel = 'Unlocked on Day $day ${_formatToday()}';
 
-            // Streak row
-            QuietHomeStreakRow(streak: streak),
-
-            const SizedBox(height: 24),
-
-            if (todayAffirmation != null)
-              QuietHomeAffirmationsCard(
-                title: todayAffirmation.text,
-                unlockedLabel: 'Unlocked today',
-                onTap: () {
-                  // TODO: navigate to affirmation detail / library.
-                },
-              ),
-
-            // Spacer pushes content up, leaving room for bottom nav
-            const Spacer(),
-
-            // Optional microcopy or footer can go here later.
-            // For now, keep it clean.
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
+    return _buildHomeBody(
+      context: context,
+      streak: widget.streak,
+      unlockedLabel: unlockedLabel,
+      affirmationText: todayAffirmation?.text,
+      onMenu: widget.onMenu,
     );
   }
 }

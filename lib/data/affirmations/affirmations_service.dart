@@ -3,17 +3,51 @@
 import 'affirmations_model.dart';
 import 'affirmations_packs.dart';
 
-/// Simple service for getting daily / random affirmations.
+/// Simple service for getting affirmations.
 ///
 /// For MVP:
 /// - No persistence.
-/// - "Affirmation of the day" is deterministic based on date.
+/// - Home/Unlock flow should use sequential (day/streak-based) selection.
+/// - Date-based "today" selection is kept for future/experiments.
 class AffirmationsService {
   const AffirmationsService();
 
   /// Get all affirmations for a given pack.
   List<Affirmation> getAffirmationsForPack(String packId) {
     return affirmationsByPack[packId] ?? const [];
+  }
+
+  /// Sequential (earned) affirmation for a given pack day.
+  ///
+  /// Day 1 -> index 0, Day 2 -> index 1, etc.
+  ///
+  /// By default we wrap when day exceeds list length.
+  Affirmation? getForPackDay(
+    String packId,
+    int dayNumber, {
+    bool wrap = true,
+  }) {
+    final list = getAffirmationsForPack(packId);
+    if (list.isEmpty) return null;
+
+    final day = dayNumber <= 0 ? 1 : dayNumber;
+    final int index;
+
+    if (wrap) {
+      index = (day - 1) % list.length;
+    } else {
+      final i = day - 1;
+      index = i < 0
+          ? 0
+          : (i >= list.length ? list.length - 1 : i);
+    }
+
+    return list[index];
+  }
+
+  /// Convenience for the Core pack (Day 1 -> core_001).
+  Affirmation? getCoreForDay(int dayNumber, {bool wrap = true}) {
+    return getForPackDay(AffirmationPackIds.core, dayNumber, wrap: wrap);
   }
 
   /// Deterministic "today" affirmation for a pack.
@@ -37,6 +71,31 @@ class AffirmationsService {
   /// Convenience for the Core pack.
   Affirmation? getTodayCore() {
     return getTodayForPack(AffirmationPackIds.core);
+  }
+
+  /// Home should NOT use date-based selection for MVP.
+  ///
+  /// This returns the *earned* Core affirmation based on the user's streak day.
+  /// - Day 0 (FTUE) => null (nothing earned yet)
+  /// - Day 1 => core_001
+  /// - Day 2 => core_002, etc.
+  ///
+  /// By default we do NOT wrap (once you exceed the list length, you stay on the last one)
+  /// so we don't accidentally surface "future" affirmations.
+  Affirmation? getHomeCoreForStreakDay(int streakDay, {bool wrap = false}) {
+    if (streakDay <= 0) return null;
+    return getCoreForDay(streakDay, wrap: wrap);
+  }
+
+  /// Generic helper for other packs when we later support them.
+  /// Mirrors the Home/Core behavior: Day 0 => null, Day 1 => first item.
+  Affirmation? getHomeForPackStreakDay(
+    String packId,
+    int streakDay, {
+    bool wrap = false,
+  }) {
+    if (streakDay <= 0) return null;
+    return getForPackDay(packId, streakDay, wrap: wrap);
   }
 
   /// Random affirmation (non-deterministic).
