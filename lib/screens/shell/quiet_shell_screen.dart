@@ -6,6 +6,7 @@ import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/widgets/navigation/ql_bottom_nav.dart';
 import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
+import 'package:quietline_app/widgets/time_picker/quiet_time_picker_sheet.dart';
 import 'package:quietline_app/services/web_launch_service.dart';
 import 'package:quietline_app/services/support_call_service.dart';
 import 'package:quietline_app/screens/account/quiet_account_screen.dart';
@@ -179,9 +180,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             onEnable: () async {
               Navigator.of(context).pop();
               if (!mounted) return;
-              final picked = await showTimePicker(
+              final picked = await showModalBottomSheet<TimeOfDay>(
                 context: context,
-                initialTime: TimeOfDay.now(),
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const QuietTimePickerSheet(),
               );
 
               if (picked == null) {
