@@ -234,92 +234,90 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     final double ringSize =
         (rect.width > rect.height ? rect.width : rect.height) + ringPadding * 2;
 
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          // Dimmed scrim; tap anywhere to dismiss (logic wired later)
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _dismissHomeHint,
-            child: Container(color: Colors.black.withValues(alpha: 0.45)),
-          ),
+    return Stack(
+      children: [
+        // Dimmed scrim; tap anywhere to dismiss (logic wired later)
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _dismissHomeHint,
+          child: Container(color: Colors.black.withValues(alpha: 0.45)),
+        ),
 
-          // Spotlight ring centered on the Quiet Time button
-          Positioned(
-            left: rect.center.dx - ringSize / 2,
-            top: rect.center.dy - ringSize / 2,
-            width: ringSize,
-            height: ringSize,
-            child: IgnorePointer(
+        // Spotlight ring centered on the Quiet Time button
+        Positioned(
+          left: rect.center.dx - ringSize / 2,
+          top: rect.center.dy - ringSize / 2,
+          width: ringSize,
+          height: ringSize,
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF2FE6D2),
+                  width: 3,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
               child: Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  color: const Color(0xFF0F141A),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF2FE6D2),
-                    width: 3,
+                    color: const Color(0xFF2A3340),
+                    width: 1,
                   ),
                 ),
-              ),
-            ),
-          ),
-
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F141A),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF2A3340),
-                      width: 1,
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Well done.',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        decoration: TextDecoration.none,
+                      ),
                     ),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Well done.',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          decoration: TextDecoration.none,
-                        ),
+                    SizedBox(height: 8),
+                    Text(
+                      'You just did the hardest part; starting.\n\n'
+                      'Use Quiet Time anytime you need a reset.\n'
+                      'Tap the button at the bottom to begin.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.35,
+                        color: Color(0xFFB9C3CF),
+                        decoration: TextDecoration.none,
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        'You just did the hardest part; starting.\n\n'
-                        'Use Quiet Time anytime you need a reset.\n'
-                        'Tap the button at the bottom to begin.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.35,
-                          color: Color(0xFFB9C3CF),
-                          decoration: TextDecoration.none,
-                        ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Tap anywhere to continue',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF7F8A99),
+                        decoration: TextDecoration.none,
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Tap anywhere to continue',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF7F8A99),
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
