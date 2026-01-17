@@ -13,6 +13,7 @@ import 'package:quietline_app/screens/affirmations/quiet_affirmations_library_sc
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
+import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
 
 import 'package:quietline_app/data/user/user_service.dart';
 
@@ -48,7 +49,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _homeHintLoaded = false;
   bool _showHomeHint = false;
 
-  bool _showReminderPrompt = false;
 
   final _web = WebLaunchService();
 
@@ -142,7 +142,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
 
   Future<void> _maybeScheduleReminderPrompt() async {
     // Only schedule if home hint is not showing and prompt isn't already shown.
-    if (_showHomeHint || _showReminderPrompt) {
+    if (_showHomeHint) {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
@@ -155,10 +155,46 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (!mounted) return;
       if (_showHomeHint) return;
-      setState(() {
-        _showReminderPrompt = true;
-      });
+      _showReminderModal();
     });
+  }
+
+  Future<void> _showReminderModal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return ReminderPromptModalCard(
+          actions: ReminderPromptActions(
+            onLater: () async {
+              await reminderService.markReminderPromptSeen();
+              if (!mounted) return;
+              Navigator.of(this.context).pop();
+            },
+            onEnable: () async {
+              Navigator.of(context).pop();
+              if (!mounted) return;
+              final picked = await showTimePicker(
+                context: context,
+                initialTime: TimeOfDay.now(),
+              );
+
+              if (picked == null) {
+                await reminderService.markReminderPromptSeen();
+                return;
+              }
+
+              await reminderService.enableReminder(time: picked);
+            },
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _dismissHomeHint() async {
@@ -287,90 +323,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     );
   }
 
-  // Card for the reminder prompt (no Positioned wrapper)
-  Widget _buildInlineReminderCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F141A),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFF2A3340)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Build a quiet habit',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-              decoration: TextDecoration.none,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'A short daily reminder can help you return to Quiet Time when you need it most.',
-            style: TextStyle(
-              fontSize: 14,
-              height: 1.35,
-              color: Color(0xFFB9C3CF),
-              decoration: TextDecoration.none,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              TextButton(
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  final reminderService = ReminderService(prefs);
-                  await reminderService.markReminderPromptSeen();
-                  if (!mounted) return;
-                  setState(() {
-                    _showReminderPrompt = false;
-                  });
-                },
-                child: const Text(
-                  'Later',
-                  style: TextStyle(color: Color(0xFF7F8A99)),
-                ),
-              ),
-              const Spacer(),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF2FE6D2),
-                  foregroundColor: Colors.black,
-                ),
-                onPressed: () async {
-                  final prefs = await SharedPreferences.getInstance();
-                  final reminderService = ReminderService(prefs);
-                  await reminderService.markReminderEnabled();
-                  if (!mounted) return;
-                  setState(() {
-                    _showReminderPrompt = false;
-                  });
-                },
-                child: const Text('Set a reminder'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Inline wrapper for reminder prompt
-  Widget _buildInlineReminderPrompt() {
-    if (!_showReminderPrompt) {
-      return const SizedBox.shrink();
-    }
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      child: _buildInlineReminderCard(),
-    );
-  }
 
 
   @override
@@ -474,12 +426,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           ),
         ),
 
-        Positioned.fill(
-          child: IgnorePointer(
-            ignoring: false,
-            child: _buildInlineReminderPrompt(),
-          ),
-        ),
 
         // Dimmed scrim when menu is open; tap to close
         if (_isMenuOpen)
