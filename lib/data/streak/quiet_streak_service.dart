@@ -35,6 +35,25 @@ class QuietStreakService {
     }
   }
 
+  /// Returns true if a quiet session has already been completed today (local date).
+  static Future<bool> hasCompletedToday() async {
+    try {
+      final now = DateTime.now();
+      return await repo.hasCompletedToday(now);
+    } catch (_) {
+      // MVP fail-safe: assume not completed so flow is not blocked.
+      return false;
+    }
+  }
+
+  /// Check if the user is currently on a streak (streak > 0).
+  ///
+  /// Returns true if the current streak is greater than zero.
+  static Future<bool> isOnStreak() async {
+    final streak = await getCurrentStreak();
+    return streak > 0;
+  }
+
   /// Reset/clear the streak, if you ever need it (e.g., debugging).
   ///
   /// Delegates to [QuietStreakRepository.resetStreak].

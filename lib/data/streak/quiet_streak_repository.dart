@@ -41,6 +41,11 @@ class QuietStreakRepository {
     return _local.getCurrentStreak();
   }
 
+  /// Returns true if a quiet session has already been completed today (local date-only).
+  Future<bool> hasCompletedToday(DateTime today) {
+    return _local.hasCompletedToday(today);
+  }
+
   /// Optional helper to wipe streak (for debugging or a “reset progress” feature).
   Future<void> clearStreak() {
     return _local.clear();

@@ -65,6 +65,10 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       return;
     }
 
+    // Check if today was already completed BEFORE this session.
+    final bool hadCompletedTodayBeforeSession =
+        await QuietStreakService.hasCompletedToday();
+
     // Increment streak here — this is the moment the user earns it.
     // FTUE flow: 0 -> 1 happens exactly once.
     final int previous = widget.streak; // 0 on first install
@@ -72,16 +76,22 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
     if (!mounted) return;
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (_) => QuietResultsOkScreen(
-          previousStreak: previous,   // 0
-          streak: current,            // 1
-          completedToday: true,
-          isNew: current == 1,         // FTUE animation trigger
+    // Only show the streak/results screen on the FIRST completion of the day.
+    if (!hadCompletedTodayBeforeSession) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => QuietResultsOkScreen(
+            previousStreak: previous,
+            streak: current,
+            completedToday: true,
+            isNew: current == 1,
+          ),
         ),
-      ),
-    );
+      );
+    } else {
+      // Subsequent sessions today skip the streak screen.
+      Navigator.of(context).pop();
+    }
   }
 
   @override
