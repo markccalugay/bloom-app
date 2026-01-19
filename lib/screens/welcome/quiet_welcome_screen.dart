@@ -117,10 +117,8 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
     final sessionId = 'session-${DateTime.now().millisecondsSinceEpoch}';
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (_) => QuietBreathScreen(
-          sessionId: sessionId,
-          streak: widget.streak,
-        ),
+        builder: (_) =>
+            QuietBreathScreen(sessionId: sessionId, streak: widget.streak),
       ),
     );
   }
