@@ -34,12 +34,29 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     with TickerProviderStateMixin {
   late final QuietBreathController controller;
 
+  bool _hasStarted = false;
+  bool _showPauseIcon = false;
+
   @override
   void initState() {
     super.initState();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     controller = QuietBreathController(vsync: this);
     controller.onSessionComplete = _handleSessionComplete;
+
+    controller.listenable.addListener(() {
+      if (controller.isPlaying && !_hasStarted) {
+        _hasStarted = true;
+        HapticFeedback.selectionClick();
+        Future.delayed(const Duration(milliseconds: 120), () {
+          if (mounted) {
+            setState(() {
+              _showPauseIcon = true;
+            });
+          }
+        });
+      }
+    });
   }
 
   @override
@@ -103,18 +120,42 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Column(
+        child: Stack(
           children: [
-            const SizedBox(height: kQBHeaderTopGap),
-            AnimatedBuilder(
-              animation: controller.listenable,
-              builder: (_, _) => QuietBreathTimerTitle(controller: controller),
+            Center(
+              child: Column(
+                children: [
+                  const SizedBox(height: kQBHeaderTopGap),
+                  AnimatedBuilder(
+                    animation: controller.listenable,
+                    builder: (_, _) => QuietBreathTimerTitle(controller: controller),
+                  ),
+                  Expanded(child: QuietBreathCircle(controller: controller)),
+                ],
+              ),
             ),
-            Expanded(child: QuietBreathCircle(controller: controller)),
-            QuietBreathControls(controller: controller),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: AnimatedOpacity(
+                opacity: _hasStarted ? 0.0 : 1.0,
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOut,
+                child: IgnorePointer(
+                  ignoring: _hasStarted,
+                  child: QuietBreathControls(
+                    controller: controller,
+                    hasStarted: _hasStarted,
+                    isPlaying: controller.isPlaying,
+                  ),
+                ),
+              ),
+            ),
             if (kDebugMode)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+              Positioned(
+                top: 12,
+                right: 12,
                 child: TextButton(
                   onPressed: () {
                     controller.completeSessionImmediately();
@@ -125,7 +166,30 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   ),
                 ),
               ),
-            const SizedBox(height: 12),
+            if (_showPauseIcon)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: AnimatedOpacity(
+                  opacity: _showPauseIcon ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOut,
+                  child: IconButton(
+                    icon: Icon(
+                      controller.isPlaying ? Icons.pause : Icons.play_arrow,
+                      size: 22,
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withValues(alpha: 0.6),
+                    ),
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      controller.toggle();
+                    },
+                  ),
+                ),
+              ),
           ],
         ),
       ),
