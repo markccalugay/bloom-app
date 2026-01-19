@@ -43,6 +43,9 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   int? _streak; // null = loading / unknown
   String _displayName = 'Quiet guest';
 
+  TimeOfDay? _reminderTime;
+  String _reminderLabel = 'Daily reminder · Not set';
+
   // Geometry measurement for Quiet Time button
   Rect? _quietTimeButtonRect;
   bool _didMeasureQuietTimeButton = false;
@@ -58,6 +61,45 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     super.initState();
     _loadStreak();
     _loadDisplayName();
+    _loadReminderState();
+  }
+  Future<void> _loadReminderState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hour = prefs.getInt('reminderHour');
+    final minute = prefs.getInt('reminderMinute');
+
+    if (hour == null || minute == null) {
+      if (!mounted) return;
+      setState(() {
+        _reminderTime = null;
+        _reminderLabel = 'Daily reminder · Not set';
+      });
+      return;
+    }
+
+    final time = TimeOfDay(hour: hour, minute: minute);
+    if (!mounted) return;
+    setState(() {
+      _reminderTime = time;
+      _reminderLabel = 'Daily reminder · ${time.format(context)}';
+    });
+  }
+
+  Future<void> _editReminderTime() async {
+    final picked = await showModalBottomSheet<TimeOfDay>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => QuietTimePickerSheet(initialTime: _reminderTime),
+    );
+
+    if (picked == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+    await reminderService.enableReminder(time: picked);
+
+    await _loadReminderState();
   }
 
   Future<void> _loadStreak() async {
@@ -447,6 +489,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           width: menuWidth,
           child: QLSideMenu(
             displayName: _displayName,
+            reminderLabel: _reminderLabel,
+            onEditReminder: () async {
+              _toggleMenu();
+              await _editReminderTime();
+            },
             onClose: _toggleMenu,
             onOpenAccount: () async {
               _toggleMenu();

@@ -32,6 +32,9 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onOpenPrivacy;
   final VoidCallback? onOpenTerms;
 
+  final String? reminderLabel;
+  final VoidCallback? onEditReminder;
+
   const QLSideMenu({
     super.key,
     required this.displayName,
@@ -48,6 +51,8 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenAccount,
     this.showBrotherhood = false,
     this.showJourney = false,
+    this.reminderLabel,
+    this.onEditReminder,
   });
 
   @override
@@ -209,6 +214,16 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onOpenTerms,
+                    ),
+
+                    const SizedBox(height: 16),
+                    const _SectionLabel('Preferences'),
+                    _MenuItem(
+                      icon: Icons.notifications_none_rounded,
+                      label: reminderLabel ?? 'Daily reminder',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onEditReminder,
                     ),
 
                     const SizedBox(height: 24),

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class QuietTimePickerSheet extends StatefulWidget {
-  const QuietTimePickerSheet({super.key});
+  final TimeOfDay? initialTime;
+  const QuietTimePickerSheet({super.key, this.initialTime});
 
   @override
   State<QuietTimePickerSheet> createState() => _QuietTimePickerSheetState();
@@ -13,6 +14,29 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
   int _selectedHour = 9; // 1–12
   int _selectedMinute = 0; // 0–55 (5 min steps)
   bool _isAm = true;
+
+  @override
+  void initState() {
+    if (widget.initialTime != null) {
+      final hour = widget.initialTime!.hour;
+      final minute = widget.initialTime!.minute;
+      if (hour == 0) {
+        _selectedHour = 12;
+        _isAm = true;
+      } else if (hour == 12) {
+        _selectedHour = 12;
+        _isAm = false;
+      } else if (hour > 12) {
+        _selectedHour = hour - 12;
+        _isAm = false;
+      } else {
+        _selectedHour = hour;
+        _isAm = true;
+      }
+      _selectedMinute = minute;
+    }
+    super.initState();
+  }
 
   static const List<int> _hours = [
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
