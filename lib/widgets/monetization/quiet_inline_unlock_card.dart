@@ -1,71 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
-/// Inline, low-pressure unlock prompt shown inside results flows.
-/// Designed to acknowledge progress without interrupting it.
 class QuietInlineUnlockCard extends StatelessWidget {
-  final VoidCallback onExplore;
+  final String title;
+  final String subtitle;
+  final String ctaLabel;
+  final VoidCallback onTap;
 
   const QuietInlineUnlockCard({
     super.key,
-    required this.onExplore,
+    required this.title,
+    required this.subtitle,
+    required this.ctaLabel,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final onSurface = theme.colorScheme.onSurface;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: Colors.white.withValues(alpha: 0.04),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.08),
+    return Container(
+      margin: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'You’ve built momentum.',
-              style: textTheme.titleSmall?.copyWith(
-                color: onSurface,
-                fontWeight: FontWeight.w600,
-              ),
+          const SizedBox(height: 6),
+          Text(
+            subtitle,
+            style: textTheme.bodyMedium?.copyWith(
+              color: textTheme.bodyMedium?.color?.withValues(alpha: 0.75),
+              height: 1.3,
             ),
-            const SizedBox(height: 8),
-            Text(
-              'Explore deeper breathing practices designed for steadiness, discipline, and recovery.',
-              style: textTheme.bodyMedium?.copyWith(
-                color: onSurface.withValues(alpha: 0.75),
-                height: 1.4,
+          ),
+          const SizedBox(height: 14),
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: onTap,
+              style: TextButton.styleFrom(
+                foregroundColor: QLColors.primaryTeal,
               ),
-            ),
-            const SizedBox(height: 14),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: onExplore,
-                style: TextButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  foregroundColor: QLColors.primaryTeal,
-                  textStyle: textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+              child: Text(
+                ctaLabel,
+                style: textTheme.labelLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                child: const Text('Explore deeper practices'),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

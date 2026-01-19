@@ -90,7 +90,9 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => QuietTimePickerSheet(initialTime: _reminderTime),
+      builder: (_) => QuietTimePickerSheet(
+        initialTime: _reminderTime,
+      ),
     );
 
     if (picked == null) return;

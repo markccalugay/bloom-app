@@ -224,6 +224,7 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onEditReminder,
+                      enabled: onEditReminder != null,
                     ),
 
                     const SizedBox(height: 24),
