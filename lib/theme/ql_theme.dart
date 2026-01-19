@@ -11,6 +11,95 @@ class QLColors {
   static const Color navIconInactive = Color(0xFF6D747C);
 }
 
+class QLGradients {
+  // ── Soft tier (early / low streak)
+  static const Gradient softPrimary = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF1A2430),
+      Color(0xFF111821),
+    ],
+  );
+
+  static const List<Gradient> softSecondary = [
+    LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF18222D),
+        Color(0xFF0F151D),
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF1C2632),
+        Color(0xFF121922),
+      ],
+    ),
+  ];
+
+  // ── Grounded tier (mid streak)
+  static const Gradient groundedPrimary = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF20303A),
+      Color(0xFF141C23),
+    ],
+  );
+
+  static const List<Gradient> groundedSecondary = [
+    LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF1F2D36),
+        Color(0xFF131B22),
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF22333F),
+        Color(0xFF151E26),
+      ],
+    ),
+  ];
+
+  // ── Steady tier (high streak)
+  static const Gradient steadyPrimary = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [
+      Color(0xFF24424A),
+      Color(0xFF162128),
+    ],
+  );
+
+  static const List<Gradient> steadySecondary = [
+    LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF2A4B53),
+        Color(0xFF18242B),
+      ],
+    ),
+    LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: [
+        Color(0xFF213E45),
+        Color(0xFF151F25),
+      ],
+    ),
+  ];
+}
+
 class QLTheme {
   static ThemeData dark = ThemeData(
     brightness: Brightness.dark,
