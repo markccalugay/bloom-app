@@ -10,6 +10,7 @@ import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/core/feature_flags.dart';
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
+import 'package:quietline_app/screens/results/quiet_session_complete_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
@@ -90,7 +91,11 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       );
     } else {
       // Subsequent sessions today skip the streak screen.
-      Navigator.of(context).pop();
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (_) => QuietSessionCompleteScreen(),
+        ),
+      );
     }
   }
 
