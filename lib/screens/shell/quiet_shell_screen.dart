@@ -53,6 +53,13 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _homeHintLoaded = false;
   bool _showHomeHint = false;
 
+  // DEBUG: local premium entitlement toggle
+  bool _debugPremiumEnabled = false;
+  void _toggleDebugPremium() {
+    setState(() {
+      _debugPremiumEnabled = !_debugPremiumEnabled;
+    });
+  }
 
   final _web = WebLaunchService();
 
@@ -496,6 +503,13 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
               _toggleMenu();
               await _editReminderTime();
             },
+
+            // DEBUG premium toggle
+            debugPremiumLabel: _debugPremiumEnabled
+                ? 'Debug: Premium · ON'
+                : 'Debug: Premium · OFF',
+            onToggleDebugPremium: _toggleDebugPremium,
+
             onClose: _toggleMenu,
             onOpenAccount: () async {
               _toggleMenu();

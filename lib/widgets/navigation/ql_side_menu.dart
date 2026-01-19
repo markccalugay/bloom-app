@@ -35,6 +35,11 @@ class QLSideMenu extends StatelessWidget {
   final String? reminderLabel;
   final VoidCallback? onEditReminder;
 
+  final bool? debugPremiumEnabled;
+  final VoidCallback? onToggleDebugPremium;
+
+  final String? debugPremiumLabel;
+
   const QLSideMenu({
     super.key,
     required this.displayName,
@@ -53,6 +58,9 @@ class QLSideMenu extends StatelessWidget {
     this.showJourney = false,
     this.reminderLabel,
     this.onEditReminder,
+    this.debugPremiumEnabled,
+    this.onToggleDebugPremium,
+    this.debugPremiumLabel,
   });
 
   @override
@@ -226,6 +234,15 @@ class QLSideMenu extends StatelessWidget {
                       onTap: onEditReminder,
                       enabled: onEditReminder != null,
                     ),
+                    if (debugPremiumLabel != null)
+                      _MenuItem(
+                        icon: Icons.lock_open_rounded,
+                        label: debugPremiumLabel!,
+                        iconColor: iconColor,
+                        textColor: baseTextColor,
+                        onTap: onToggleDebugPremium,
+                        enabled: onToggleDebugPremium != null,
+                      ),
 
                     const SizedBox(height: 24),
                     Padding(
