@@ -26,7 +26,7 @@ class QuietBreathControls extends StatelessWidget {
             onPressed: controller.toggle,
             backgroundColor: kQBWaveColorMain,
             textColor: Colors.white,
-            margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            margin: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
           );
         } else {
           return const SizedBox.shrink();
