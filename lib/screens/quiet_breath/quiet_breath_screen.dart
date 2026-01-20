@@ -174,19 +174,22 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   opacity: _showPauseIcon ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 220),
                   curve: Curves.easeOut,
-                  child: IconButton(
-                    icon: Icon(
-                      controller.isPlaying ? Icons.pause : Icons.play_arrow,
-                      size: 22,
-                      color: Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.6),
+                  child: AnimatedBuilder(
+                    animation: controller.listenable,
+                    builder: (_, _) => IconButton(
+                      icon: Icon(
+                        controller.isPlaying ? Icons.pause : Icons.play_arrow,
+                        size: 22,
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.6),
+                      ),
+                      onPressed: () {
+                        HapticFeedback.selectionClick();
+                        controller.toggle();
+                      },
                     ),
-                    onPressed: () {
-                      HapticFeedback.selectionClick();
-                      controller.toggle();
-                    },
                   ),
                 ),
               ),

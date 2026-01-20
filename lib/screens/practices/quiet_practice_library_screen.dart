@@ -7,9 +7,16 @@ import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
-class QuietPracticeLibraryScreen extends StatelessWidget {
+class QuietPracticeLibraryScreen extends StatefulWidget {
   const QuietPracticeLibraryScreen({super.key});
 
+  @override
+  State<QuietPracticeLibraryScreen> createState() =>
+      _QuietPracticeLibraryScreenState();
+}
+
+class _QuietPracticeLibraryScreenState
+    extends State<QuietPracticeLibraryScreen> {
   @override
   Widget build(BuildContext context) {
     final practices = PracticeCatalog.all;
