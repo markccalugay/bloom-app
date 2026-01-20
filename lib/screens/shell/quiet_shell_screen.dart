@@ -11,6 +11,7 @@ import 'package:quietline_app/services/web_launch_service.dart';
 import 'package:quietline_app/services/support_call_service.dart';
 import 'package:quietline_app/screens/account/quiet_account_screen.dart';
 import 'package:quietline_app/screens/affirmations/quiet_affirmations_library_screen.dart';
+import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
@@ -526,6 +527,21 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 _currentIndex = 2;
                 _isMenuOpen = false;
               });
+            },
+            onNavigatePractices: () async {
+              // Close the menu first.
+              if (_isMenuOpen) {
+                setState(() {
+                  _isMenuOpen = false;
+                });
+              }
+
+              // Open the Practice Library.
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => QuietPracticeLibraryScreen(),
+                ),
+              );
             },
             onNavigateAffirmations: () async {
               // Close the menu first.

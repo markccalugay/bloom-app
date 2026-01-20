@@ -22,9 +22,33 @@ class PracticeCatalog {
     tier: PracticeTier.premium,
   );
 
+  static const navyCalm = Practice(
+    id: 'navy_calm',
+    title: 'Navy Calm',
+    description: 'Controlled breathing for stress tolerance and composure.',
+    tier: PracticeTier.premium,
+  );
+
+  static const athleteFocus = Practice(
+    id: 'athlete_focus',
+    title: 'Athlete Focus',
+    description: 'Performance breathing for focus and recovery.',
+    tier: PracticeTier.premium,
+  );
+
+  static const coldResolve = Practice(
+    id: 'cold_resolve',
+    title: 'Cold Resolve',
+    description: 'Breath control to build resilience under discomfort.',
+    tier: PracticeTier.premium,
+  );
+
   static const all = <Practice>[
     coreQuiet,
     steadyDiscipline,
     monkCalm,
+    navyCalm,
+    athleteFocus,
+    coldResolve,
   ];
 }

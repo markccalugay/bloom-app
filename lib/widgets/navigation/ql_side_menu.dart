@@ -15,6 +15,7 @@ class QLSideMenu extends StatelessWidget {
   // Navigation callbacks (optional so we can wire them gradually)
   final VoidCallback? onNavigateJourney;
   final VoidCallback? onNavigateBrotherhood;
+  final VoidCallback? onNavigatePractices;
   final VoidCallback? onNavigateAffirmations;
   final VoidCallback? onOpenAccount;
 
@@ -46,6 +47,7 @@ class QLSideMenu extends StatelessWidget {
     required this.onClose,
     this.onNavigateJourney,
     this.onNavigateBrotherhood,
+    this.onNavigatePractices,
     this.onNavigateAffirmations,
     this.onOpenAbout,
     this.onOpenWebsite,
@@ -168,6 +170,13 @@ class QLSideMenu extends StatelessWidget {
                         textColor: baseTextColor,
                         onTap: onNavigateBrotherhood,
                       ),
+                    _MenuItem(
+                      icon: Icons.self_improvement_rounded,
+                      label: 'Practices',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onNavigatePractices,
+                    ),
                     _MenuItem(
                       icon: Icons.favorite_outline_rounded,
                       label: 'Affirmations',
