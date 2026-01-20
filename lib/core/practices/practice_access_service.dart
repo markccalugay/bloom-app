@@ -7,8 +7,8 @@ class PracticeAccessService {
   bool canAccess(Practice practice) {
     if (practice.tier == PracticeTier.free) return true;
 
-    // MVP: allow premium access via debug flag only
-    if (FeatureFlags.debugPremiumEnabled) return true;
+    // MVP: allow premium access via launch-time cached entitlement only
+    if (FeatureFlags.launchPremiumEnabled) return true;
 
     return false;
   }
