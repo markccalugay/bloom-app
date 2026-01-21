@@ -4,7 +4,9 @@ import 'package:quietline_app/data/practices/practice_catalog.dart';
 import 'package:quietline_app/data/practices/practice_model.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
-import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
+// TODO(StoreKit): Reconnect practice selection to QuietBreathScreen
+// once premium entitlement is driven by StoreKit.
+// import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietPracticeLibraryScreen extends StatefulWidget {
@@ -21,6 +23,9 @@ class _QuietPracticeLibraryScreenState
   Widget build(BuildContext context) {
     final practices = PracticeCatalog.all;
     final accessService = const PracticeAccessService();
+    // TODO(StoreKit): Will be used when routing active practice
+    // into QuietBreathScreen once premium entitlement is finalized.
+    // final activeId = accessService.activePracticeId;
 
     return Scaffold(
       backgroundColor: QLColors.background,
@@ -32,7 +37,18 @@ class _QuietPracticeLibraryScreenState
       body: ListView.separated(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
         itemCount: practices.length,
-        separatorBuilder: (_, _) => const SizedBox(height: 12),
+        separatorBuilder: (context, index) {
+          if (index == 0) {
+            return Column(
+              children: [
+                const SizedBox(height: 16),
+                Divider(color: Colors.white.withValues(alpha: 0.08)),
+                const SizedBox(height: 16),
+              ],
+            );
+          }
+          return const SizedBox(height: 12);
+        },
         itemBuilder: (context, index) {
           final practice = practices[index];
           final bool canAccess = accessService.canAccess(practice);
@@ -40,26 +56,31 @@ class _QuietPracticeLibraryScreenState
           return _PracticeTile(
             practice: practice,
             locked: !canAccess,
-            onTap: () {
-              if (canAccess) {
-                final sessionId =
-                    'session-${DateTime.now().millisecondsSinceEpoch}';
-
+            isActive: accessService.isActive(practice.id),
+            onTap: () async {
+              if (!canAccess) {
                 Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => QuietBreathScreen(
-                      sessionId: sessionId,
-                      streak: 0,
-                    ),
-                  ),
+                  MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
                 );
-              } else {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => const QuietPaywallScreen(),
-                  ),
-                );
+                return;
               }
+
+              await showModalBottomSheet(
+                context: context,
+                backgroundColor: QLColors.background,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                builder: (_) => _PracticeDetailSheet(
+                  practice: practice,
+                  isActive: accessService.isActive(practice.id),
+                  onActivate: () async {
+                    await accessService.setActivePractice(practice.id);
+                    if (context.mounted) Navigator.of(context).pop();
+                    setState(() {});
+                  },
+                ),
+              );
             },
           );
         },
@@ -71,11 +92,13 @@ class _QuietPracticeLibraryScreenState
 class _PracticeTile extends StatelessWidget {
   final Practice practice;
   final bool locked;
+  final bool isActive;
   final VoidCallback onTap;
 
   const _PracticeTile({
     required this.practice,
     required this.locked,
+    required this.isActive,
     required this.onTap,
   });
 
@@ -99,11 +122,26 @@ class _PracticeTile extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(
-              locked ? Icons.lock_outline : Icons.self_improvement_rounded,
-              color: locked
-                  ? onSurface.withValues(alpha: 0.4)
-                  : QLColors.primaryTeal,
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(
+                  locked ? Icons.lock_outline : Icons.self_improvement_rounded,
+                  color: locked
+                      ? onSurface.withValues(alpha: 0.4)
+                      : QLColors.primaryTeal,
+                ),
+                if (isActive)
+                  const Positioned(
+                    bottom: -2,
+                    right: -2,
+                    child: Icon(
+                      Icons.check_circle,
+                      size: 14,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(width: 14),
             Expanded(
@@ -126,6 +164,26 @@ class _PracticeTile extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (isActive && !locked) ...[
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: QLColors.primaryTeal.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        'Active',
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: QLColors.primaryTeal,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ],
                   if (locked) ...[
                     const SizedBox(height: 8),
                     Text(
@@ -142,5 +200,84 @@ class _PracticeTile extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _PracticeDetailSheet extends StatelessWidget {
+  final Practice practice;
+  final bool isActive;
+  final VoidCallback onActivate;
+
+  const _PracticeDetailSheet({
+    required this.practice,
+    required this.isActive,
+    required this.onActivate,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            practice.id.replaceAll('_', ' ').toUpperCase(),
+            style: theme.textTheme.labelSmall,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            practice.description,
+            style: theme.textTheme.bodyLarge,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            _practiceDetails(practice.id),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 24),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: isActive ? null : onActivate,
+              child: Text(isActive ? 'Active' : 'Activate'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _practiceDetails(String id) {
+    switch (id) {
+      case 'core_quiet':
+        return 'Technique: 4–4–4 box breathing.\n'
+            'Inhale for 4 seconds, hold for 4, exhale for 4.\n'
+            'Benefits: Calms the nervous system and resets attention.';
+      case 'steady_discipline':
+        return 'Technique: Slow rhythmic breathing with steady pacing.\n'
+            'Benefits: Builds consistency, self-control, and emotional regulation.';
+      case 'monk_calm':
+        return 'Technique: Extended exhales inspired by monastic breathing.\n'
+            'Benefits: Encourages deep calm, patience, and mental stillness.';
+      case 'navy_calm':
+        return 'Technique: 4–7–8 breathing.\n'
+            'Inhale for 4, hold for 7, exhale for 8.\n'
+            'Benefits: Improves stress tolerance and composure under pressure.';
+      case 'athlete_focus':
+        return 'Technique: Performance-focused breathing cycles.\n'
+            'Benefits: Enhances focus, recovery, and physical readiness.';
+      case 'cold_resolve':
+        return 'Technique: Controlled breathing under discomfort.\n'
+            'Benefits: Builds resilience, stress endurance, and mental toughness.';
+      default:
+        return '';
+    }
   }
 }

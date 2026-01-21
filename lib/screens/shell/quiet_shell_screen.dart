@@ -57,12 +57,24 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _showHomeHint = false;
 
   // DEBUG: premium entitlement toggle
-  void _toggleDebugPremium() {
+  void _toggleDebugPremium() async {
+    // Close the side menu synchronously
+    if (_isMenuOpen) {
+      setState(() {
+        _isMenuOpen = false;
+      });
+    }
+
+    // Flip entitlement immediately
     final current = PremiumEntitlement.instance.isPremium;
     PremiumEntitlement.instance.debugSetPremium(!current);
 
-    // Simulate real StoreKit behavior by restarting the app tree
-    AppRestart.restart(context);
+    // Restart app tree synchronously in next frame
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      AppRestart.restart(context);
+    });
   }
 
   final _web = WebLaunchService();

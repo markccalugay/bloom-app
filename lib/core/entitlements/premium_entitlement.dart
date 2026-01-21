@@ -22,8 +22,9 @@ class PremiumEntitlement {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // MVP backing store (will be replaced by StoreKit)
-    _isPremium = FeatureFlags.launchPremiumEnabled;
+    // TODO(StoreKit): REMOVE before App Store release.
+    // Temporary override to unlock all premium features for testing.
+    _isPremium = true;
 
     _isInitialized = true;
   }
