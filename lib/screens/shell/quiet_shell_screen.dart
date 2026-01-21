@@ -20,6 +20,7 @@ import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 
 import 'package:quietline_app/core/feature_flags.dart';
+import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 
 import 'package:quietline_app/services/first_launch_service.dart';
 
@@ -54,12 +55,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _homeHintLoaded = false;
   bool _showHomeHint = false;
 
-  // DEBUG: local premium entitlement toggle
-  bool _debugPremiumEnabled = false;
+  // DEBUG: premium entitlement toggle
   void _toggleDebugPremium() {
-    setState(() {
-      _debugPremiumEnabled = !_debugPremiumEnabled;
-    });
+    final current = PremiumEntitlement.instance.isPremium;
+    PremiumEntitlement.instance.debugSetPremium(!current);
+    setState(() {});
   }
 
   final _web = WebLaunchService();
@@ -506,7 +506,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             },
 
             // DEBUG premium toggle
-            debugPremiumLabel: _debugPremiumEnabled
+            debugPremiumLabel: PremiumEntitlement.instance.isPremium
                 ? 'Debug: Premium · ON'
                 : 'Debug: Premium · OFF',
             onToggleDebugPremium: _toggleDebugPremium,
