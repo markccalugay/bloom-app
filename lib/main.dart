@@ -16,6 +16,7 @@ import 'data/streak/quiet_streak_service.dart';
 // import 'services/first_launch_service.dart';
 // import 'screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
+import 'package:quietline_app/core/app_restart.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -38,7 +39,7 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  runApp(const QuietLineApp());
+  runApp(const AppRestart(child: QuietLineApp()));
 }
 
 class QuietLineApp extends StatelessWidget {

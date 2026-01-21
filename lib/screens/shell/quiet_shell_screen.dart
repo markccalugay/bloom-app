@@ -21,6 +21,7 @@ import 'package:quietline_app/data/user/user_service.dart';
 
 import 'package:quietline_app/core/feature_flags.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
+import 'package:quietline_app/core/app_restart.dart';
 
 import 'package:quietline_app/services/first_launch_service.dart';
 
@@ -59,7 +60,9 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   void _toggleDebugPremium() {
     final current = PremiumEntitlement.instance.isPremium;
     PremiumEntitlement.instance.debugSetPremium(!current);
-    setState(() {});
+
+    // Simulate real StoreKit behavior by restarting the app tree
+    AppRestart.restart(context);
   }
 
   final _web = WebLaunchService();
