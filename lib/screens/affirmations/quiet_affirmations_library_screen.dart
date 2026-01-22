@@ -4,7 +4,6 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
-import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietAffirmationsLibraryScreen extends StatefulWidget {

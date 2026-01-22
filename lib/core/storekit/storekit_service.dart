@@ -95,6 +95,24 @@ class StoreKitService {
     );
   }
 
+  /// Explicit restore action (used by Paywall UI)
+  Future<void> restorePurchases() async {
+    if (!_initialized) {
+      debugPrint('[StoreKit] restorePurchases called before initialize — initializing now');
+      await initialize();
+      return;
+    }
+
+    final available = await _iap.isAvailable();
+    if (!available) {
+      debugPrint('[StoreKit] restorePurchases failed: Store not available');
+      return;
+    }
+
+    debugPrint('[StoreKit] restorePurchases started');
+    await _iap.restorePurchases();
+  }
+
   /// Optional cleanup (probably never needed)
   void dispose() {
     _purchaseSub?.cancel();

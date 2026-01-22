@@ -2,8 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 import '../../theme/ql_theme.dart';
 
-class QuietPaywallScreen extends StatelessWidget {
+class QuietPaywallScreen extends StatefulWidget {
   const QuietPaywallScreen({super.key});
+
+  @override
+  State<QuietPaywallScreen> createState() => _QuietPaywallScreenState();
+}
+
+class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
+  bool _isProcessing = false;
+  bool _hasClosed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -12,10 +20,10 @@ class QuietPaywallScreen extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: StoreKitService.instance.isPremium,
       builder: (context, isPremium, _) {
-        if (isPremium) {
-          // Close paywall automatically once premium is unlocked
+        if (isPremium && !_hasClosed) {
+          _hasClosed = true;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (Navigator.of(context).canPop()) {
+            if (mounted && Navigator.of(context).canPop()) {
               Navigator.of(context).pop();
             }
           });
@@ -41,21 +49,33 @@ class QuietPaywallScreen extends StatelessWidget {
                   ),
                   const Spacer(),
                   ElevatedButton(
-                    onPressed: isPremium
+                    onPressed: (isPremium || _isProcessing)
                         ? null
                         : () async {
+                            setState(() => _isProcessing = true);
                             await StoreKitService.instance.purchasePremium();
+                            if (mounted) setState(() => _isProcessing = false);
                           },
-                    child: Text(
-                      isPremium ? 'QuietLine+ Unlocked' : 'Unlock QuietLine+',
-                    ),
+                    child: _isProcessing
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Text(
+                            isPremium ? 'QuietLine+ Unlocked' : 'Unlock QuietLine+',
+                          ),
                   ),
                   const SizedBox(height: 12),
                   Center(
                     child: TextButton(
-                      onPressed: () async {
-                        await StoreKitService.instance.restorePurchases();
-                      },
+                      onPressed: _isProcessing
+                          ? null
+                          : () async {
+                              setState(() => _isProcessing = true);
+                              await StoreKitService.instance.restorePurchases();
+                              if (mounted) setState(() => _isProcessing = false);
+                            },
                       child: Text(
                         'Restore Purchases',
                         style: theme.textTheme.bodyMedium?.copyWith(

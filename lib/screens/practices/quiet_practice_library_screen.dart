@@ -4,7 +4,6 @@ import 'package:quietline_app/data/practices/practice_catalog.dart';
 import 'package:quietline_app/data/practices/practice_model.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
-import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 // TODO(StoreKit): Reconnect practice selection to QuietBreathScreen
 // once premium entitlement is driven by StoreKit.
 // import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
