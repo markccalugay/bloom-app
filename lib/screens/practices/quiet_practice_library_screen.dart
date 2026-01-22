@@ -4,10 +4,12 @@ import 'package:quietline_app/data/practices/practice_catalog.dart';
 import 'package:quietline_app/data/practices/practice_model.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
+import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 // TODO(StoreKit): Reconnect practice selection to QuietBreathScreen
 // once premium entitlement is driven by StoreKit.
 // import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietPracticeLibraryScreen extends StatefulWidget {
   const QuietPracticeLibraryScreen({super.key});
@@ -19,6 +21,16 @@ class QuietPracticeLibraryScreen extends StatefulWidget {
 
 class _QuietPracticeLibraryScreenState
     extends State<QuietPracticeLibraryScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final practices = PracticeCatalog.all;
@@ -34,52 +46,57 @@ class _QuietPracticeLibraryScreenState
         elevation: 0,
         title: const Text('Practices'),
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-        itemCount: practices.length,
-        separatorBuilder: (context, index) {
-          if (index == 0) {
-            return Column(
-              children: [
-                const SizedBox(height: 16),
-                Divider(color: Colors.white.withValues(alpha: 0.08)),
-                const SizedBox(height: 16),
-              ],
-            );
-          }
-          return const SizedBox(height: 12);
-        },
-        itemBuilder: (context, index) {
-          final practice = practices[index];
-          final bool canAccess = accessService.canAccess(practice);
-
-          return _PracticeTile(
-            practice: practice,
-            locked: !canAccess,
-            isActive: accessService.isActive(practice.id),
-            onTap: () async {
-              if (!canAccess) {
-                Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
+      body: ValueListenableBuilder<bool>(
+        valueListenable: StoreKitService.instance.isPremium,
+        builder: (context, isPremium, _) {
+          return ListView.separated(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+            itemCount: practices.length,
+            separatorBuilder: (context, index) {
+              if (index == 0) {
+                return Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Divider(color: Colors.white.withValues(alpha: 0.08)),
+                    const SizedBox(height: 16),
+                  ],
                 );
-                return;
               }
+              return const SizedBox(height: 12);
+            },
+            itemBuilder: (context, index) {
+              final practice = practices[index];
+              final bool canAccess = accessService.canAccess(practice);
 
-              await showModalBottomSheet(
-                context: context,
-                backgroundColor: QLColors.background,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                ),
-                builder: (_) => _PracticeDetailSheet(
-                  practice: practice,
-                  isActive: accessService.isActive(practice.id),
-                  onActivate: () async {
-                    await accessService.setActivePractice(practice.id);
-                    if (context.mounted) Navigator.of(context).pop();
-                    setState(() {});
-                  },
-                ),
+              return _PracticeTile(
+                practice: practice,
+                locked: !canAccess,
+                isActive: accessService.isActive(practice.id),
+                onTap: () async {
+                  if (!canAccess) {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
+                    );
+                    return;
+                  }
+
+                  await showModalBottomSheet(
+                    context: context,
+                    backgroundColor: QLColors.background,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                    ),
+                    builder: (_) => _PracticeDetailSheet(
+                      practice: practice,
+                      isActive: accessService.isActive(practice.id),
+                      onActivate: () async {
+                        await accessService.setActivePractice(practice.id);
+                        if (context.mounted) Navigator.of(context).pop();
+                        setState(() {});
+                      },
+                    ),
+                  );
+                },
               );
             },
           );

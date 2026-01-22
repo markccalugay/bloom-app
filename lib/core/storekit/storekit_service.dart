@@ -14,10 +14,11 @@ class StoreKitService {
 
   final InAppPurchase _iap = InAppPurchase.instance;
 
+  ProductDetails? _premiumProduct;
+
   /// Your subscription product IDs
   static const Set<String> _premiumProductIds = {
     'quietline.premium.monthly',
-    // add yearly later if needed
   };
 
   final ValueNotifier<bool> isPremium = ValueNotifier<bool>(false);
@@ -35,6 +36,15 @@ class StoreKitService {
     if (!available) {
       debugPrint('[StoreKit] Store not available');
       return;
+    }
+
+    final response = await _iap.queryProductDetails(_premiumProductIds);
+
+    if (response.productDetails.isNotEmpty) {
+      _premiumProduct = response.productDetails.first;
+      debugPrint('[StoreKit] Loaded product: ${_premiumProduct!.id}');
+    } else {
+      debugPrint('[StoreKit] No products found');
     }
 
     // Listen for purchase updates
@@ -68,6 +78,21 @@ class StoreKitService {
       debugPrint('[StoreKit] Premium entitlement = $premiumFound');
       isPremium.value = premiumFound;
     }
+  }
+
+  Future<void> purchasePremium() async {
+    if (_premiumProduct == null) {
+      debugPrint('[StoreKit] purchasePremium called but product not loaded');
+      return;
+    }
+
+    final purchaseParam = PurchaseParam(productDetails: _premiumProduct!);
+
+    // TODO: This MUST be changed to buyNonConsumable → buyNonConsumable ONLY AFTER
+    // confirming product type. Subscriptions require buyNonConsumable() in Flutter IAP.
+    await _iap.buyNonConsumable(
+      purchaseParam: purchaseParam,
+    );
   }
 
   /// Optional cleanup (probably never needed)

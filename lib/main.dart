@@ -17,6 +17,7 @@ import 'data/streak/quiet_streak_service.dart';
 // import 'screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/core/app_restart.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 import 'package:timezone/data/latest.dart' as tz;
 
@@ -24,6 +25,7 @@ late QuietStreakRepository quietStreakRepo;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await StoreKitService.instance.initialize();
   await PremiumEntitlement.instance.initialize();
   debugPrint('[BOOT] premium=${PremiumEntitlement.instance.isPremium}');
   tz.initializeTimeZones();

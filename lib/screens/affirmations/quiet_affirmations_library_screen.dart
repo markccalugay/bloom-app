@@ -5,6 +5,7 @@ import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietAffirmationsLibraryScreen extends StatefulWidget {
   const QuietAffirmationsLibraryScreen({super.key});
@@ -118,8 +119,11 @@ class _QuietAffirmationsLibraryScreenState
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : CustomScrollView(
-              slivers: [
+          : ValueListenableBuilder<bool>(
+              valueListenable: StoreKitService.instance.isPremium,
+              builder: (context, isPremium, _) {
+                return CustomScrollView(
+                  slivers: [
                 // --- CORE HEADER ---
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -256,8 +260,8 @@ class _QuietAffirmationsLibraryScreenState
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             final a = items[index];
-                            final bool isPremiumLocked = !PremiumEntitlement.instance.isPremium;
-                            final bool unlocked = PremiumEntitlement.instance.isPremium;
+                            final bool isPremiumLocked = !isPremium;
+                            final bool unlocked = isPremium;
 
                             return AffirmationGridTile(
                               affirmation: a,
@@ -301,7 +305,9 @@ class _QuietAffirmationsLibraryScreenState
                   ];
                 }),
               ],
-            ),
+            );
+        },
+      ),
     );
   }
 }
