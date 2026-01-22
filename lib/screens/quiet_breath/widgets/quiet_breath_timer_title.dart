@@ -15,26 +15,11 @@ class QuietBreathTimerTitle extends StatelessWidget {
         : (controller.isFresh ? 'Ready when you are.' : 'Paused.');
 
     // Instruction (phase-synced when playing)
-    String instruction;
-    if (controller.isPlaying) {
-      switch (controller.boxPhaseIndex) {
-        case 0:
-          instruction = 'Inhale slowly.';
-          break;
-        case 1:
-          instruction = 'Hold steady.';
-          break;
-        case 2:
-          instruction = 'Exhale gently.';
-          break;
-        default:
-          instruction = 'Hold steady.';
-      }
-    } else if (controller.isFresh) {
-      instruction = 'Press Start to begin.';
-    } else {
-      instruction = 'Tap Resume to continue.';
-    }
+    final String instruction = controller.isPlaying
+        ? controller.phaseLabel
+        : (controller.isFresh
+            ? 'Press Start to begin.'
+            : 'Tap Resume to continue.');
 
     return Column(
       mainAxisSize: MainAxisSize.min,

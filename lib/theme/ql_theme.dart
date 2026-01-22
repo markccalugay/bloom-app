@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 
 class QLColors {
   static const background = Color(0xFF111821); // <- your dark gritty navy
@@ -136,4 +137,42 @@ class QLTheme {
       ),
     ),
   );
+
+  static String labelForPhase(BreathPhaseType phase) {
+    switch (phase) {
+      case BreathPhaseType.inhale:
+        return 'Inhale';
+      case BreathPhaseType.hold:
+        return 'Hold';
+      case BreathPhaseType.exhale:
+        return 'Exhale';
+      case BreathPhaseType.rest:
+        return 'Rest';
+      case BreathPhaseType.power:
+        return 'Breathe';
+      case BreathPhaseType.retention:
+        return 'Hold';
+      case BreathPhaseType.recovery:
+        return 'Recover';
+    }
+  }
+
+  static Color colorForPhase(BreathPhaseType phase) {
+    switch (phase) {
+      case BreathPhaseType.inhale:
+        return QLColors.primaryTeal;
+      case BreathPhaseType.hold:
+        return QLColors.textLow;
+      case BreathPhaseType.exhale:
+        return const Color(0xFF5FA8D3);
+      case BreathPhaseType.rest:
+        return const Color(0xFF3A4A55);
+      case BreathPhaseType.power:
+        return QLColors.primaryTeal;
+      case BreathPhaseType.retention:
+        return QLColors.textLow;
+      case BreathPhaseType.recovery:
+        return QLColors.primaryTeal;
+    }
+  }
 }

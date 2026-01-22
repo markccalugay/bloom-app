@@ -6,7 +6,8 @@ import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 // TODO(StoreKit): Reconnect practice selection to QuietBreathScreen
 // once premium entitlement is driven by StoreKit.
-// import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
+import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
+import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
@@ -90,8 +91,20 @@ class _QuietPracticeLibraryScreenState
                       isActive: accessService.isActive(practice.id),
                       onActivate: () async {
                         await accessService.setActivePractice(practice.id);
-                        if (context.mounted) Navigator.of(context).pop();
-                        setState(() {});
+                        if (!context.mounted) return;
+
+                        Navigator.of(context).pop();
+
+                        final contract = _contractForPractice(practice.id);
+
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            settings: RouteSettings(arguments: contract),
+                            builder: (_) => QuietBreathScreen(
+                              sessionId: practice.id,
+                            ),
+                          ),
+                        );
                       },
                     ),
                   );
@@ -290,3 +303,22 @@ class _PracticeDetailSheet extends StatelessWidget {
     }
   }
 }
+
+  BreathingPracticeContract _contractForPractice(String id) {
+    switch (id) {
+      case 'core_quiet':
+        return coreQuietContract;
+      case 'steady_discipline':
+        return steadyDisciplineContract;
+      case 'monk_calm':
+        return monkCalmContract;
+      case 'navy_calm':
+        return navyCalmContract;
+      case 'athlete_focus':
+        return athleteFocusContract;
+      case 'cold_resolve':
+        return coldResolveContract;
+      default:
+        return coreQuietContract;
+    }
+  }
