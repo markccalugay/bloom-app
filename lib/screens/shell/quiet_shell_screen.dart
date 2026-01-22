@@ -20,8 +20,6 @@ import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 
 import 'package:quietline_app/core/feature_flags.dart';
-import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
-import 'package:quietline_app/core/app_restart.dart';
 
 import 'package:quietline_app/services/first_launch_service.dart';
 
@@ -56,26 +54,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _homeHintLoaded = false;
   bool _showHomeHint = false;
 
-  // DEBUG: premium entitlement toggle
-  void _toggleDebugPremium() async {
-    // Close the side menu synchronously
-    if (_isMenuOpen) {
-      setState(() {
-        _isMenuOpen = false;
-      });
-    }
-
-    // Flip entitlement immediately
-    final current = PremiumEntitlement.instance.isPremium;
-    PremiumEntitlement.instance.debugSetPremium(!current);
-
-    // Restart app tree synchronously in next frame
-    if (!mounted) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      AppRestart.restart(context);
-    });
-  }
 
   final _web = WebLaunchService();
 
@@ -520,11 +498,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
               await _editReminderTime();
             },
 
-            // DEBUG premium toggle
-            debugPremiumLabel: PremiumEntitlement.instance.isPremium
-                ? 'Debug: Premium · ON'
-                : 'Debug: Premium · OFF',
-            onToggleDebugPremium: _toggleDebugPremium,
 
             onClose: _toggleMenu,
             onOpenAccount: () async {

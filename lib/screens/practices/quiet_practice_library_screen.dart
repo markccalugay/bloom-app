@@ -115,9 +115,7 @@ class _PracticeTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: locked ? 0.04 : 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.06),
-          ),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -159,9 +157,7 @@ class _PracticeTile extends StatelessWidget {
                   Text(
                     practice.description,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: onSurface.withValues(
-                        alpha: locked ? 0.6 : 0.85,
-                      ),
+                      color: onSurface.withValues(alpha: locked ? 0.6 : 0.85),
                     ),
                   ),
                   if (isActive && !locked) ...[
@@ -229,10 +225,7 @@ class _PracticeDetailSheet extends StatelessWidget {
             style: theme.textTheme.labelSmall,
           ),
           const SizedBox(height: 12),
-          Text(
-            practice.description,
-            style: theme.textTheme.bodyLarge,
-          ),
+          Text(practice.description, style: theme.textTheme.bodyLarge),
           const SizedBox(height: 12),
           Text(
             _practiceDetails(practice.id),

@@ -1,13 +1,10 @@
-import '../feature_flags.dart';
+import 'dart:async';
+
+import '../storekit/storekit_service.dart';
 
 /// Single source of truth for premium access.
-/// 
-/// Today:
-/// - Backed by FeatureFlags (debug / launch-time cache)
-/// 
-/// Tomorrow:
-/// - Backed by StoreKit entitlement state
-/// 
+///
+/// Backed by StoreKit entitlement state.
 /// UI and feature code must ONLY talk to this class.
 class PremiumEntitlement {
   PremiumEntitlement._();
@@ -18,30 +15,34 @@ class PremiumEntitlement {
   bool _isPremium = false;
 
   /// Call once at app startup.
-  /// Locks entitlement state for the session.
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // TODO(StoreKit): REMOVE before App Store release.
-    // Temporary override to unlock all premium features for testing.
-    _isPremium = true;
+    // Initialize StoreKit
+    await StoreKitService.instance.initialize();
+
+    // Sync initial value
+    _isPremium = StoreKitService.instance.isPremium.value;
+
+    // Listen for entitlement changes
+    StoreKitService.instance.isPremium.addListener(_onPremiumChanged);
 
     _isInitialized = true;
   }
 
+  void _onPremiumChanged() {
+    _isPremium = StoreKitService.instance.isPremium.value;
+  }
+
   /// Read-only premium entitlement.
   bool get isPremium {
-    if (!_isInitialized) {
-      // Fail safe: no entitlement until initialized
-      return false;
-    }
+    if (!_isInitialized) return false;
     return _isPremium;
   }
 
-  /// DEV ONLY
-  /// Used by debug menu to simulate entitlement changes.
-  /// Requires app restart to take effect (intentional).
-  void debugSetPremium(bool value) {
-    FeatureFlags.debugPremiumEnabled = value;
+  /// Optional cleanup (not required for MVP)
+  void dispose() {
+    StoreKitService.instance.isPremium.removeListener(_onPremiumChanged);
+    _isInitialized = false;
   }
 }
