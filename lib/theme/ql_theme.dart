@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 
 class QLColors {
-  static const background = Color(0xFF111821); // <- your dark gritty navy
+  static const background = Color(0xFF111821);
   static const primaryTeal = Color(0xFF3B8F86);
   static const textHigh = Colors.white;
-  static const textLow  = Color(0x99FFFFFF); // 60% white
-  static const dangerRed = Color(0xFFDD4A48); // 988 text
+  static const ringTrack = Color(0x44FFFFFF); // softened neutral for radial track
+  static const textLow  = Color(0x99FFFFFF);
+  static const dangerRed = Color(0xFFDD4A48);
   static const Color navBarBackground = Color(0xFFE5E7EA);
   static const Color navIconActive = primaryTeal;
   static const Color navIconInactive = Color(0xFF6D747C);
@@ -162,11 +163,11 @@ class QLTheme {
       case BreathPhaseType.inhale:
         return QLColors.primaryTeal;
       case BreathPhaseType.hold:
-        return QLColors.textLow;
+        return const Color(0xFF6D747C);
       case BreathPhaseType.exhale:
-        return const Color(0xFF5FA8D3);
+        return QLColors.primaryTeal.withValues(alpha: 0.85);
       case BreathPhaseType.rest:
-        return const Color(0xFF3A4A55);
+        return QLColors.primaryTeal.withValues(alpha: 0.35);
       case BreathPhaseType.power:
         return QLColors.primaryTeal;
       case BreathPhaseType.retention:

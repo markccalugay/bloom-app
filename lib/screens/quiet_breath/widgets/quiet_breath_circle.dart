@@ -15,7 +15,6 @@ class QuietBreathCircle extends StatelessWidget {
       child: const SizedBox.expand(),
       builder: (context, child) {
         final ringSize = kQBCircleSize + 2 * (kQBRingOuterPadding + kQBRingThickness);
-        final phaseIndex = controller.currentPhaseIndex;
         return Center(
           child: Stack(
             alignment: Alignment.center,
@@ -26,7 +25,6 @@ class QuietBreathCircle extends StatelessWidget {
                 height: ringSize,
                 child: CustomPaint(
                   painter: QuietBreathRingPainter(
-                    phaseIndex: phaseIndex,
                     phaseProgress: controller.phaseProgress,
                     phaseColor: controller.phaseColor,
                   ),
@@ -39,7 +37,7 @@ class QuietBreathCircle extends StatelessWidget {
                 child: CustomPaint(
                   painter: QuietBreathWavePainter(
                     phase: controller.wavePhase,
-                    progress: controller.phaseProgress,
+                    progress: controller.sessionProgress,
                     introT: controller.introT,
                   ),
                   child: child,

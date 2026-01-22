@@ -81,20 +81,23 @@ class QuietBreathController extends ChangeNotifier {
   double get phase => _waveCtrl.value * 2 * math.pi;
   /// Numeric phase used by wave painter (semantic-safe)
   double get wavePhase => phase;
+  /// Continuous time value for smooth wave animation (never resets)
+  double get waveT => _waveCtrl.value;
   double get progress => _riseCtrl.value; // 0..1 -> bottom..top
+  /// Overall session progress (0.0 → 1.0), monotonic across the entire session.
+  /// Used for smooth background animations (waves), independent of breathing phases.
+  double get sessionProgress => _riseCtrl.value;
   double get introT =>
       _introCtrl.value; // 0..1, 0 = full at rest, 1 = drop complete
 
   // --- Breathing phase tracking (for radial ring & instructions) ---
-  double get _phaseT => _boxCtrl.value; // 0..1 over the cycle (private)
-  int get _phaseSecond =>
-      (_phaseT * _cycleSeconds).floor().clamp(0, _cycleSeconds - 1);
 
   int get phaseIndex {
+    final elapsed = _boxCtrl.value * _cycleSeconds;
     int acc = 0;
     for (int i = 0; i < _phases.length; i++) {
       acc += _phases[i].seconds;
-      if (_phaseSecond < acc) return i;
+      if (elapsed < acc) return i;
     }
     return _phases.length - 1;
   }
@@ -102,12 +105,13 @@ class QuietBreathController extends ChangeNotifier {
   int get currentPhaseIndex => phaseIndex;
 
   double get phaseProgress {
+    final elapsed = _boxCtrl.value * _cycleSeconds;
     int start = 0;
     for (int i = 0; i < phaseIndex; i++) {
       start += _phases[i].seconds;
     }
-    final local = (_phaseSecond - start).clamp(0, _phases[phaseIndex].seconds);
-    return (local / _phases[phaseIndex].seconds).clamp(0.0, 1.0);
+    final local = (elapsed - start).clamp(0.0, _phases[phaseIndex].seconds.toDouble());
+    return local / _phases[phaseIndex].seconds;
   }
 
   double get currentPhaseProgress => phaseProgress;
@@ -158,7 +162,11 @@ class QuietBreathController extends ChangeNotifier {
     _riseCtrl.forward();
 
     if (!_boxCtrl.isAnimating) {
-      _boxCtrl.repeat();
+      _boxCtrl.repeat(
+        min: 0.0,
+        max: 1.0,
+        period: Duration(seconds: _cycleSeconds),
+      );
     }
 
     // Countdown (for internal state only; completion is driven by _riseCtrl)

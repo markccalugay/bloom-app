@@ -50,7 +50,7 @@ const kQBCircleBorderWidth         = 2.0;   // px stroke width if enabled
 // The ring that shows per-phase (4s) progress. Adjust spacing/weight here.
 const double kQBRingOuterPadding   = 5.0;           // px gap between ellipse edge and ring
 const double kQBRingThickness      = 20.0;          // px stroke thickness of ring
-const Color  kQBRingTrackColor     = Color(0xFFE5E7EA); // neutral track color
+const Color  kQBRingTrackColor     = Color(0xFF3A434B); // dark neutral track for contrast against HOLD
 
 // ===== Timing =====
 // Wave motion + intro animation + overall session defaults.
