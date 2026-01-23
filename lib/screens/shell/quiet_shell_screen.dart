@@ -187,6 +187,9 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   }
 
   Future<void> _maybeScheduleReminderPrompt() async {
+    if (_currentIndex != 0) {
+      return;
+    }
     // Only schedule if home hint is not showing and prompt isn't already shown.
     if (_showHomeHint) {
       return;
@@ -199,6 +202,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     );
     if (!eligible) return;
     Future.delayed(const Duration(milliseconds: 2200), () {
+      if (_currentIndex != 0) return;
       if (!mounted) return;
       if (_showHomeHint) return;
       _showReminderModal();
