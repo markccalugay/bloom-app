@@ -8,6 +8,8 @@
 /// - Explicit phase semantics
 /// - Readable, debuggable, and extensible
 
+library breath_phase_contracts;
+
 // ignore_for_file: dangling_library_doc_comments
 
 /// High‑level semantic meaning of a breath phase.
