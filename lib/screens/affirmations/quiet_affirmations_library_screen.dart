@@ -281,7 +281,7 @@ class _QuietAffirmationsLibraryScreenState
                                     }
                                   : null,
                               onLockedTap: () {
-                                const message = 'Premium packs are coming soon.';
+                                const message = 'Unlock with QuietLine+';
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(message),

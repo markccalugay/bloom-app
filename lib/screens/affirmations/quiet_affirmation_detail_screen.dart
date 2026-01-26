@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/data/affirmations/affirmations_model.dart';
+import 'package:quietline_app/data/affirmations/affirmation_pack_theme.dart';
 
 /// Fullscreen detail view for a single affirmation.
 /// - Big centered text
@@ -56,6 +57,8 @@ class _QuietAffirmationDetailScreenState
     final textTheme = theme.textTheme;
     final onSurface = theme.colorScheme.onSurface;
 
+    final packTheme = AffirmationPackTheme.forPack(widget.affirmation.packId);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(''),
@@ -78,17 +81,10 @@ class _QuietAffirmationDetailScreenState
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(
-                      color: const Color(0xFFD9D9D9),
+                      color: packTheme.borderColor,
                       width: 1.5,
                     ),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF4A5563), // dark slate
-                        Color(0xFF1F2933), // deeper bottom
-                      ],
-                    ),
+                    gradient: packTheme.backgroundGradient,
                   ),
                   padding:
                       const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
