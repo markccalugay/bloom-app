@@ -173,6 +173,38 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   ),
                 ),
               ),
+            if (kDebugMode)
+              Positioned(
+                top: 48,
+                left: 12,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DefaultTextStyle(
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Colors.white,
+                      height: 1.3,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('DEBUG · ${controller.contract.name}'),
+                        const SizedBox(height: 4),
+                        for (final phase in controller.contract.phases)
+                          Text(
+                            '${phase.type.name[0].toUpperCase()}${phase.type.name.substring(1)}: ${phase.seconds}s',
+                          ),
+                        const SizedBox(height: 4),
+                        Text('Cycles: ${controller.contract.cycles}'),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             if (_showPauseIcon)
               Positioned(
                 top: 8,

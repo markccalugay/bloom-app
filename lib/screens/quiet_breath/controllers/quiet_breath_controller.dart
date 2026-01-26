@@ -11,6 +11,9 @@ class QuietBreathController extends ChangeNotifier {
   // Active breathing practice contract (default = Core Quiet)
   BreathingPracticeContract _contract = coreQuietContract;
 
+  /// Exposes the active breathing practice contract as a read-only getter.
+  BreathingPracticeContract get contract => _contract;
+
   // Derived phases from the active contract
   List<BreathPhaseContract> get _phases => _contract.phases;
 
