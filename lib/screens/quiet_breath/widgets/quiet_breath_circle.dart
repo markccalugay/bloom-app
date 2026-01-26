@@ -25,9 +25,8 @@ class QuietBreathCircle extends StatelessWidget {
                 height: ringSize,
                 child: CustomPaint(
                   painter: QuietBreathRingPainter(
-                    phaseIndex: controller.boxPhaseIndex,
-                    phaseProgress: controller.boxPhaseProgress,
-                    phaseColor: controller.boxPhaseColor,
+                    phaseProgress: controller.phaseProgress,
+                    phaseColor: controller.phaseColor,
                   ),
                 ),
               ),
@@ -37,8 +36,8 @@ class QuietBreathCircle extends StatelessWidget {
                 height: kQBCircleSize,
                 child: CustomPaint(
                   painter: QuietBreathWavePainter(
-                    phase: controller.phase,
-                    progress: controller.progress,
+                    phase: controller.wavePhase,
+                    progress: controller.sessionProgress,
                     introT: controller.introT,
                   ),
                   child: child,

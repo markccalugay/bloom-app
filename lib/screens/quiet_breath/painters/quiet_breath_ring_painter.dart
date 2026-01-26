@@ -4,12 +4,10 @@ import '../quiet_breath_constants.dart';
 
 /// Draws a radial ring where the active arc fills 0→360° based on [phaseProgress].
 class QuietBreathRingPainter extends CustomPainter {
-  final int phaseIndex;        // 0..3 (Inhale, Hold, Exhale, Hold) – used for color only
-  final double phaseProgress;  // 0..1 within current 4s phase
+  final double phaseProgress;  // 0..1 across entire session
   final Color phaseColor;
 
   const QuietBreathRingPainter({
-    required this.phaseIndex,
     required this.phaseProgress,
     required this.phaseColor,
   });
@@ -47,8 +45,7 @@ class QuietBreathRingPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant QuietBreathRingPainter old) {
-    return old.phaseIndex != phaseIndex ||
-           old.phaseProgress != phaseProgress ||
+    return old.phaseProgress != phaseProgress ||
            old.phaseColor != phaseColor;
   }
 }

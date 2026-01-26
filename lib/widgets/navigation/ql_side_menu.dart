@@ -15,6 +15,7 @@ class QLSideMenu extends StatelessWidget {
   // Navigation callbacks (optional so we can wire them gradually)
   final VoidCallback? onNavigateJourney;
   final VoidCallback? onNavigateBrotherhood;
+  final VoidCallback? onNavigatePractices;
   final VoidCallback? onNavigateAffirmations;
   final VoidCallback? onOpenAccount;
 
@@ -32,12 +33,21 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onOpenPrivacy;
   final VoidCallback? onOpenTerms;
 
+  final String? reminderLabel;
+  final VoidCallback? onEditReminder;
+
+  final bool? debugPremiumEnabled;
+  final VoidCallback? onToggleDebugPremium;
+
+  final String? debugPremiumLabel;
+
   const QLSideMenu({
     super.key,
     required this.displayName,
     required this.onClose,
     this.onNavigateJourney,
     this.onNavigateBrotherhood,
+    this.onNavigatePractices,
     this.onNavigateAffirmations,
     this.onOpenAbout,
     this.onOpenWebsite,
@@ -48,6 +58,11 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenAccount,
     this.showBrotherhood = false,
     this.showJourney = false,
+    this.reminderLabel,
+    this.onEditReminder,
+    this.debugPremiumEnabled,
+    this.onToggleDebugPremium,
+    this.debugPremiumLabel,
   });
 
   @override
@@ -156,6 +171,13 @@ class QLSideMenu extends StatelessWidget {
                         onTap: onNavigateBrotherhood,
                       ),
                     _MenuItem(
+                      icon: Icons.self_improvement_rounded,
+                      label: 'Practices',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onNavigatePractices,
+                    ),
+                    _MenuItem(
                       icon: Icons.favorite_outline_rounded,
                       label: 'Affirmations',
                       iconColor: iconColor,
@@ -210,6 +232,26 @@ class QLSideMenu extends StatelessWidget {
                       textColor: baseTextColor,
                       onTap: onOpenTerms,
                     ),
+
+                    const SizedBox(height: 16),
+                    const _SectionLabel('Preferences'),
+                    _MenuItem(
+                      icon: Icons.notifications_none_rounded,
+                      label: reminderLabel ?? 'Daily reminder',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onEditReminder,
+                      enabled: onEditReminder != null,
+                    ),
+                    if (debugPremiumLabel != null)
+                      _MenuItem(
+                        icon: Icons.lock_open_rounded,
+                        label: debugPremiumLabel!,
+                        iconColor: iconColor,
+                        textColor: baseTextColor,
+                        onTap: onToggleDebugPremium,
+                        enabled: onToggleDebugPremium != null,
+                      ),
 
                     const SizedBox(height: 24),
                     Padding(

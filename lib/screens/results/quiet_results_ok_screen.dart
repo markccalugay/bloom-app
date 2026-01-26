@@ -6,6 +6,8 @@ import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
 import 'package:quietline_app/data/affirmations/affirmations_model.dart';
+import 'package:quietline_app/widgets/monetization/quiet_inline_unlock_card.dart';
+import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 
 import 'quiet_results_constants.dart';
 import 'quiet_results_strings.dart';
@@ -156,6 +158,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
         ? (streak > prevStreak)
         : widget.isNew;
     final bool continuedStreak = streakIncreased && prevStreak > 0;
+    final bool showPracticeUnlock = streakIncreased && streak >= 3;
 
     // Compute displayStreakNow for the Day X label.
     // This must never show Day 0 and must match the big flame number.
@@ -289,6 +292,23 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
               ),
 
               const Spacer(),
+
+              if (showPracticeUnlock) ...[
+                QuietInlineUnlockCard(
+                  title: 'Explore deeper practices',
+                  subtitle:
+                      'Go beyond the core reset with guided discipline, calm, and resilience practices.',
+                  ctaLabel: 'View practices',
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const QuietPracticeLibraryScreen(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 20),
+              ],
 
               // DEBUG BUTTONS (TEMPORARY)
               if (kDebugMode) ...[

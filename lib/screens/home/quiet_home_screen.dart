@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../home/widgets/quiet_home_app_bar.dart';
 import '../home/widgets/quiet_home_streak_row.dart';
-import '../home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
+import 'package:quietline_app/widgets/affirmations/quiet_home_affirmations_carousel.dart';
 
 const double kHomeHorizontalPadding = 16.0;
 const double kHomeTopSpacing = 20.0;          // space between app bar and streak
@@ -64,21 +64,9 @@ Widget _buildHomeBody({
 
           const SizedBox(height: 32.0),
 
-          if (affirmationText != null)
-            QuietHomeAffirmationsCard(
-              title: affirmationText,
-              unlockedLabel: unlockedLabel,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (_) => QuietAffirmationFullscreenScreen(
-                      text: affirmationText,
-                      unlockedLabel: unlockedLabel,
-                    ),
-                  ),
-                );
-              },
-            ),
+          QuietHomeAffirmationsCarousel(
+            streak: streak,
+          ),
 
           const Spacer(),
           const SizedBox(height: kHomeBottomSpacing),

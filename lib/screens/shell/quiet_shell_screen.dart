@@ -3,20 +3,31 @@ import 'package:quietline_app/screens/home/quiet_home_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/brotherhood/quiet_brotherhood_page.dart';
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
+import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/widgets/navigation/ql_bottom_nav.dart';
 import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
+import 'package:quietline_app/widgets/time_picker/quiet_time_picker_sheet.dart';
 import 'package:quietline_app/services/web_launch_service.dart';
 import 'package:quietline_app/services/support_call_service.dart';
 import 'package:quietline_app/screens/account/quiet_account_screen.dart';
 import 'package:quietline_app/screens/affirmations/quiet_affirmations_library_screen.dart';
+import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+
+import 'package:quietline_app/core/reminder/reminder_service.dart';
+import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
 
 import 'package:quietline_app/data/user/user_service.dart';
 
 import 'package:quietline_app/core/feature_flags.dart';
 
 import 'package:quietline_app/services/first_launch_service.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:flutter/foundation.dart';
+
 
 /// Root shell that hosts the bottom navigation and top-level tabs.
 class QuietShellScreen extends StatefulWidget {
@@ -27,10 +38,15 @@ class QuietShellScreen extends StatefulWidget {
 }
 
 class _QuietShellScreenState extends State<QuietShellScreen> {
+  // Ownership of the Quiet Time button key (non-static)
+  final GlobalKey _quietTimeButtonKey = GlobalKey();
   int _currentIndex = 0;
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
   String _displayName = 'Quiet guest';
+
+  TimeOfDay? _reminderTime;
+  String _reminderLabel = 'Daily reminder · Not set';
 
   // Geometry measurement for Quiet Time button
   Rect? _quietTimeButtonRect;
@@ -39,6 +55,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _homeHintLoaded = false;
   bool _showHomeHint = false;
 
+
   final _web = WebLaunchService();
 
   @override
@@ -46,9 +63,47 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     super.initState();
     _loadStreak();
     _loadDisplayName();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _measureQuietTimeButtonIfNeeded();
+    _loadReminderState();
+  }
+  Future<void> _loadReminderState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final hour = prefs.getInt('reminderHour');
+    final minute = prefs.getInt('reminderMinute');
+
+    if (hour == null || minute == null) {
+      if (!mounted) return;
+      setState(() {
+        _reminderTime = null;
+        _reminderLabel = 'Daily reminder · Not set';
+      });
+      return;
+    }
+
+    final time = TimeOfDay(hour: hour, minute: minute);
+    if (!mounted) return;
+    setState(() {
+      _reminderTime = time;
+      _reminderLabel = 'Daily reminder · ${time.format(context)}';
     });
+  }
+
+  Future<void> _editReminderTime() async {
+    final picked = await showModalBottomSheet<TimeOfDay>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => QuietTimePickerSheet(
+        initialTime: _reminderTime,
+      ),
+    );
+
+    if (picked == null) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+    await reminderService.enableReminder(time: picked);
+
+    await _loadReminderState();
   }
 
   Future<void> _loadStreak() async {
@@ -86,10 +141,20 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     });
   }
 
+  void _maybeMeasureQuietTimeButton() {
+    if (_didMeasureQuietTimeButton) return;
+    if (_currentIndex != 0) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _measureQuietTimeButtonIfNeeded();
+    });
+  }
+
   void _measureQuietTimeButtonIfNeeded() {
     if (_didMeasureQuietTimeButton) return;
 
-    final context = QLBottomNav.quietTimeButtonKey.currentContext;
+    final context = _quietTimeButtonKey.currentContext;
     if (context == null) return;
 
     final renderBox = context.findRenderObject() as RenderBox?;
@@ -116,6 +181,73 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       _homeHintLoaded = true;
       _showHomeHint = (_streak ?? 0) >= 1 && !hasSeen;
     });
+
+    if (!_showHomeHint) {
+      _maybeScheduleReminderPrompt();
+    }
+  }
+
+  Future<void> _maybeScheduleReminderPrompt() async {
+    if (_currentIndex != 0) {
+      return;
+    }
+    // Only schedule if home hint is not showing and prompt isn't already shown.
+    if (_showHomeHint) {
+      return;
+    }
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+    final eligible = reminderService.shouldShowReminderPrompt(
+      ftueCompleted: true,
+      quietTimeSessionCount: _streak ?? 0,
+    );
+    if (!eligible) return;
+    Future.delayed(const Duration(milliseconds: 2200), () {
+      if (_currentIndex != 0) return;
+      if (!mounted) return;
+      if (_showHomeHint) return;
+      _showReminderModal();
+    });
+  }
+
+  Future<void> _showReminderModal() async {
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+
+    if (!mounted) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return ReminderPromptModalCard(
+          actions: ReminderPromptActions(
+            onLater: () async {
+              await reminderService.markReminderPromptSeen();
+              if (!mounted) return;
+              Navigator.of(this.context).pop();
+            },
+            onEnable: () async {
+              Navigator.of(context).pop();
+              if (!mounted) return;
+              final picked = await showModalBottomSheet<TimeOfDay>(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+                builder: (_) => const QuietTimePickerSheet(),
+              );
+
+              if (picked == null) {
+                await reminderService.markReminderPromptSeen();
+                return;
+              }
+
+              await reminderService.enableReminder(time: picked);
+            },
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _dismissHomeHint() async {
@@ -155,98 +287,100 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     final double ringSize =
         (rect.width > rect.height ? rect.width : rect.height) + ringPadding * 2;
 
-    return Positioned.fill(
-      child: Stack(
-        children: [
-          // Dimmed scrim; tap anywhere to dismiss (logic wired later)
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _dismissHomeHint,
-            child: Container(color: Colors.black.withValues(alpha: 0.45)),
-          ),
+    return Stack(
+      children: [
+        // Dimmed scrim; tap anywhere to dismiss (logic wired later)
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _dismissHomeHint,
+          child: Container(color: Colors.black.withValues(alpha: 0.45)),
+        ),
 
-          // Spotlight ring centered on the Quiet Time button
-          Positioned(
-            left: rect.center.dx - ringSize / 2,
-            top: rect.center.dy - ringSize / 2,
-            width: ringSize,
-            height: ringSize,
-            child: IgnorePointer(
+        // Spotlight ring centered on the Quiet Time button
+        Positioned(
+          left: rect.center.dx - ringSize / 2,
+          top: rect.center.dy - ringSize / 2,
+          width: ringSize,
+          height: ringSize,
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: const Color(0xFF2FE6D2),
+                  width: 3,
+                ),
+              ),
+            ),
+          ),
+        ),
+
+        SafeArea(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
               child: Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  shape: BoxShape.circle,
+                  color: const Color(0xFF0F141A),
+                  borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: const Color(0xFF2FE6D2),
-                    width: 3,
+                    color: const Color(0xFF2A3340),
+                    width: 1,
                   ),
                 ),
-              ),
-            ),
-          ),
-
-          SafeArea(
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF0F141A),
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF2A3340),
-                      width: 1,
+                child: const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Well done.',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        decoration: TextDecoration.none,
+                      ),
                     ),
-                  ),
-                  child: const Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        'Well done.',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                          decoration: TextDecoration.none,
-                        ),
+                    SizedBox(height: 8),
+                    Text(
+                      'You just did the hardest part; starting.\n\n'
+                      'Use Quiet Time anytime you need a reset.\n'
+                      'Tap the button at the bottom to begin.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        height: 1.35,
+                        color: Color(0xFFB9C3CF),
+                        decoration: TextDecoration.none,
                       ),
-                      SizedBox(height: 8),
-                      Text(
-                        'You just did the hardest part; starting.\n\n'
-                        'Use Quiet Time anytime you need a reset.\n'
-                        'Tap the button at the bottom to begin.',
-                        style: TextStyle(
-                          fontSize: 14,
-                          height: 1.35,
-                          color: Color(0xFFB9C3CF),
-                          decoration: TextDecoration.none,
-                        ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Tap anywhere to continue',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF7F8A99),
+                        decoration: TextDecoration.none,
                       ),
-                      SizedBox(height: 10),
-                      Text(
-                        'Tap anywhere to continue',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF7F8A99),
-                          decoration: TextDecoration.none,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
+
+
 
   @override
   Widget build(BuildContext context) {
     const double menuWidth = 280.0;
+
+    _maybeMeasureQuietTimeButton();
 
     return Stack(
       children: [
@@ -254,6 +388,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
         Scaffold(
           body: _buildBody(),
           bottomNavigationBar: QLBottomNav(
+            quietTimeButtonKey: _quietTimeButtonKey,
             currentIndex: _currentIndex,
             onItemSelected: (index) async {
               if (index == 1) {
@@ -264,11 +399,19 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 // MVP: mood check-ins are disabled. Keep the code path behind a flag
                 // so we can reconnect in V2 by flipping FeatureFlags.moodCheckInsEnabled.
                 if (!FeatureFlags.moodCheckInsEnabled) {
+                  if (kDebugMode) {
+                    debugPrint(
+                      '[QuietTime] Session started | ${DateTime.now().toIso8601String()}',
+                    );
+                  }
+                  // NOTE: Shell launches always default to Core Quiet.
+                  // Practice-selected sessions must pass an explicit contract via navigation.
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => QuietBreathScreen(
                         sessionId: sessionId,
                         streak: _streak ?? 0,
+                        contract: coreQuietContract, // Explicit default for Shell-launched sessions
                       ),
                     ),
                   );
@@ -277,6 +420,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                   // so Home reflects the latest value.
                   if (!mounted) return;
                   await _loadStreak();
+                  if (kDebugMode) {
+                    debugPrint(
+                      '[QuietTime] Session ended | streak=${_streak ?? "unknown"} | ${DateTime.now().toIso8601String()}',
+                    );
+                  }
                   return;
                 }
 
@@ -286,11 +434,19 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       mode: MoodCheckinMode.pre,
                       sessionId: sessionId,
                       onSubmit: (_) {
+                        if (kDebugMode) {
+                          debugPrint(
+                            '[QuietTime] Session started | ${DateTime.now().toIso8601String()}',
+                          );
+                        }
+                        // NOTE: Shell launches always default to Core Quiet.
+                        // Practice-selected sessions must pass an explicit contract via navigation.
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => QuietBreathScreen(
                               sessionId: sessionId,
                               streak: _streak ?? 0,
+                              contract: coreQuietContract, // Explicit default for Shell-launched sessions
                             ),
                           ),
                         );
@@ -305,6 +461,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 // so Home reflects the latest value.
                 if (!mounted) return;
                 await _loadStreak();
+                if (kDebugMode) {
+                  debugPrint(
+                    '[QuietTime] Session ended | streak=${_streak ?? "unknown"} | ${DateTime.now().toIso8601String()}',
+                  );
+                }
               } else {
                 // Left and right icons behave as true tabs (Home / Brotherhood).
                 setState(() {
@@ -315,7 +476,13 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           ),
         ),
 
-        _buildHomeHintOverlay(),
+        Positioned.fill(
+          child: IgnorePointer(
+            ignoring: false,
+            child: _buildHomeHintOverlay(),
+          ),
+        ),
+
 
         // Dimmed scrim when menu is open; tap to close
         if (_isMenuOpen)
@@ -336,6 +503,13 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           width: menuWidth,
           child: QLSideMenu(
             displayName: _displayName,
+            reminderLabel: _reminderLabel,
+            onEditReminder: () async {
+              _toggleMenu();
+              await _editReminderTime();
+            },
+
+
             onClose: _toggleMenu,
             onOpenAccount: () async {
               _toggleMenu();
@@ -352,6 +526,21 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 _currentIndex = 2;
                 _isMenuOpen = false;
               });
+            },
+            onNavigatePractices: () async {
+              // Close the menu first.
+              if (_isMenuOpen) {
+                setState(() {
+                  _isMenuOpen = false;
+                });
+              }
+
+              // Open the Practice Library.
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => QuietPracticeLibraryScreen(),
+                ),
+              );
             },
             onNavigateAffirmations: () async {
               // Close the menu first.

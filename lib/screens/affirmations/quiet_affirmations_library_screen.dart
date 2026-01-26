@@ -4,6 +4,7 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietAffirmationsLibraryScreen extends StatefulWidget {
   const QuietAffirmationsLibraryScreen({super.key});
@@ -117,8 +118,11 @@ class _QuietAffirmationsLibraryScreenState
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : CustomScrollView(
-              slivers: [
+          : ValueListenableBuilder<bool>(
+              valueListenable: StoreKitService.instance.isPremium,
+              builder: (context, isPremium, _) {
+                return CustomScrollView(
+                  slivers: [
                 // --- CORE HEADER ---
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
@@ -255,8 +259,8 @@ class _QuietAffirmationsLibraryScreenState
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             final a = items[index];
-                            const bool isPremiumLocked = true;
-                            const bool unlocked = false;
+                            final bool isPremiumLocked = !isPremium;
+                            final bool unlocked = isPremium;
 
                             return AffirmationGridTile(
                               affirmation: a,
@@ -264,9 +268,20 @@ class _QuietAffirmationsLibraryScreenState
                               isPremiumLocked: isPremiumLocked,
                               lockedLabel: 'Premium',
                               unlockedLabel: null,
-                              onTap: null,
+                              onTap: unlocked
+                                  ? () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => QuietAffirmationFullscreenScreen(
+                                            text: a.text,
+                                            unlockedLabel: 'Premium',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  : null,
                               onLockedTap: () {
-                                const message = 'Premium packs are coming soon.';
+                                const message = 'Unlock with QuietLine+';
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                     content: Text(message),
@@ -289,7 +304,9 @@ class _QuietAffirmationsLibraryScreenState
                   ];
                 }),
               ],
-            ),
+            );
+        },
+      ),
     );
   }
 }

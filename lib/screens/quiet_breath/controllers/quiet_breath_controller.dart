@@ -2,21 +2,36 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../quiet_breath_constants.dart';
+import '../models/breath_phase_contracts.dart';
+import '../../../theme/ql_theme.dart';
 
 /// Central brain for the Quiet Breath screen.
 /// Manages: play/pause, wave phase, rising water, countdown timer.
 class QuietBreathController extends ChangeNotifier {
+  // Active breathing practice contract (default = Core Quiet)
+  BreathingPracticeContract _contract = coreQuietContract;
+
+  /// Exposes the active breathing practice contract as a read-only getter.
+  BreathingPracticeContract get contract => _contract;
+
+  // Derived phases from the active contract
+  List<BreathPhaseContract> get _phases => _contract.phases;
+
+  int get _cycleSeconds =>
+      _phases.fold(0, (sum, p) => sum + p.seconds);
+
   late final AnimationController _waveCtrl;
   late final AnimationController _riseCtrl;
   late final AnimationController _introCtrl;
-  late final AnimationController _boxCtrl; // 0..1 over 16s box-breath cycle
+  late final AnimationController _boxCtrl; // 0..1 over breathing cycle
 
   // Cycle-based session target
   int _targetCycles = kQBCyclesBaseline; // can be set from streak later
   int get targetCycles => _targetCycles;
   set targetCycles(int n) => setTargetCycles(n);
-  int get _sessionTotalSeconds =>
-      _targetCycles * kQBBoxCycleSec; // cycles * 16s
+
+
+  int get _sessionTotalSeconds => _targetCycles * _cycleSeconds;
 
   Timer? _countdown;
   bool _isPlaying = false;
@@ -53,7 +68,7 @@ class QuietBreathController extends ChangeNotifier {
     )..value = 0.0; // 0 = looks full before start
     _boxCtrl = AnimationController(
       vsync: vsync,
-      duration: const Duration(seconds: kQBBoxCycleSec), // now 16s
+      duration: Duration(seconds: _cycleSeconds),
     )..value = 0.0;
   }
 
@@ -67,39 +82,48 @@ class QuietBreathController extends ChangeNotifier {
 
   // Animation inputs for painter
   double get phase => _waveCtrl.value * 2 * math.pi;
+  /// Numeric phase used by wave painter (semantic-safe)
+  double get wavePhase => phase;
+  /// Continuous time value for smooth wave animation (never resets)
+  double get waveT => _waveCtrl.value;
   double get progress => _riseCtrl.value; // 0..1 -> bottom..top
+  /// Overall session progress (0.0 → 1.0), monotonic across the entire session.
+  /// Used for smooth background animations (waves), independent of breathing phases.
+  double get sessionProgress => _riseCtrl.value;
   double get introT =>
       _introCtrl.value; // 0..1, 0 = full at rest, 1 = drop complete
 
-  // --- Box breathing phase tracking (for radial ring & instructions) ---
-  double get boxT => _boxCtrl.value; // 0..1 in current 16-second cycle
-  int get boxSecond =>
-      (boxT * kQBBoxCycleSec).floor().clamp(0, kQBBoxCycleSec - 1);
+  // --- Breathing phase tracking (for radial ring & instructions) ---
 
-  /// 0 = Inhale, 1 = Hold, 2 = Exhale, 3 = Hold (second)
-  int get boxPhaseIndex {
-    final segLen = kQBBoxCycleSec / 4; // 4s each segment
-    final idx = (boxSecond / segLen).floor();
-    return idx.clamp(0, 3);
+  int get phaseIndex {
+    final elapsed = _boxCtrl.value * _cycleSeconds;
+    int acc = 0;
+    for (int i = 0; i < _phases.length; i++) {
+      acc += _phases[i].seconds;
+      if (elapsed < acc) return i;
+    }
+    return _phases.length - 1;
   }
 
-  /// 0..1 progress within the current 4-second phase
-  double get boxPhaseProgress {
-    final segLen = kQBBoxCycleSec / 4; // 4.0
-    final phaseStart = boxPhaseIndex * segLen;
-    final cycleTime = boxT * kQBBoxCycleSec; // 0..16
-    final local = (cycleTime - phaseStart).clamp(0.0, segLen);
-    return (local / segLen).clamp(0.0, 1.0);
+  int get currentPhaseIndex => phaseIndex;
+
+  double get phaseProgress {
+    final elapsed = _boxCtrl.value * _cycleSeconds;
+    int start = 0;
+    for (int i = 0; i < phaseIndex; i++) {
+      start += _phases[i].seconds;
+    }
+    final local = (elapsed - start).clamp(0.0, _phases[phaseIndex].seconds.toDouble());
+    return local / _phases[phaseIndex].seconds;
   }
 
-  String get boxPhaseLabel =>
-      const ['Inhale', 'Hold', 'Exhale', 'Hold'][boxPhaseIndex];
-  Color get boxPhaseColor => const [
-    kQBColorInhale,
-    kQBColorHold,
-    kQBColorExhale,
-    kQBColorHold,
-  ][boxPhaseIndex];
+  double get currentPhaseProgress => phaseProgress;
+
+  BreathPhaseType get currentPhase => _phases[phaseIndex].type;
+
+  String get phaseLabel => QLTheme.labelForPhase(currentPhase);
+
+  Color get phaseColor => QLTheme.colorForPhase(currentPhase);
 
   // UI label for the primary control button
   String get primaryLabel {
@@ -141,7 +165,11 @@ class QuietBreathController extends ChangeNotifier {
     _riseCtrl.forward();
 
     if (!_boxCtrl.isAnimating) {
-      _boxCtrl.repeat();
+      _boxCtrl.repeat(
+        min: 0.0,
+        max: 1.0,
+        period: Duration(seconds: _cycleSeconds),
+      );
     }
 
     // Countdown (for internal state only; completion is driven by _riseCtrl)
@@ -228,6 +256,31 @@ class QuietBreathController extends ChangeNotifier {
     _introCtrl.reset();
     _boxCtrl.value = 0.0;
     _secondsLeft = _sessionTotalSeconds;
+    notifyListeners();
+  }
+
+  /// Switch the active breathing practice.
+  /// This resets timing safely without touching animation structure.
+  void setContract(BreathingPracticeContract contract) {
+    assert(contract.phases.isNotEmpty, 'Breathing contract must have phases');
+
+    _contract = contract;
+
+    // Update cycle count from the contract
+    _targetCycles = contract.cycles;
+
+    // Update durations to match new contract
+    _boxCtrl.duration = Duration(seconds: _cycleSeconds);
+    _riseCtrl.duration = Duration(seconds: _sessionTotalSeconds);
+
+    // Reset session state if not actively playing
+    if (!_isPlaying) {
+      _boxCtrl.value = 0.0;
+      _riseCtrl.value = 0.0;
+      _secondsLeft = _sessionTotalSeconds;
+      _sessionCompleted = false;
+    }
+
     notifyListeners();
   }
 

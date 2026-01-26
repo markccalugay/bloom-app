@@ -108,6 +108,9 @@ class QuietResultsNotOkScreen extends StatelessWidget {
                   child: QLPrimaryButton(
                     label: QuietResultsStrings.groundButton,
                     onPressed: () {
+                      // TODO: When distress results are re-enabled post-MVP,
+                      // inject an explicit breathing practice contract here
+                      // instead of relying on QuietBreathScreen defaults.
                       // Start a brand new quiet session with a fresh sessionId.
                       final newSessionId = DateTime.now().toIso8601String();
                       Navigator.of(context).pushReplacement(
