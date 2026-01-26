@@ -3,6 +3,7 @@ import 'package:quietline_app/screens/home/quiet_home_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/brotherhood/quiet_brotherhood_page.dart';
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
+import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/widgets/navigation/ql_bottom_nav.dart';
 import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
@@ -403,11 +404,14 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       '[QuietTime] Session started | ${DateTime.now().toIso8601String()}',
                     );
                   }
+                  // NOTE: Shell launches always default to Core Quiet.
+                  // Practice-selected sessions must pass an explicit contract via navigation.
                   await Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => QuietBreathScreen(
                         sessionId: sessionId,
                         streak: _streak ?? 0,
+                        contract: coreQuietContract, // Explicit default for Shell-launched sessions
                       ),
                     ),
                   );
@@ -435,11 +439,14 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                             '[QuietTime] Session started | ${DateTime.now().toIso8601String()}',
                           );
                         }
+                        // NOTE: Shell launches always default to Core Quiet.
+                        // Practice-selected sessions must pass an explicit contract via navigation.
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => QuietBreathScreen(
                               sessionId: sessionId,
                               streak: _streak ?? 0,
+                              contract: coreQuietContract, // Explicit default for Shell-launched sessions
                             ),
                           ),
                         );

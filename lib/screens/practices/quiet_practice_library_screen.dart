@@ -99,9 +99,9 @@ class _QuietPracticeLibraryScreenState
 
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            settings: RouteSettings(arguments: contract),
                             builder: (_) => QuietBreathScreen(
                               sessionId: practice.id,
+                              contract: contract,
                             ),
                           ),
                         );

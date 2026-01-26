@@ -6,6 +6,7 @@ import 'quiet_breath_constants.dart';
 import 'widgets/quiet_breath_circle.dart';
 import 'widgets/quiet_breath_controls.dart';
 import 'widgets/quiet_breath_timer_title.dart';
+import 'models/breath_phase_contracts.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/core/feature_flags.dart';
@@ -20,10 +21,13 @@ class QuietBreathScreen extends StatefulWidget {
   /// Optional with a safe default so existing call sites don't break.
   final int streak;
 
+  final BreathingPracticeContract? contract;
+
   const QuietBreathScreen({
     super.key,
     required this.sessionId,
     this.streak = 0,
+    this.contract,
   });
 
   @override
@@ -42,6 +46,9 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     super.initState();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     controller = QuietBreathController(vsync: this);
+    if (widget.contract != null) {
+      controller.setContract(widget.contract!);
+    }
     controller.onSessionComplete = _handleSessionComplete;
 
     controller.listenable.addListener(() {
