@@ -177,3 +177,5 @@ Presence beats productivity.
 
 The goal is not to change the user.  
 The goal is to give them a place to return to.
+
+© 2025 – QuietLine, All rights reserved.
