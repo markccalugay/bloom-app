@@ -182,19 +182,14 @@ The goal is to give them a place to return to.
 
 ## Socials
 
-[![Website](https://readmecodegen.vercel.app/api/social-icon?name=link&color=%233F8E89&size=32)](https://quietline.app)
-Website: https://quietline.app
+[![Website](https://readmecodegen.vercel.app/api/social-icon?name=link&color=%233F8E89&size=20)](https://quietline.app) Website: https://quietline.app
 
-[![Facebook](https://readmecodegen.vercel.app/api/social-icon?name=facebook&color=%233F8E89&size=32)](https://www.facebook.com/profile.php?id=61587141693033)
-Facebook: https://www.facebook.com/profile.php?id=61587141693033
+[![Facebook](https://readmecodegen.vercel.app/api/social-icon?name=facebook&color=%233F8E89&size=20)](https://www.facebook.com/profile.php?id=61587141693033) Facebook: https://www.facebook.com/profile.php?id=61587141693033
 
-[![Instagram](https://readmecodegen.vercel.app/api/social-icon?name=instagram&color=%233F8E89&size=32)](https://www.instagram.com/quietline_app?igsh=MXdpYzlkamtpem1hZA%3D%3D&utm_source=qr)
-Instagram: https://www.instagram.com/quietline_app
+[![Instagram](https://readmecodegen.vercel.app/api/social-icon?name=instagram&color=%233F8E89&size=20)](https://www.instagram.com/quietline_app?igsh=MXdpYzlkamtpem1hZA%3D%3D&utm_source=qr) Instagram: https://www.instagram.com/quietline_app
 
-[![Twitter](https://readmecodegen.vercel.app/api/social-icon?name=twitter&color=%233F8E89&size=32)](https://x.com/QuietLine_App)
-Twitter: https://x.com/QuietLine_App
+[![Twitter](https://readmecodegen.vercel.app/api/social-icon?name=twitter&color=%233F8E89&size=20)](https://x.com/QuietLine_App) Twitter: https://x.com/QuietLine_App
 
-[![YouTube](https://readmecodegen.vercel.app/api/social-icon?name=youtube&color=%233F8E89&size=32)](https://youtube.com/@quietlineapp?si=m6FToWe5GNVNpw2a)
-YouTube: https://youtube.com/@quietlineapp
+[![YouTube](https://readmecodegen.vercel.app/api/social-icon?name=youtube&color=%233F8E89&size=20)](https://youtube.com/@quietlineapp?si=m6FToWe5GNVNpw2a) YouTube: https://youtube.com/@quietlineapp
 
 © 2025 – QuietLine, All rights reserved.
