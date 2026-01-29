@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'core/reminder/reminder_service.dart';
+import 'core/notifications/notification_service.dart';
+import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 // import 'screens/quiet_breath/quiet_breath_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_strings.dart';
@@ -43,6 +46,9 @@ void main() async {
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const AppRestart(child: QuietLineApp()));
+  WidgetsBinding.instance.addObserver(
+    _ReminderTimezoneObserver(),
+  );
 }
 
 class QuietLineApp extends StatelessWidget {
@@ -146,5 +152,34 @@ class DebugResultsEntryScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _ReminderTimezoneObserver extends WidgetsBindingObserver {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    if (state != AppLifecycleState.resumed) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final reminderService = ReminderService(prefs);
+
+    final needsResync = await reminderService.needsTimezoneResync();
+    if (!needsResync) return;
+
+    final hour = prefs.getInt('reminderHour');
+    final minute = prefs.getInt('reminderMinute');
+
+    if (hour == null || minute == null) return;
+
+    final notificationService = NotificationService();
+    await notificationService.initialize();
+
+    await notificationService.rebuildDaily(
+      time: TimeOfDay(hour: hour, minute: minute),
+    );
+
+    final currentTimezone =
+        await FlutterNativeTimezone.getLocalTimezone();
+    await reminderService.updateStoredTimezone(currentTimezone);
   }
 }
