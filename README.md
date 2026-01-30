@@ -190,6 +190,6 @@ The goal is to give them a place to return to.
 
 [![Twitter](https://readmecodegen.vercel.app/api/social-icon?name=twitter&color=%233F8E89&size=20)](https://x.com/QuietLine_App) Twitter: https://x.com/QuietLine_App
 
-[![YouTube](https://readmecodegen.vercel.app/api/social-icon?name=youtube&color=%233F8E89&size=20)](https://youtube.com/@quietlineapp?si=m6FToWe5GNVNpw2a) YouTube: https://youtube.com/@quietlineapp
+[![YouTube](https://readmecodegen.vercel.app/api/social-icon?name=youtube&color=%233F8E89&size=20)](https://www.youtube.com/@quietline-app) YouTube: https://www.youtube.com/@quietline-app
 
 © 2025 – QuietLine, All rights reserved.
