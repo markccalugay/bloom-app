@@ -33,7 +33,12 @@ class _QuietPracticeLibraryScreenState
 
   @override
   Widget build(BuildContext context) {
-    final practices = PracticeCatalog.all;
+    // TEMPORARY: Hide Cold Resolve from UI for App Store submission.
+    // Cold Resolve logic, contracts, and data remain intact.
+    // TODO(ColdResolve): Re-enable once Cold Resolve experience and StoreKit gating are finalized.
+    final practices = PracticeCatalog.all
+        .where((practice) => practice.id != 'cold_resolve')
+        .toList();
     final accessService = const PracticeAccessService();
     // TODO(StoreKit): Will be used when routing active practice
     // into QuietBreathScreen once premium entitlement is finalized.
