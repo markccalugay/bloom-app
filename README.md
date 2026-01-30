@@ -184,7 +184,7 @@ The goal is to give them a place to return to.
 
 [![Website](https://readmecodegen.vercel.app/api/social-icon?name=link&color=%233F8E89&size=20)](https://quietline.app) Website: https://quietline.app
 
-[![Facebook](https://readmecodegen.vercel.app/api/social-icon?name=facebook&color=%233F8E89&size=20)](https://www.facebook.com/profile.php?id=61587141693033) Facebook: https://www.facebook.com/profile.php?id=61587141693033
+[![Facebook](https://readmecodegen.vercel.app/api/social-icon?name=facebook&color=%233F8E89&size=20)](https://www.facebook.com/profile.php?id=61587141693033) Facebook: https://www.facebook.com/QuietLineApp/
 
 [![Instagram](https://readmecodegen.vercel.app/api/social-icon?name=instagram&color=%233F8E89&size=20)](https://www.instagram.com/quietline_app?igsh=MXdpYzlkamtpem1hZA%3D%3D&utm_source=qr) Instagram: https://www.instagram.com/quietline_app
 
