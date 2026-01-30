@@ -3,6 +3,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 
 class NotificationService {
+  static const int _dailyReminderId = 1001;
+
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
@@ -65,7 +67,7 @@ class NotificationService {
     }
 
     await _plugin.zonedSchedule(
-      1001,
+      _dailyReminderId,
       'Quiet Time',
       'Take a moment to return to stillness.',
       scheduled,
@@ -75,5 +77,19 @@ class NotificationService {
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
+  }
+
+  /// Cancels the existing daily reminder notification.
+  Future<void> cancelDailyReminder() async {
+    await _plugin.cancel(_dailyReminderId);
+  }
+
+  /// Rebuilds the daily reminder by cancelling the existing
+  /// notification and scheduling a new one at the given time.
+  Future<void> rebuildDaily({
+    required TimeOfDay time,
+  }) async {
+    await cancelDailyReminder();
+    await scheduleDaily(time: time);
   }
 }
