@@ -40,9 +40,8 @@ class _QuietPracticeLibraryScreenState
         .where((practice) => practice.id != 'cold_resolve')
         .toList();
     final accessService = const PracticeAccessService();
-    // TODO(StoreKit): Will be used when routing active practice
-    // into QuietBreathScreen once premium entitlement is finalized.
-    // final activeId = accessService.activePracticeId;
+    // TODO(ColdResolve): activeId will be used when Cold Resolve is reintroduced and routed with StoreKit gating.
+    final activeId = accessService.activePracticeId;
 
     return Scaffold(
       backgroundColor: QLColors.background,
