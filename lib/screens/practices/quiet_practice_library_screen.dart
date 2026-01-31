@@ -297,8 +297,8 @@ class _PracticeDetailSheet extends StatelessWidget {
         return 'Technique: Performance-focused breathing cycles.\n'
             'Benefits: Enhances focus, recovery, and physical readiness.';
       case 'cold_resolve':
-        return 'Technique: Controlled breathing under discomfort.\n'
-            'Benefits: Builds resilience, stress endurance, and mental toughness.';
+        return 'A fast, activating breathing practice inspired by Wim Hof.\n'
+            'Designed to build resilience and sharpen mental control under stress.';
       default:
         return '';
     }
