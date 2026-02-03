@@ -48,6 +48,18 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                     'Unlock additional breathing practices designed to build discipline, calm, and resilience.',
                     style: theme.textTheme.bodyLarge,
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'QuietLine Premium',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$4.99 per month. Subscription automatically renews unless canceled at least 24 hours before the end of the current period.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withAlpha(180),
+                    ),
+                  ),
                   const Spacer(),
                   ElevatedButton(
                     onPressed: (isPremium || _isProcessing)
