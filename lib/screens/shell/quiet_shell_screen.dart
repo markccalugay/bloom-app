@@ -3,7 +3,6 @@ import 'package:quietline_app/screens/home/quiet_home_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/brotherhood/quiet_brotherhood_page.dart';
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/widgets/navigation/ql_bottom_nav.dart';
 import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
@@ -17,6 +16,7 @@ import 'package:quietline_app/screens/practices/quiet_practice_library_screen.da
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
+import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/core/feature_flags.dart';
 import 'package:quietline_app/core/theme/theme_service.dart';
 import 'package:quietline_app/data/user/user_service.dart';
@@ -414,7 +414,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       builder: (_) => QuietBreathScreen(
                         sessionId: sessionId,
                         streak: _streak ?? 0,
-                        contract: coreQuietContract, // Explicit default for Shell-launched sessions
+                        contract: PracticeAccessService.instance.getActiveContract(), // Use active practice
                       ),
                     ),
                   );
@@ -449,7 +449,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                             builder: (_) => QuietBreathScreen(
                               sessionId: sessionId,
                               streak: _streak ?? 0,
-                              contract: coreQuietContract, // Explicit default for Shell-launched sessions
+                              contract: PracticeAccessService.instance.getActiveContract(), // Use active practice
                             ),
                           ),
                         );

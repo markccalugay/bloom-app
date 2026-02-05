@@ -66,6 +66,12 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
 
+    debugPrint('[NotificationService] Scheduling daily reminder:');
+    debugPrint('  - Target: ${time.hour}:${time.minute.toString().padLeft(2, '0')}');
+    debugPrint('  - Now (tz.local): $now');
+    debugPrint('  - Scheduled (tz.local): $scheduled');
+    debugPrint('  - Timezone: ${tz.local.name}');
+
     await _plugin.zonedSchedule(
       _dailyReminderId,
       'Quiet Time',

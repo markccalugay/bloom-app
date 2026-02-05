@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/reminder/reminder_service.dart';
+import 'core/practices/practice_access_service.dart';
 import 'core/notifications/notification_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 // import 'screens/quiet_breath/quiet_breath_screen.dart';
@@ -22,7 +23,7 @@ import 'package:quietline_app/core/app_restart.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 import 'package:quietline_app/core/theme/theme_service.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:quietline_app/core/timezone/timezone_service.dart';
 
 late QuietStreakRepository quietStreakRepo;
 
@@ -32,7 +33,7 @@ void main() async {
   await PremiumEntitlement.instance.initialize();
   await ThemeService.instance.initialize();
   debugPrint('[BOOT] premium=${PremiumEntitlement.instance.isPremium}');
-  tz.initializeTimeZones();
+  await TimezoneService.initialize();
 
   final prefs = await SharedPreferences.getInstance();
   quietStreakRepo = QuietStreakRepository(
@@ -40,6 +41,7 @@ void main() async {
   );
 
   QuietStreakService.repo = quietStreakRepo;
+  await PracticeAccessService.instance.initialize();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -128,6 +130,7 @@ class _ReminderTimezoneObserver extends WidgetsBindingObserver {
       time: TimeOfDay(hour: hour, minute: minute),
     );
 
+    await TimezoneService.initialize();
     final currentTimezone =
         await FlutterTimezone.getLocalTimezone();
     await reminderService.updateStoredTimezone(currentTimezone);
