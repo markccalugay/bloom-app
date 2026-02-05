@@ -103,9 +103,7 @@ class _QuietAffirmationsLibraryScreenState
         'Unlocked on Day $_unlockedDay ${_formatFullMonthDate(today)}';
 
     return Scaffold(
-      backgroundColor: QLColors.background,
       appBar: AppBar(
-        backgroundColor: QLColors.background,
         elevation: 0,
         iconTheme: IconThemeData(color: baseTextColor),
         title: Text(
@@ -212,7 +210,7 @@ class _QuietAffirmationsLibraryScreenState
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   sliver: SliverToBoxAdapter(
-                    child: Divider(color: baseTextColor.withValues(alpha: 0.12)),
+                    child: Divider(color: baseTextColor.withValues(alpha: 0.08)),
                   ),
                 ),
 

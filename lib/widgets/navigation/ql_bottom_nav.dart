@@ -24,8 +24,11 @@ class QLBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color dockBackground = Color(0xFFD9D9D9); // updated dock background
-    const Color activeColor = Color(0xFF111827); // near-black for the center logo
+    final theme = Theme.of(context);
+    final Color dockBackground = theme.brightness == Brightness.dark
+        ? const Color(0xFF1C242D) // Subtle variant of dark background
+        : const Color(0xFFE5E7EA);
+    final Color activeColor = theme.colorScheme.primary;
 
     return SizedBox(
       height: _kNavTotalHeight,
@@ -139,6 +142,10 @@ class _PrimaryNavItem extends StatelessWidget {
               AppAssets.quietlineLogo,
               width: 45,
               height: 45,
+              colorFilter: ColorFilter.mode(
+                activeColor,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),

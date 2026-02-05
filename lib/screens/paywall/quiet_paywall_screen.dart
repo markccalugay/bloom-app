@@ -31,7 +31,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
         }
 
         return Scaffold(
-          backgroundColor: QLColors.background,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),

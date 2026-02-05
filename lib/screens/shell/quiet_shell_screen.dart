@@ -7,6 +7,7 @@ import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/widgets/navigation/ql_bottom_nav.dart';
 import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
+import 'package:quietline_app/widgets/theme/quiet_theme_selection_sheet.dart';
 import 'package:quietline_app/widgets/time_picker/quiet_time_picker_sheet.dart';
 import 'package:quietline_app/services/web_launch_service.dart';
 import 'package:quietline_app/services/support_call_service.dart';
@@ -16,11 +17,10 @@ import 'package:quietline_app/screens/practices/quiet_practice_library_screen.da
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
-import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
-
-import 'package:quietline_app/data/user/user_service.dart';
-
 import 'package:quietline_app/core/feature_flags.dart';
+import 'package:quietline_app/core/theme/theme_service.dart';
+import 'package:quietline_app/data/user/user_service.dart';
+import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
 
 import 'package:quietline_app/services/first_launch_service.dart';
 
@@ -563,6 +563,16 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             onCall988: SupportCallService.call988,
             onOpenPrivacy: _web.openPrivacy,
             onOpenTerms: _web.openTerms,
+            currentThemeLabel: ThemeService.instance.currentThemeLabel,
+            onOpenThemeSelection: () async {
+              _toggleMenu();
+              await showModalBottomSheet(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => const QuietThemeSelectionSheet(),
+              );
+            },
           ),
         ),
       ],

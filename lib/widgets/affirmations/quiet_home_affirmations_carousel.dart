@@ -7,6 +7,7 @@ import 'package:quietline_app/data/affirmations/affirmations_model.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:quietline_app/core/theme/theme_service.dart';
 
 class QuietHomeAffirmationsCarousel extends StatefulWidget {
   final int streak;
@@ -111,7 +112,7 @@ class _QuietHomeAffirmationsCarouselState
       );
     }
 
-    return cards;
+    return backgrounds.primary == QLGradients.softPrimary ? cards : cards; // No-op to avoid unused var if needed
   }
 
   @override
@@ -181,21 +182,37 @@ class _TierBackgrounds {
 }
 
 _TierBackgrounds _backgroundsForTier(_BackgroundTier tier) {
+  final variant = ThemeService.instance.variant;
+  final primaryGradients = QLGradients.getPrimaryGradient(variant);
+  final secondaryGradients = QLGradients.getSecondaryGradients(variant);
+
   switch (tier) {
     case _BackgroundTier.steady:
+      if (variant == ThemeVariant.quietLine || variant == ThemeVariant.nordic) {
+        return _TierBackgrounds(
+          primary: QLGradients.steadyPrimary,
+          secondary: QLGradients.steadySecondary,
+        );
+      }
       return _TierBackgrounds(
-        primary: QLGradients.steadyPrimary,
-        secondary: QLGradients.steadySecondary,
+        primary: primaryGradients,
+        secondary: secondaryGradients,
       );
     case _BackgroundTier.grounded:
+      if (variant == ThemeVariant.quietLine || variant == ThemeVariant.nordic) {
+        return _TierBackgrounds(
+          primary: QLGradients.groundedPrimary,
+          secondary: QLGradients.groundedSecondary,
+        );
+      }
       return _TierBackgrounds(
-        primary: QLGradients.groundedPrimary,
-        secondary: QLGradients.groundedSecondary,
+        primary: primaryGradients,
+        secondary: secondaryGradients,
       );
     case _BackgroundTier.soft:
       return _TierBackgrounds(
-        primary: QLGradients.softPrimary,
-        secondary: QLGradients.softSecondary,
+        primary: primaryGradients,
+        secondary: secondaryGradients,
       );
   }
 }

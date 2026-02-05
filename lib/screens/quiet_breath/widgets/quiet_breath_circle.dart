@@ -10,11 +10,26 @@ class QuietBreathCircle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return AnimatedBuilder(
       animation: controller.listenable,
       child: const SizedBox.expand(),
       builder: (context, child) {
         final ringSize = kQBCircleSize + 2 * (kQBRingOuterPadding + kQBRingThickness);
+        
+        final ringTrackColor = theme.brightness == Brightness.dark
+            ? const Color(0xFF3A434B)
+            : theme.colorScheme.onSurface.withValues(alpha: 0.1);
+        
+        final ellipseBgColor = theme.brightness == Brightness.dark
+            ? const Color(0xFF5E6874)
+            : theme.colorScheme.onSurface.withValues(alpha: 0.15);
+
+        final waveDim = theme.colorScheme.primary.withValues(
+          alpha: theme.brightness == Brightness.dark ? 0.7 : 0.4,
+        );
+
         return Center(
           child: Stack(
             alignment: Alignment.center,
@@ -26,6 +41,7 @@ class QuietBreathCircle extends StatelessWidget {
                 child: CustomPaint(
                   painter: QuietBreathRingPainter(
                     phaseProgress: controller.phaseProgress,
+                    trackColor: ringTrackColor,
                     phaseColor: controller.phaseColor,
                   ),
                 ),
@@ -39,6 +55,9 @@ class QuietBreathCircle extends StatelessWidget {
                     phase: controller.wavePhase,
                     progress: controller.sessionProgress,
                     introT: controller.introT,
+                    waveColorMain: theme.colorScheme.primary,
+                    waveColorDim: waveDim,
+                    ellipseBackgroundColor: ellipseBgColor,
                   ),
                   child: child,
                 ),

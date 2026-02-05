@@ -66,7 +66,7 @@ class _QuietSplashScreenState extends State<QuietSplashScreen>
     final theme = Theme.of(context);
     final onSurface = theme.colorScheme.onSurface;
     return Scaffold(
-      backgroundColor: QLColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
         child: FadeTransition(
           opacity: _fade,

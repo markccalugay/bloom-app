@@ -29,20 +29,6 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(4),
-        child: Ink(
-          width: double.infinity,
-          height: 200,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(4),
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF1A2228),
-                Color(0xFF11171D),
-              ],
-            ),
-          ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Stack(
@@ -69,7 +55,7 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
                       child: Text(
                         unlockedLabel!,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.75),
+                          color: onSurface.withValues(alpha: 0.75),
                         ),
                       ),
                     ),
@@ -85,8 +71,8 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
                       AppAssets.quietlineLogo,
                       width: 14,
                       height: 14,
-                      colorFilter: const ColorFilter.mode(
-                        Colors.white,
+                      colorFilter: ColorFilter.mode(
+                        onSurface,
                         BlendMode.srcIn,
                       ),
                     ),
@@ -122,15 +108,8 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
         child: Container(
           width: double.infinity,
           height: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF1A2228),
-                Color(0xFF11171D),
-              ],
-            ),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
@@ -144,7 +123,7 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
                     child: IconButton(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.close),
-                      color: Colors.white.withValues(alpha: 0.85),
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                       tooltip: 'Close',
                       splashRadius: 20,
                       padding: const EdgeInsets.all(10),
@@ -166,7 +145,7 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
                         text,
                         textAlign: TextAlign.center,
                         style: theme.textTheme.headlineSmall?.copyWith(
-                          color: Colors.white,
+                          color: theme.colorScheme.onSurface,
                           fontWeight: FontWeight.w600,
                           height: 1.32,
                         ),
@@ -189,7 +168,8 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.75),
+                                color: theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.75),
                               ),
                             ),
                           )
@@ -202,8 +182,8 @@ class QuietAffirmationFullscreenScreen extends StatelessWidget {
                           AppAssets.quietlineLogo,
                           width: 16,
                           height: 16,
-                          colorFilter: const ColorFilter.mode(
-                            Colors.white,
+                          colorFilter: ColorFilter.mode(
+                            theme.colorScheme.onSurface,
                             BlendMode.srcIn,
                           ),
                         ),

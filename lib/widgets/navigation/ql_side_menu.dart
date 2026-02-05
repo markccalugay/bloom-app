@@ -40,6 +40,8 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onToggleDebugPremium;
 
   final String? debugPremiumLabel;
+  final String? currentThemeLabel;
+  final VoidCallback? onOpenThemeSelection;
 
   const QLSideMenu({
     super.key,
@@ -63,6 +65,8 @@ class QLSideMenu extends StatelessWidget {
     this.debugPremiumEnabled,
     this.onToggleDebugPremium,
     this.debugPremiumLabel,
+    this.currentThemeLabel,
+    this.onOpenThemeSelection,
   });
 
   @override
@@ -71,10 +75,10 @@ class QLSideMenu extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     final Color baseTextColor = textTheme.bodyMedium?.color ?? Colors.white;
-    final Color iconColor = QLColors.primaryTeal;
+    final Color iconColor = theme.colorScheme.primary;
 
     return Material(
-      color: QLColors.background,
+      color: theme.scaffoldBackgroundColor,
       child: SafeArea(
         right: false,
         child: Column(
@@ -87,7 +91,7 @@ class QLSideMenu extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: QLColors.primaryTeal.withValues(
+                    backgroundColor: theme.colorScheme.primary.withValues(
                       alpha: 0.2,
                     ),
                     child: const Icon(
@@ -130,10 +134,10 @@ class QLSideMenu extends StatelessWidget {
               ),
             ),
 
-            const Divider(
+            Divider(
               height: 1,
               thickness: 1,
-              color: Color(0x14FFFFFF), // very soft divider
+              color: baseTextColor.withValues(alpha: 0.08), // very soft divider
             ),
 
             Expanded(
@@ -242,6 +246,14 @@ class QLSideMenu extends StatelessWidget {
                       textColor: baseTextColor,
                       onTap: onEditReminder,
                       enabled: onEditReminder != null,
+                    ),
+                    _MenuItem(
+                      icon: Icons.palette_outlined,
+                      label: currentThemeLabel ?? 'Theme',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onOpenThemeSelection,
+                      enabled: onOpenThemeSelection != null,
                     ),
                     if (debugPremiumLabel != null)
                       _MenuItem(
@@ -380,12 +392,12 @@ class _ComingSoonPill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withValues(alpha: 0.06),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
       ),
       child: Text(
         'Soon',
         style: textTheme.labelSmall?.copyWith(
-          color: Colors.white.withValues(alpha: 0.8),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),

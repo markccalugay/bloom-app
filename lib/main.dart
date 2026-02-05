@@ -22,6 +22,7 @@ import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/core/app_restart.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
+import 'package:quietline_app/core/theme/theme_service.dart';
 import 'package:timezone/data/latest.dart' as tz;
 
 late QuietStreakRepository quietStreakRepo;
@@ -30,6 +31,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StoreKitService.instance.initialize();
   await PremiumEntitlement.instance.initialize();
+  await ThemeService.instance.initialize();
   debugPrint('[BOOT] premium=${PremiumEntitlement.instance.isPremium}');
   tz.initializeTimeZones();
 
@@ -56,67 +58,16 @@ class QuietLineApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: QLTheme.dark,
-      // Entry router: Splash → Welcome → (FTUE Quiet Time once) → Home
-      home: const QuietEntryScreen(),
-
-      /*
-      // FTUE: On first install, start with Quiet Time.
-      // After the first completed session, boot into the app shell (Home).
-      home: FutureBuilder<bool>(
-        future: FirstLaunchService.instance.hasCompletedFirstSession(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Scaffold(
-              backgroundColor: Colors.black,
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          final hasCompleted = snapshot.data!;
-          final sessionId = DateTime.now().toIso8601String();
-
-          // First launch (FTUE): go straight into Quiet Time.
-          if (!hasCompleted) {
-            // MVP: mood check-ins are disabled. Keep the original FTUE path behind a flag.
-            return QuietBreathScreen(sessionId: sessionId, streak: 0);
-            // V2 (optional): re-enable the original FTUE pre-checkin flow.
-            // if (FeatureFlags.moodCheckInsEnabled) {
-            //   return MoodCheckinScreen(
-            //     mode: MoodCheckinMode.pre,
-            //     sessionId: sessionId,
-            //     onSubmit: (_) {
-            //       Navigator.of(context).push(
-            //         MaterialPageRoute(
-            //           builder: (_) => QuietBreathScreen(
-            //             sessionId: sessionId,
-            //             streak: 0,
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //     onSkip: () {
-            //       Navigator.of(context).push(
-            //         MaterialPageRoute(
-            //           builder: (_) => QuietBreathScreen(
-            //             sessionId: sessionId,
-            //             streak: 0,
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //   );
-            // }
-          }
-
-          // Post-FTUE: go into the app shell (Home).
-          return const QuietShellScreen();
-        },
-      ),
-      */
-      // home: const DebugResultsEntryScreen(),
+    return ListenableBuilder(
+      listenable: ThemeService.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: ThemeService.instance.themeData,
+          // Entry router: Splash → Welcome → (FTUE Quiet Time once) → Home
+          home: const QuietEntryScreen(),
+        );
+      },
     );
   }
 }
