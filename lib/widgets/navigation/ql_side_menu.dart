@@ -32,15 +32,7 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onOpenPrivacy;
   final VoidCallback? onOpenTerms;
 
-  final String? reminderLabel;
-  final VoidCallback? onEditReminder;
-
-  final bool? debugPremiumEnabled;
-  final VoidCallback? onToggleDebugPremium;
-
   final String? debugPremiumLabel;
-  final String? currentThemeLabel;
-  final VoidCallback? onOpenThemeSelection;
 
   const QLSideMenu({
     super.key,
@@ -59,13 +51,7 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenAccount,
     this.showBrotherhood = false,
     this.showJourney = false,
-    this.reminderLabel,
-    this.onEditReminder,
-    this.debugPremiumEnabled,
-    this.onToggleDebugPremium,
     this.debugPremiumLabel,
-    this.currentThemeLabel,
-    this.onOpenThemeSelection,
   });
 
   @override
@@ -176,7 +162,7 @@ class QLSideMenu extends StatelessWidget {
                       ),
                     _MenuItem(
                       icon: Icons.person_rounded,
-                      label: 'Your account',
+                      label: 'My account',
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onOpenAccount,
@@ -252,33 +238,6 @@ class QLSideMenu extends StatelessWidget {
                       onTap: onOpenTerms,
                     ),
 
-                    const SizedBox(height: 16),
-                    const _SectionLabel('Preferences'),
-                    _MenuItem(
-                      icon: Icons.notifications_none_rounded,
-                      label: reminderLabel ?? 'Daily reminder',
-                      iconColor: iconColor,
-                      textColor: baseTextColor,
-                      onTap: onEditReminder,
-                      enabled: onEditReminder != null,
-                    ),
-                    _MenuItem(
-                      icon: Icons.palette_outlined,
-                      label: currentThemeLabel ?? 'Theme',
-                      iconColor: iconColor,
-                      textColor: baseTextColor,
-                      onTap: onOpenThemeSelection,
-                      enabled: onOpenThemeSelection != null,
-                    ),
-                    if (debugPremiumLabel != null)
-                      _MenuItem(
-                        icon: Icons.lock_open_rounded,
-                        label: debugPremiumLabel!,
-                        iconColor: iconColor,
-                        textColor: baseTextColor,
-                        onTap: onToggleDebugPremium,
-                        enabled: onToggleDebugPremium != null,
-                      ),
 
                     const SizedBox(height: 24),
                     Padding(
