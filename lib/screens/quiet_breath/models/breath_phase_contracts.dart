@@ -131,22 +131,24 @@ const BreathingPracticeContract athleteFocusContract =
 /*                              COLD RESOLVE                                  */
 /* -------------------------------------------------------------------------- */
 
-/// Cold Resolve (Wim Hof–inspired)
+/// Cold Resolve (Wim Hof–inspired, simplified)
 ///
-/// This is intentionally a NON‑EXECUTABLE contract placeholder.
-/// It exists so the system can reason about the practice *semantically*
-/// before the round‑based state machine is implemented.
+/// NOTE:
+/// This is a simplified, cycle-based version that fits the existing
+/// QuietLine breathing framework.
+/// Inspired by Wim Hof Method, but NOT a canonical implementation.
+///
+/// TODO(mark): Revisit advanced round-based Cold Resolve with
+/// power breathing + retention when a dedicated execution model exists.
 const BreathingPracticeContract coldResolveContract =
     BreathingPracticeContract(
   id: 'cold_resolve',
   name: 'Cold Resolve',
-  cycles: 3,
+  cycles: 30,
   isAdvanced: true,
   phases: [
-    // Phase semantics only — execution handled later
-    BreathPhaseContract(type: BreathPhaseType.power, seconds: 0),
-    BreathPhaseContract(type: BreathPhaseType.retention, seconds: 0),
-    BreathPhaseContract(type: BreathPhaseType.recovery, seconds: 15),
+    BreathPhaseContract(type: BreathPhaseType.inhale, seconds: 2),
+    BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 2),
   ],
 );
 

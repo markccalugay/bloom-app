@@ -33,16 +33,12 @@ class _QuietPracticeLibraryScreenState
 
   @override
   Widget build(BuildContext context) {
-    // TEMPORARY: Hide Cold Resolve from UI for App Store submission.
-    // Cold Resolve logic, contracts, and data remain intact.
-    // TODO(ColdResolve): Re-enable once Cold Resolve experience and StoreKit gating are finalized.
-    final practices = PracticeCatalog.all
-        .where((practice) => practice.id != 'cold_resolve')
-        .toList();
+    // Cold Resolve is now re-enabled in the UI.
+    // Access and gating are still handled by PracticeAccessService and StoreKit.
+    final practices = PracticeCatalog.all.toList();
+    // NOTE: active practice state is resolved via accessService.isActive()
+    // activePracticeId is intentionally not read here to avoid unused state.
     final accessService = const PracticeAccessService();
-    // TODO(StoreKit): Will be used when routing active practice
-    // into QuietBreathScreen once premium entitlement is finalized.
-    // final activeId = accessService.activePracticeId;
 
     return Scaffold(
       backgroundColor: QLColors.background,
@@ -301,8 +297,8 @@ class _PracticeDetailSheet extends StatelessWidget {
         return 'Technique: Performance-focused breathing cycles.\n'
             'Benefits: Enhances focus, recovery, and physical readiness.';
       case 'cold_resolve':
-        return 'Technique: Controlled breathing under discomfort.\n'
-            'Benefits: Builds resilience, stress endurance, and mental toughness.';
+        return 'A fast, activating breathing practice inspired by Wim Hof.\n'
+            'Designed to build resilience and sharpen mental control under stress.';
       default:
         return '';
     }

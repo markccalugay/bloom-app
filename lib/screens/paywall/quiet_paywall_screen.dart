@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../theme/ql_theme.dart';
 
 class QuietPaywallScreen extends StatefulWidget {
@@ -46,6 +47,18 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                   Text(
                     'Unlock additional breathing practices designed to build discipline, calm, and resilience.',
                     style: theme.textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'QuietLine Premium',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '\$4.99 per month. Subscription automatically renews unless canceled at least 24 hours before the end of the current period.',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withAlpha(180),
+                    ),
                   ),
                   const Spacer(),
                   ElevatedButton(
@@ -96,6 +109,44 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                           color: theme.colorScheme.onSurface.withAlpha(153),
                         ),
                       ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse(
+                                'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/',
+                              ),
+                            );
+                          },
+                          child: Text(
+                            'Terms of Use',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                        const Text('•'),
+                        GestureDetector(
+                          onTap: () {
+                            launchUrl(
+                              Uri.parse('https://quietline.app/privacy'),
+                            );
+                          },
+                          child: Text(
+                            'Privacy Policy',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 24),
