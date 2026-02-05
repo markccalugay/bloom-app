@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import '../controllers/quiet_breath_controller.dart';
 import '../quiet_breath_constants.dart';
 
