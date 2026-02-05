@@ -90,9 +90,9 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
               (value) => Center(
                 child: Text(
                   labelBuilder(value),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -108,9 +108,9 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
       top: false,
       child: Container(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF0E1A1F), // QuietLine dark tone
-          borderRadius: BorderRadius.vertical(
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: const BorderRadius.vertical(
             top: Radius.circular(24),
           ),
         ),
@@ -118,12 +118,12 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // Title
-            const Text(
+            Text(
               'Choose a time',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
 
@@ -170,9 +170,11 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
                 Expanded(
                   child: TextButton(
                     onPressed: _cancel,
-                    child: const Text(
+                    child: Text(
                       'Cancel',
-                      style: TextStyle(color: Colors.white70),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      ),
                     ),
                   ),
                 ),
@@ -180,8 +182,8 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
                   child: ElevatedButton(
                     onPressed: _confirm,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF4FA39A),
-                      foregroundColor: Colors.black,
+                      backgroundColor: Theme.of(context).colorScheme.secondary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),

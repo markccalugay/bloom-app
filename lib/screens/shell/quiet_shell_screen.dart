@@ -3,10 +3,10 @@ import 'package:quietline_app/screens/home/quiet_home_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/brotherhood/quiet_brotherhood_page.dart';
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
 import 'package:quietline_app/widgets/navigation/ql_bottom_nav.dart';
 import 'package:quietline_app/widgets/navigation/ql_side_menu.dart';
+import 'package:quietline_app/widgets/theme/quiet_theme_selection_sheet.dart';
 import 'package:quietline_app/widgets/time_picker/quiet_time_picker_sheet.dart';
 import 'package:quietline_app/services/web_launch_service.dart';
 import 'package:quietline_app/services/support_call_service.dart';
@@ -16,11 +16,11 @@ import 'package:quietline_app/screens/practices/quiet_practice_library_screen.da
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
-import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
-
-import 'package:quietline_app/data/user/user_service.dart';
-
+import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/core/feature_flags.dart';
+import 'package:quietline_app/core/theme/theme_service.dart';
+import 'package:quietline_app/data/user/user_service.dart';
+import 'package:quietline_app/widgets/reminder/reminder_prompt_card.dart';
 
 import 'package:quietline_app/services/first_launch_service.dart';
 
@@ -44,6 +44,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
   String _displayName = 'Quiet guest';
+  String _avatarId = 'viking';
 
   TimeOfDay? _reminderTime;
   String _reminderLabel = 'Daily reminder · Not set';
@@ -125,12 +126,14 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       if (!mounted) return;
       setState(() {
         _displayName = user.username;
+        _avatarId = user.avatarId;
       });
     } catch (_) {
       // Silent fallback for MVP.
       if (!mounted) return;
       setState(() {
         _displayName = 'Quiet guest';
+        _avatarId = 'viking';
       });
     }
   }
@@ -411,7 +414,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                       builder: (_) => QuietBreathScreen(
                         sessionId: sessionId,
                         streak: _streak ?? 0,
-                        contract: coreQuietContract, // Explicit default for Shell-launched sessions
+                        contract: PracticeAccessService.instance.getActiveContract(), // Use active practice
                       ),
                     ),
                   );
@@ -446,7 +449,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                             builder: (_) => QuietBreathScreen(
                               sessionId: sessionId,
                               streak: _streak ?? 0,
-                              contract: coreQuietContract, // Explicit default for Shell-launched sessions
+                              contract: PracticeAccessService.instance.getActiveContract(), // Use active practice
                             ),
                           ),
                         );
@@ -503,23 +506,36 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           width: menuWidth,
           child: QLSideMenu(
             displayName: _displayName,
-            reminderLabel: _reminderLabel,
-            onEditReminder: () async {
-              _toggleMenu();
-              await _editReminderTime();
-            },
-
-
+            avatarId: _avatarId,
             onClose: _toggleMenu,
             onOpenAccount: () async {
               _toggleMenu();
               await Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const QuietAccountScreen()),
+                MaterialPageRoute(
+                  builder: (_) => QuietAccountScreen(
+                    reminderLabel: _reminderLabel,
+                    onEditReminder: _editReminderTime,
+                    currentThemeLabel:
+                        ThemeService.instance.currentThemeLabel,
+                    onOpenThemeSelection: () async {
+                      await showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        isScrollControlled: true,
+                        builder: (_) => const QuietThemeSelectionSheet(),
+                      );
+                    },
+                    onSettingsChanged: () {
+                      if (mounted) setState(() {});
+                    },
+                  ),
+                ),
               );
 
-              // If the user updated their display name, refresh it when we return.
+              // Refresh states when returning.
               if (!mounted) return;
               await _loadDisplayName();
+              await _loadReminderState();
             },
             onNavigateBrotherhood: () {
               setState(() {

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:quietline_app/data/affirmations/affirmations_model.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
+import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
@@ -30,6 +31,8 @@ class _QuietHomeAffirmationsCarouselState
   Timer? _autoRotateTimer;
 
   late final List<_AffirmationCardData> _cards;
+  Set<String> _unlockedIds = {};
+  bool _isLoading = true;
   int _currentIndex = 0;
 
   @override
@@ -37,8 +40,18 @@ class _QuietHomeAffirmationsCarouselState
     super.initState();
 
     _pageController = PageController();
+    _loadData();
+  }
 
-    _cards = _buildCards();
+  Future<void> _loadData() async {
+    final unlocked = await AffirmationsUnlockService.instance.getUnlockedIds();
+    if (!mounted) return;
+
+    setState(() {
+      _unlockedIds = unlocked;
+      _cards = _buildCards();
+      _isLoading = false;
+    });
 
     _startAutoRotate();
   }
@@ -79,13 +92,13 @@ class _QuietHomeAffirmationsCarouselState
     final primary =
         service.getHomeCoreForStreakDay(widget.streak);
 
-    final allCore = service.getAffirmationsForPack('core')
-        .where((a) => a.id != primary?.id)
+    final allUnlocked = service.getAffirmationsForPack('core')
+        .where((a) => _unlockedIds.contains(a.id) && a.id != primary?.id)
         .toList();
 
-    allCore.shuffle(rng);
+    allUnlocked.shuffle(rng);
 
-    final secondary = allCore.take(2).toList();
+    final secondary = allUnlocked.take(2).toList();
 
     final tier = _backgroundTierForStreak(widget.streak);
 
@@ -111,15 +124,15 @@ class _QuietHomeAffirmationsCarouselState
       );
     }
 
-    return cards;
+    return backgrounds.primary == QLGradients.tealFlame ? cards : cards; // No-op to avoid unused var if needed
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_cards.isEmpty) return const SizedBox.shrink();
+    if (_isLoading || _cards.isEmpty) return const SizedBox.shrink();
 
     return SizedBox(
-      height: 140, // fixed height to prevent layout jumps
+      height: 192, // Increased height by 20% (160 * 1.2)
       child: PageView.builder(
         controller: _pageController,
         itemCount: _cards.length,
@@ -130,14 +143,18 @@ class _QuietHomeAffirmationsCarouselState
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: card.background,
-              ),
-              child: QuietHomeAffirmationsCard(
-                title: card.affirmation.text,
-              ),
+            child: QuietHomeAffirmationsCard(
+              title: card.affirmation.text,
+              gradient: card.background,
+              onTap: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => QuietAffirmationFullscreenScreen(
+                      text: card.affirmation.text,
+                    ),
+                  ),
+                );
+              },
             ),
           );
         },
@@ -181,21 +198,22 @@ class _TierBackgrounds {
 }
 
 _TierBackgrounds _backgroundsForTier(_BackgroundTier tier) {
+  // Mapping to the new Flame Gradient System
   switch (tier) {
     case _BackgroundTier.steady:
-      return _TierBackgrounds(
-        primary: QLGradients.steadyPrimary,
-        secondary: QLGradients.steadySecondary,
+      return const _TierBackgrounds(
+        primary: QLGradients.amberFlame,
+        secondary: [QLGradients.amberFlame, QLGradients.tealFlame],
       );
     case _BackgroundTier.grounded:
-      return _TierBackgrounds(
-        primary: QLGradients.groundedPrimary,
-        secondary: QLGradients.groundedSecondary,
+      return const _TierBackgrounds(
+        primary: QLGradients.steelFlame,
+        secondary: [QLGradients.steelFlame, QLGradients.tealFlame],
       );
     case _BackgroundTier.soft:
-      return _TierBackgrounds(
-        primary: QLGradients.softPrimary,
-        secondary: QLGradients.softSecondary,
+      return const _TierBackgrounds(
+        primary: QLGradients.tealFlame,
+        secondary: [QLGradients.tealFlame, QLGradients.midnightFlame],
       );
   }
 }

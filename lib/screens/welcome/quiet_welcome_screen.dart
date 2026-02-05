@@ -134,7 +134,7 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
     final onSurface = cs.onSurface;
 
     return Scaffold(
-      backgroundColor: QLColors.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),

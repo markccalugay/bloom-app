@@ -9,7 +9,7 @@ import 'package:quietline_app/theme/ql_theme.dart';
 // -------------------------------------------------------------
 
 // ===== Colors =====
-const kMCBackgroundColor = QLColors.background;
+const kMCBackgroundColor = Colors.black; // Fallback only; widgets should use Theme.of(context)
 const kMCPrimaryTeal = QLColors.primaryTeal;
 const kMCTrackColor = Color(0xFFE5E7EA);
 const kMCLowLabelColor = Color(0xFFBFC5C9); // light gray text

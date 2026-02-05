@@ -3,7 +3,6 @@ import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietAffirmationsLibraryScreen extends StatefulWidget {
@@ -96,17 +95,16 @@ class _QuietAffirmationsLibraryScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final baseTextColor = theme.textTheme.bodyMedium?.color ?? Colors.white;
+    final Color baseTextColor = theme.colorScheme.onSurface;
 
     final today = DateTime.now();
     final unlockedLabel =
         'Unlocked on Day $_unlockedDay ${_formatFullMonthDate(today)}';
 
     return Scaffold(
-      backgroundColor: QLColors.background,
       appBar: AppBar(
-        backgroundColor: QLColors.background,
         elevation: 0,
+        backgroundColor: Colors.transparent,
         iconTheme: IconThemeData(color: baseTextColor),
         title: Text(
           'Affirmations',
@@ -130,12 +128,24 @@ class _QuietAffirmationsLibraryScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Daily Affirmations',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: baseTextColor,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Daily Affirmations',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: baseTextColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              '${_streak > 0 ? _streak : 0}/${coreAffirmations.length}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -212,7 +222,7 @@ class _QuietAffirmationsLibraryScreenState
                 SliverPadding(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
                   sliver: SliverToBoxAdapter(
-                    child: Divider(color: baseTextColor.withValues(alpha: 0.12)),
+                    child: Divider(color: baseTextColor.withValues(alpha: 0.08)),
                   ),
                 ),
 
@@ -259,8 +269,8 @@ class _QuietAffirmationsLibraryScreenState
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             final a = items[index];
-                            final bool isPremiumLocked = !isPremium;
-                            final bool unlocked = isPremium;
+                            final bool isPremiumLocked = a.isPremium && !isPremium;
+                            final bool unlocked = !a.isPremium || isPremium;
 
                             return AffirmationGridTile(
                               affirmation: a,

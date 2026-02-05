@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:quietline_app/data/user/user_service.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 
 /// Slide-in side menu used by the shell.
 /// The shell owns the open/close state and passes callbacks down.
@@ -10,6 +12,7 @@ Future<String> _getVersionLabel() async {
 }
 class QLSideMenu extends StatelessWidget {
   final String displayName;
+  final String avatarId;
   final VoidCallback onClose;
 
   // Navigation callbacks (optional so we can wire them gradually)
@@ -33,17 +36,12 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onOpenPrivacy;
   final VoidCallback? onOpenTerms;
 
-  final String? reminderLabel;
-  final VoidCallback? onEditReminder;
-
-  final bool? debugPremiumEnabled;
-  final VoidCallback? onToggleDebugPremium;
-
   final String? debugPremiumLabel;
 
   const QLSideMenu({
     super.key,
     required this.displayName,
+    required this.avatarId,
     required this.onClose,
     this.onNavigateJourney,
     this.onNavigateBrotherhood,
@@ -58,10 +56,6 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenAccount,
     this.showBrotherhood = false,
     this.showJourney = false,
-    this.reminderLabel,
-    this.onEditReminder,
-    this.debugPremiumEnabled,
-    this.onToggleDebugPremium,
     this.debugPremiumLabel,
   });
 
@@ -71,10 +65,10 @@ class QLSideMenu extends StatelessWidget {
     final textTheme = theme.textTheme;
 
     final Color baseTextColor = textTheme.bodyMedium?.color ?? Colors.white;
-    final Color iconColor = QLColors.primaryTeal;
+    final Color iconColor = theme.colorScheme.primary;
 
     return Material(
-      color: QLColors.background,
+      color: theme.scaffoldBackgroundColor,
       child: SafeArea(
         right: false,
         child: Column(
@@ -82,43 +76,60 @@ class QLSideMenu extends StatelessWidget {
           children: [
             // Header: avatar + name + close
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 16),
+              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: QLColors.primaryTeal.withValues(
-                      alpha: 0.2,
-                    ),
-                    child: const Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName.trim().isNotEmpty
-                              ? displayName.trim()
-                              : 'Quiet guest',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: baseTextColor,
-                          ),
+                    child: InkWell(
+                      onTap: onOpenAccount,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Anonymous by default',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: baseTextColor.withValues(alpha: 0.6),
-                          ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor:
+                                  theme.colorScheme.primary.withValues(
+                                alpha: 0.2,
+                              ),
+                              child: Text(
+                                avatarPresets[avatarId] ?? '👤',
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayName.trim().isNotEmpty
+                                        ? displayName.trim()
+                                        : 'Quiet guest',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: baseTextColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Anonymous by default',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: baseTextColor.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   IconButton(
@@ -130,10 +141,10 @@ class QLSideMenu extends StatelessWidget {
               ),
             ),
 
-            const Divider(
+            Divider(
               height: 1,
               thickness: 1,
-              color: Color(0x14FFFFFF), // very soft divider
+              color: baseTextColor.withValues(alpha: 0.08), // very soft divider
             ),
 
             Expanded(
@@ -157,7 +168,7 @@ class QLSideMenu extends StatelessWidget {
                       ),
                     _MenuItem(
                       icon: Icons.person_rounded,
-                      label: 'Your account',
+                      label: 'My account',
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onOpenAccount,
@@ -233,25 +244,44 @@ class QLSideMenu extends StatelessWidget {
                       onTap: onOpenTerms,
                     ),
 
+
+
                     const SizedBox(height: 16),
-                    const _SectionLabel('Preferences'),
-                    _MenuItem(
-                      icon: Icons.notifications_none_rounded,
-                      label: reminderLabel ?? 'Daily reminder',
-                      iconColor: iconColor,
-                      textColor: baseTextColor,
-                      onTap: onEditReminder,
-                      enabled: onEditReminder != null,
+
+                    ValueListenableBuilder<bool>(
+                      valueListenable: StoreKitService.instance.isPremium,
+                      builder: (context, isPremium, _) {
+                        if (isPremium) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => const QuietPaywallScreen(),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: theme.colorScheme.primary,
+                              foregroundColor: theme.colorScheme.onPrimary,
+                              minimumSize: const Size(double.infinity, 44),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Unlock QuietLine+',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    if (debugPremiumLabel != null)
-                      _MenuItem(
-                        icon: Icons.lock_open_rounded,
-                        label: debugPremiumLabel!,
-                        iconColor: iconColor,
-                        textColor: baseTextColor,
-                        onTap: onToggleDebugPremium,
-                        enabled: onToggleDebugPremium != null,
-                      ),
 
                     const SizedBox(height: 24),
                     Padding(
@@ -376,16 +406,17 @@ class _ComingSoonPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(999),
-        color: Colors.white.withValues(alpha: 0.06),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
       ),
       child: Text(
         'Soon',
         style: textTheme.labelSmall?.copyWith(
-          color: Colors.white.withValues(alpha: 0.8),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
           fontSize: 11,
           fontWeight: FontWeight.w500,
         ),

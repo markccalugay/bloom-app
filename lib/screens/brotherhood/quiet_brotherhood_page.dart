@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 /// Placeholder Brotherhood / community page.
 /// This gives the bottom nav a real destination and avoids build errors
@@ -12,10 +11,10 @@ class QuietBrotherhoodPage extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: QLColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('Brotherhood'),
-        backgroundColor: QLColors.background,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
       ),
       body: Center(
@@ -28,7 +27,7 @@ class QuietBrotherhoodPage extends StatelessWidget {
                 'Brotherhood is coming soon.',
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: theme.colorScheme.onSurface,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -36,7 +35,7 @@ class QuietBrotherhoodPage extends StatelessWidget {
               Text(
                 'You\'ll be able to share what you\'re going through and encourage other men who are doing the same.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
                 ),
                 textAlign: TextAlign.center,
               ),

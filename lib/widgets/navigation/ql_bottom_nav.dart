@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 const double _kDockHeight = 70.0;          // height of the gray bar (similar to X)
 const double _kNavTotalHeight = 120.0;      // total space reserved for nav + overlap
@@ -24,8 +25,11 @@ class QLBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const Color dockBackground = Color(0xFFD9D9D9); // updated dock background
-    const Color activeColor = Color(0xFF111827); // near-black for the center logo
+    final theme = Theme.of(context);
+    final Color dockBackground = theme.brightness == Brightness.dark
+        ? QLColors.deepCharcoal
+        : const Color(0xFFE5E7EA);
+    final Color activeColor = theme.colorScheme.primary;
 
     return SizedBox(
       height: _kNavTotalHeight,
@@ -41,6 +45,14 @@ class QLBottomNav extends StatelessWidget {
               height: _kDockHeight,
               decoration: BoxDecoration(
                 color: dockBackground,
+                border: Border(
+                  top: BorderSide(
+                    color: theme.brightness == Brightness.dark
+                        ? QLColors.steelGray.withValues(alpha: 0.15)
+                        : Colors.transparent,
+                    width: 0.5,
+                  ),
+                ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -139,6 +151,10 @@ class _PrimaryNavItem extends StatelessWidget {
               AppAssets.quietlineLogo,
               width: 45,
               height: 45,
+              colorFilter: ColorFilter.mode(
+                activeColor,
+                BlendMode.srcIn,
+              ),
             ),
           ),
         ),

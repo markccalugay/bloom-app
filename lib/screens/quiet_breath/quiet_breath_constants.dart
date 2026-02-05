@@ -1,6 +1,4 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 // -----------------------------------------------------------------------------
 // Quiet Breath • Constants
@@ -12,15 +10,10 @@ import 'package:quietline_app/theme/ql_theme.dart';
 // • No renames to avoid breaking imports; this is a readability pass only.
 // -----------------------------------------------------------------------------
 
-// ===== Visual Palette =====
-// Screen background + brand tones used across the Quiet Breath screen.
-const kQBBackgroundColor = QLColors.background;    // Unified app background
-const kQBWaveColorMain   = QLColors.primaryTeal;   // Brand primary teal
-const kQBWaveColorDim    = Color(0xFF3F8E89); // Same hue; lower alpha in painter
-const kQBTextColor       = Colors.white;      // Primary text on dark bg
-
-// Ellipse background fill (behind waves). Steel gray for neutral contrast.
-const kQBEllipseBackgroundColor = Color(0xFF5E6874);
+// ===== Visual Palette (Theme-Driven) =====
+// Note: Screen background, wave sounds, and brand tones are now resolved
+// dynamically via Theme.of(context) in the widgets.
+// These constants are kept only where a fallback value is needed.
 
 // ===== Ellipse & Water Geometry =====
 // Size and behavior of the main breathing ellipse and water fill.
@@ -50,7 +43,7 @@ const kQBCircleBorderWidth         = 2.0;   // px stroke width if enabled
 // The ring that shows per-phase (4s) progress. Adjust spacing/weight here.
 const double kQBRingOuterPadding   = 5.0;           // px gap between ellipse edge and ring
 const double kQBRingThickness      = 20.0;          // px stroke thickness of ring
-const Color  kQBRingTrackColor     = Color(0xFF3A434B); // dark neutral track for contrast against HOLD
+// Radius ring colors are now theme-aware in QuietBreathCircle.
 
 // ===== Timing =====
 // Wave motion + intro animation + overall session defaults.
@@ -67,12 +60,7 @@ const int kQBBoxExhaleSec = 4; // seconds
 const int kQBBoxHold2Sec  = 4; // seconds (second hold)
 const int kQBBoxCycleSec  = kQBBoxInhaleSec + kQBBoxHoldSec + kQBBoxExhaleSec + kQBBoxHold2Sec; // 16s
 
-// ===== Phase Colors (brand-aware; easy to A/B test) =====
-// You can tweak these to emphasize state transitions. Start subtle; refine later.
-const Color kQBColorInhale = kQBWaveColorMain;      // Calm teal (inhale)
-const Color kQBColorHold   = Color(0xFF5E6874);     // Steel gray (hold)
-const Color kQBColorExhale = Color(0xFF2D6F6A);     // Deep sea teal (exhale)
-// If you want a distinct second-hold color, add it in controller mapping; otherwise reuse hold.
+// Phase colors are primarily managed by the breathing contract.
 
 // ===== UI Sizing =====
 const double kQBButtonWidth  = 220; // px

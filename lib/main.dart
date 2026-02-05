@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/reminder/reminder_service.dart';
+import 'core/practices/practice_access_service.dart';
 import 'core/notifications/notification_service.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 // import 'screens/quiet_breath/quiet_breath_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_strings.dart';
-import 'theme/ql_theme.dart';
 import 'screens/entry/quiet_entry_screen.dart';
 
 import 'screens/results/quiet_results_ok_screen.dart';
@@ -22,7 +22,8 @@ import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/core/app_restart.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:quietline_app/core/theme/theme_service.dart';
+import 'package:quietline_app/core/timezone/timezone_service.dart';
 
 late QuietStreakRepository quietStreakRepo;
 
@@ -30,8 +31,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StoreKitService.instance.initialize();
   await PremiumEntitlement.instance.initialize();
+  await ThemeService.instance.initialize();
   debugPrint('[BOOT] premium=${PremiumEntitlement.instance.isPremium}');
-  tz.initializeTimeZones();
+  await TimezoneService.initialize();
 
   final prefs = await SharedPreferences.getInstance();
   quietStreakRepo = QuietStreakRepository(
@@ -39,6 +41,7 @@ void main() async {
   );
 
   QuietStreakService.repo = quietStreakRepo;
+  await PracticeAccessService.instance.initialize();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -56,67 +59,16 @@ class QuietLineApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      theme: QLTheme.dark,
-      // Entry router: Splash → Welcome → (FTUE Quiet Time once) → Home
-      home: const QuietEntryScreen(),
-
-      /*
-      // FTUE: On first install, start with Quiet Time.
-      // After the first completed session, boot into the app shell (Home).
-      home: FutureBuilder<bool>(
-        future: FirstLaunchService.instance.hasCompletedFirstSession(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Scaffold(
-              backgroundColor: Colors.black,
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-
-          final hasCompleted = snapshot.data!;
-          final sessionId = DateTime.now().toIso8601String();
-
-          // First launch (FTUE): go straight into Quiet Time.
-          if (!hasCompleted) {
-            // MVP: mood check-ins are disabled. Keep the original FTUE path behind a flag.
-            return QuietBreathScreen(sessionId: sessionId, streak: 0);
-            // V2 (optional): re-enable the original FTUE pre-checkin flow.
-            // if (FeatureFlags.moodCheckInsEnabled) {
-            //   return MoodCheckinScreen(
-            //     mode: MoodCheckinMode.pre,
-            //     sessionId: sessionId,
-            //     onSubmit: (_) {
-            //       Navigator.of(context).push(
-            //         MaterialPageRoute(
-            //           builder: (_) => QuietBreathScreen(
-            //             sessionId: sessionId,
-            //             streak: 0,
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //     onSkip: () {
-            //       Navigator.of(context).push(
-            //         MaterialPageRoute(
-            //           builder: (_) => QuietBreathScreen(
-            //             sessionId: sessionId,
-            //             streak: 0,
-            //           ),
-            //         ),
-            //       );
-            //     },
-            //   );
-            // }
-          }
-
-          // Post-FTUE: go into the app shell (Home).
-          return const QuietShellScreen();
-        },
-      ),
-      */
-      // home: const DebugResultsEntryScreen(),
+    return ListenableBuilder(
+      listenable: ThemeService.instance,
+      builder: (context, _) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          theme: ThemeService.instance.themeData,
+          // Entry router: Splash → Welcome → (FTUE Quiet Time once) → Home
+          home: const QuietEntryScreen(),
+        );
+      },
     );
   }
 }
@@ -178,8 +130,9 @@ class _ReminderTimezoneObserver extends WidgetsBindingObserver {
       time: TimeOfDay(hour: hour, minute: minute),
     );
 
+    await TimezoneService.initialize();
     final currentTimezone =
-        await FlutterNativeTimezone.getLocalTimezone();
+        await FlutterTimezone.getLocalTimezone();
     await reminderService.updateStoredTimezone(currentTimezone);
   }
 }
