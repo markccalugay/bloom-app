@@ -9,6 +9,8 @@ import 'package:quietline_app/screens/account/widgets/mindful_days_heatmap.dart'
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 
 /// Simple MVP account screen.
 /// Shows the anonymous user's display name.
@@ -225,94 +227,132 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                       ),
                     ),
 
+                    const SizedBox(height: 24),
+
+                    ValueListenableBuilder<bool>(
+                      valueListenable: StoreKitService.instance.isPremium,
+                      builder: (context, isPremium, _) {
+                        if (isPremium) return const SizedBox.shrink();
+                        return ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => const QuietPaywallScreen(),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: theme.colorScheme.onPrimary,
+                            minimumSize: const Size(200, 44),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            elevation: 0,
+                          ),
+                          child: const Text(
+                            'Unlock QuietLine+',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+
                     const SizedBox(height: 48),
 
-                    // --- METRICS SECTION ---
-                    FutureBuilder<Map<String, dynamic>>(
-                      future: _metricsFuture,
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const SizedBox.shrink();
-                        final metrics = snapshot.data!;
-                        final streak = metrics['streak'] as int;
-                        final sessions = metrics['sessions'] as int;
-                        final seconds = metrics['seconds'] as int;
+                    ValueListenableBuilder<bool>(
+                      valueListenable: StoreKitService.instance.isPremium,
+                      builder: (context, isPremium, _) {
+                        return FutureBuilder<Map<String, dynamic>>(
+                          future: _metricsFuture,
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) return const SizedBox.shrink();
+                            final metrics = snapshot.data!;
+                            final streak = metrics['streak'] as int;
+                            final sessions = metrics['sessions'] as int;
+                            final seconds = metrics['seconds'] as int;
 
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'METRICS',
-                              style: textTheme.labelSmall?.copyWith(
-                                letterSpacing: 0.8,
-                                fontWeight: FontWeight.w600,
-                                color: baseTextColor.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            _MetricRow(
-                              label: 'Current Streak',
-                              value: '$streak days',
-                              textColor: baseTextColor,
-                            ),
-                            const SizedBox(height: 12),
-                            _MetricRow(
-                              label: 'Sessions Completed',
-                              value: '$sessions',
-                              textColor: baseTextColor,
-                            ),
-                            const SizedBox(height: 12),
-                            _MetricRow(
-                              label: 'Total Quiet Time',
-                              value: _formatDuration(seconds),
-                              textColor: baseTextColor,
-                            ),
-                            const SizedBox(height: 12),
-                            _MetricRow(
-                              label: 'Affirmations Collected',
-                              value: '${streak > 0 ? streak : 0}/${coreAffirmations.length}',
-                              textColor: baseTextColor,
-                            ),
-                            const SizedBox(height: 32),
-
-                            // Mindful Days Heatmap
-                            Text(
-                              'MINDFUL DAYS',
-                              style: textTheme.labelSmall?.copyWith(
-                                letterSpacing: 0.8,
-                                fontWeight: FontWeight.w600,
-                                color: baseTextColor.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: theme.colorScheme.surface,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: baseTextColor.withValues(alpha: 0.08),
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'METRICS',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: baseTextColor.withValues(alpha: 0.4),
+                                  ),
                                 ),
-                              ),
-                              child: MindfulDaysHeatmap(
-                                sessionDates: metrics['dates'] as List<String>,
-                                baseTextColor: baseTextColor,
-                              ),
-                            ),
-                            const SizedBox(height: 32),
+                                const SizedBox(height: 16),
+                                _MetricRow(
+                                  label: 'Current Streak',
+                                  value: '$streak days',
+                                  textColor: baseTextColor,
+                                ),
+                                const SizedBox(height: 12),
+                                _MetricRow(
+                                  label: 'Sessions Completed',
+                                  value: '$sessions',
+                                  textColor: baseTextColor,
+                                ),
+                                const SizedBox(height: 12),
+                                _MetricRow(
+                                  label: 'Total Quiet Time',
+                                  value: _formatDuration(seconds),
+                                  textColor: baseTextColor,
+                                ),
+                                const SizedBox(height: 12),
+                                _MetricRow(
+                                  label: 'Affirmations Collected',
+                                  value: '${streak > 0 ? streak : 0}/${coreAffirmations.length}',
+                                  textColor: baseTextColor,
+                                ),
+                                const SizedBox(height: 32),
 
-                            // Favorite Practices
-                            Text(
-                              'FAVORITE PRACTICES',
-                              style: textTheme.labelSmall?.copyWith(
-                                letterSpacing: 0.8,
-                                fontWeight: FontWeight.w600,
-                                color: baseTextColor.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            _buildFavoritePractices(metrics['usage'] as Map<String, int>, baseTextColor, theme),
-                            const SizedBox(height: 48),
-                          ],
+                                // Mindful Days Heatmap
+                                Text(
+                                  'MINDFUL DAYS',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: baseTextColor.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Container(
+                                  padding: const EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    color: theme.colorScheme.surface,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: baseTextColor.withValues(alpha: 0.08),
+                                    ),
+                                  ),
+                                  child: MindfulDaysHeatmap(
+                                    sessionDates: metrics['dates'] as List<String>,
+                                    baseTextColor: baseTextColor,
+                                  ),
+                                ),
+                                const SizedBox(height: 32),
+
+                                // Favorite Practices
+                                Text(
+                                  'FAVORITE PRACTICES',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: baseTextColor.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildFavoritePractices(metrics['usage'] as Map<String, int>, baseTextColor, theme),
+                                const SizedBox(height: 48),
+                              ],
+                            );
+                          },
                         );
                       },
                     ),
