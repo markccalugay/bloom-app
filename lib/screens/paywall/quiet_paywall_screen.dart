@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../theme/ql_theme.dart';
 
 class QuietPaywallScreen extends StatefulWidget {
   const QuietPaywallScreen({super.key});
@@ -31,7 +30,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
         }
 
         return Scaffold(
-          backgroundColor: QLColors.background,
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           body: SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),

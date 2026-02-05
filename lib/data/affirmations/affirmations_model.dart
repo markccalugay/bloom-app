@@ -3,11 +3,13 @@ class Affirmation {
   final String id;      // e.g. "core_001"
   final String packId;  // e.g. "core"
   final String text;
+  final bool isPremium;
 
   const Affirmation({
     required this.id,
     required this.packId,
     required this.text,
+    this.isPremium = false,
   });
 }
 

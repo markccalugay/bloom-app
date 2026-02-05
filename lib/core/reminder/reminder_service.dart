@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'reminder_state.dart';
 import '../notifications/notification_service.dart';
@@ -136,7 +136,7 @@ class ReminderService {
     await notificationService.scheduleDaily(time: time);
 
     final String currentTimezone =
-        await FlutterNativeTimezone.getLocalTimezone();
+        await FlutterTimezone.getLocalTimezone();
     await _prefs.setString(_kLastKnownTimezone, currentTimezone);
 
     // Mark reminder as enabled only after successful scheduling
@@ -170,7 +170,7 @@ class ReminderService {
     }
 
     final String currentTimezone =
-        await FlutterNativeTimezone.getLocalTimezone();
+        await FlutterTimezone.getLocalTimezone();
 
     return storedTimezone != currentTimezone;
   }

@@ -8,7 +8,6 @@ import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 // once premium entitlement is driven by StoreKit.
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietPracticeLibraryScreen extends StatefulWidget {
@@ -35,15 +34,15 @@ class _QuietPracticeLibraryScreenState
   Widget build(BuildContext context) {
     // Cold Resolve is now re-enabled in the UI.
     // Access and gating are still handled by PracticeAccessService and StoreKit.
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
     final practices = PracticeCatalog.all.toList();
     // NOTE: active practice state is resolved via accessService.isActive()
     // activePracticeId is intentionally not read here to avoid unused state.
     final accessService = const PracticeAccessService();
 
     return Scaffold(
-      backgroundColor: QLColors.background,
       appBar: AppBar(
-        backgroundColor: QLColors.background,
         elevation: 0,
         title: const Text('Practices'),
       ),
@@ -58,7 +57,7 @@ class _QuietPracticeLibraryScreenState
                 return Column(
                   children: [
                     const SizedBox(height: 16),
-                    Divider(color: Colors.white.withValues(alpha: 0.08)),
+                    Divider(color: onSurface.withValues(alpha: 0.08)),
                     const SizedBox(height: 16),
                   ],
                 );
@@ -83,7 +82,6 @@ class _QuietPracticeLibraryScreenState
 
                   await showModalBottomSheet(
                     context: context,
-                    backgroundColor: QLColors.background,
                     shape: const RoundedRectangleBorder(
                       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                     ),
@@ -143,9 +141,9 @@ class _PracticeTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: locked ? 0.04 : 0.08),
+          color: onSurface.withValues(alpha: locked ? 0.04 : 0.08),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+          border: Border.all(color: onSurface.withValues(alpha: 0.06)),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,16 +155,16 @@ class _PracticeTile extends StatelessWidget {
                   locked ? Icons.lock_outline : Icons.self_improvement_rounded,
                   color: locked
                       ? onSurface.withValues(alpha: 0.4)
-                      : QLColors.primaryTeal,
+                      : theme.colorScheme.primary,
                 ),
                 if (isActive)
-                  const Positioned(
+                  Positioned(
                     bottom: -2,
                     right: -2,
                     child: Icon(
                       Icons.check_circle,
                       size: 14,
-                      color: Colors.greenAccent,
+                      color: theme.colorScheme.primary,
                     ),
                   ),
               ],
@@ -198,13 +196,13 @@ class _PracticeTile extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: QLColors.primaryTeal.withValues(alpha: 0.15),
+                        color: theme.colorScheme.primary.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
                         'Active',
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: QLColors.primaryTeal,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w600,
                         ),
                       ),

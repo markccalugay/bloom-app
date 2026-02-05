@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 import '../controllers/quiet_breath_controller.dart';
 import '../quiet_breath_constants.dart';
 
@@ -9,6 +10,7 @@ class QuietBreathTimerTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     // Header
     final String header = controller.isPlaying
         ? 'Find your quiet.'
@@ -27,8 +29,8 @@ class QuietBreathTimerTitle extends StatelessWidget {
         const SizedBox(height: kQBHeaderTopGap),
         Text(
           header,
-          style: const TextStyle(
-            color: kQBTextColor,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface,
             fontSize: 22,
             fontWeight: FontWeight.w700,
           ),
@@ -37,10 +39,11 @@ class QuietBreathTimerTitle extends StatelessWidget {
         const SizedBox(height: kQBHeaderToInstructionGap),
         Text(
           instruction,
-          style: TextStyle(
-            color: kQBTextColor.withValues(alpha: 0.80),
+          style: const TextStyle(
+            color: QLColors.mutedSand,
             fontSize: 14,
             fontWeight: FontWeight.w400,
+            letterSpacing: 0.2,
           ),
           textAlign: TextAlign.center,
         ),

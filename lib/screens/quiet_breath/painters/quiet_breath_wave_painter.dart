@@ -7,10 +7,17 @@ class QuietBreathWavePainter extends CustomPainter {
   final double progress;  // 0..1 water fill from bottom to top
   final double introT;    // 0..1 intro drop progress (0=full, 1=done)
 
+  final Color waveColorMain;
+  final Color waveColorDim;
+  final Color ellipseBackgroundColor;
+
   QuietBreathWavePainter({
     required this.phase,
     required this.progress,
     required this.introT,
+    required this.waveColorMain,
+    required this.waveColorDim,
+    required this.ellipseBackgroundColor,
   }) : assert(progress >= 0 && progress <= 1),
        assert(introT >= 0 && introT <= 1);
 
@@ -24,7 +31,7 @@ class QuietBreathWavePainter extends CustomPainter {
 
     // === Circle background fill ===
     final backgroundPaint = Paint()
-      ..color = kQBEllipseBackgroundColor.withValues(alpha: kQBCircleBackgroundOpacity) // Steel Gray background
+      ..color = ellipseBackgroundColor.withValues(alpha: kQBCircleBackgroundOpacity)
       ..style = PaintingStyle.fill;
 
     // Fill the entire clipped circle before drawing waves
@@ -84,8 +91,8 @@ class QuietBreathWavePainter extends CustomPainter {
       ..lineTo(0, size.height)
       ..close();
 
-    final frontPaint = Paint()..color = kQBWaveColorMain.withValues(alpha: kQBFrontWaveAlpha);
-    final backPaint  = Paint()..color = kQBWaveColorDim.withValues(alpha: kQBBackWaveAlpha);
+    final frontPaint = Paint()..color = waveColorMain.withValues(alpha: kQBFrontWaveAlpha);
+    final backPaint  = Paint()..color = waveColorDim.withValues(alpha: kQBBackWaveAlpha);
 
     // Layering: configurable draw order
     if (kQBBackWaveOnTop) {
@@ -99,5 +106,10 @@ class QuietBreathWavePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant QuietBreathWavePainter old) =>
-      old.phase != phase || old.progress != progress || old.introT != introT;
+      old.phase != phase || 
+      old.progress != progress || 
+      old.introT != introT ||
+      old.waveColorMain != waveColorMain ||
+      old.waveColorDim != waveColorDim ||
+      old.ellipseBackgroundColor != ellipseBackgroundColor;
 }

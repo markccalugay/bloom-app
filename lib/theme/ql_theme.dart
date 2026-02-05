@@ -1,135 +1,155 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 
+enum ThemeVariant {
+  quietLine,
+  quietLineLight,
+}
+
 class QLColors {
-  static const background = Color(0xFF111821);
-  static const primaryTeal = Color(0xFF3B8F86);
-  static const textHigh = Colors.white;
-  static const ringTrack = Color(0x44FFFFFF); // softened neutral for radial track
-  static const textLow  = Color(0x99FFFFFF);
-  static const dangerRed = Color(0xFFDD4A48);
-  static const Color navBarBackground = Color(0xFFE5E7EA);
-  static const Color navIconActive = primaryTeal;
-  static const Color navIconInactive = Color(0xFF6D747C);
+  // ── Light Mode — “Morning Calm” ──
+  // Core Brand
+  static const slateBlue = Color(0xFF2B3E51);    // Primary
+  static const quietAqua = Color(0xFF4FA6A1);    // Secondary
+  static const desertSand = Color(0xFFE8D1A7);   // Tertiary
+  static const warmGray = Color(0xFF9BA4AB);     // Alternate
+
+  // Accents
+  static const morningMist = Color(0xFFD7EBE7);  // Accent 1
+  static const clayBeige = Color(0xFFDABF9F);    // Accent 2
+  static const skyAsh = Color(0xFFBCC6CA);       // Accent 3
+  static const deepStone = Color(0xFF45515A);    // Accent 4
+
+  // Utility
+  static const charcoalInk = Color(0xFF2B2F33);  // Primary Text
+  static const graphiteGray = Color(0xFF5E6874); // Secondary Text
+  static const offWhiteFog = Color(0xFFF5F4F1);  // Primary BG
+  static const paleStone = Color(0xFFEEE9E3);    // Secondary BG
+
+  // Semantic
+  static const steadyGreen = Color(0xFF4B8E76);  // Success
+  static const brickRed = Color(0xFFC65A54);     // Error
+  static const cautionAmber = Color(0xFFE1B259); // Warning
+  static const tranquilBlue = Color(0xFF5DA3B3); // Info
+
+  // ── Dark Mode — “Midnight Composure” ──
+  // Core Brand
+  static const midnightBlue = Color(0xFF1D2731); // Primary
+  static const calmTeal = Color(0xFF3F8E89);     // Secondary
+  static const steelGray = Color(0xFF5E6874);    // Tertiary
+  static const mutedSand = Color(0xFFE8DCC6);    // Alternate
+
+  // Accents
+  static const deepTeal = Color(0xFF2E6D69);     // Accent 1
+  static const warmBronze = Color(0xFFA17E57);   // Accent 2
+  static const fadedSky = Color(0xFF729E99);     // Accent 3
+  static const cloudGray = Color(0xFFC6C2B8);    // Accent 4 / Secondary Text (Dark)
+
+  // Utility
+  static const sandWhite = Color(0xFFF5F4F1);    // Primary Text (identical to offWhiteFog)
+  static const deepCharcoal = Color(0xFF11161C); // Primary BG (Dark)
+  static const ironGray = Color(0xFF232B33);     // Secondary BG (Dark)
+
+  // Semantic
+  static const gentleEmerald = Color(0xFF6FBF9E); // Success
+  static const softCrimson = Color(0xFFB35A57);   // Error
+  static const mutedAmber = Color(0xFFD4A758);    // Warning
+  static const horizonBlue = Color(0xFF67B4C2);   // Info
+
+  // ── Component & Legacy Mapping ──
+  static const ringTrack = Color(0x1A000000); // 10% black for Light mode default
+  
+  // These mapping getters adapt based on context if needed, 
+  // but for raw static access we default to brand core identity.
+  static const background = deepCharcoal;
+  static const primaryTeal = calmTeal;
 }
 
 class QLGradients {
-  // ── Soft tier (early / low streak)
-  static const Gradient softPrimary = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF1A2430),
-      Color(0xFF111821),
-    ],
+  // ── Flame Gradient System ──
+
+  // 1. Teal Flame (Core Identity)
+  static const Gradient tealFlame = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [QLColors.calmTeal, Color(0xFF2C6C68)],
   );
 
-  static const List<Gradient> softSecondary = [
-    LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF18222D),
-        Color(0xFF0F151D),
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF1C2632),
-        Color(0xFF121922),
-      ],
-    ),
-  ];
-
-  // ── Grounded tier (mid streak)
-  static const Gradient groundedPrimary = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF20303A),
-      Color(0xFF141C23),
-    ],
+  // 2. Amber Flame (High Streak / Mastery)
+  static const Gradient amberFlame = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [QLColors.mutedSand, Color(0xFFC7A86E)],
   );
 
-  static const List<Gradient> groundedSecondary = [
-    LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF1F2D36),
-        Color(0xFF131B22),
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF22333F),
-        Color(0xFF151E26),
-      ],
-    ),
-  ];
-
-  // ── Steady tier (high streak)
-  static const Gradient steadyPrimary = LinearGradient(
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
-    colors: [
-      Color(0xFF24424A),
-      Color(0xFF162128),
-    ],
+  // 3. Steel Flame (Reset / Pause State)
+  static const Gradient steelFlame = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [QLColors.steelGray, Color(0xFF313841)],
   );
 
-  static const List<Gradient> steadySecondary = [
-    LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF2A4B53),
-        Color(0xFF18242B),
-      ],
-    ),
-    LinearGradient(
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-      colors: [
-        Color(0xFF213E45),
-        Color(0xFF151F25),
-      ],
-    ),
-  ];
+  // 4. Midnight Flame (Inactive / Reflection Mode)
+  static const Gradient midnightFlame = LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [QLColors.midnightBlue, Color(0xFF0E141B)],
+  );
+
+  // Mapping to current theme
+  static Gradient getPrimaryGradient(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.quietLine:
+        return tealFlame;
+      case ThemeVariant.quietLineLight:
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [QLColors.quietAqua, QLColors.slateBlue.withValues(alpha: 0.8)],
+        );
+    }
+  }
+
+  static List<Gradient> getSecondaryGradients(ThemeVariant variant) {
+    return [tealFlame, amberFlame, steelFlame, midnightFlame];
+  }
 }
 
 class QLTheme {
   static ThemeData dark = ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: QLColors.background,
-    colorScheme: ColorScheme.dark(
-      surface: QLColors.background,
-      primary: QLColors.primaryTeal,
-      secondary: QLColors.primaryTeal,
-      error: QLColors.dangerRed,
+    scaffoldBackgroundColor: QLColors.midnightBlue, // Per dark mode Primary
+    colorScheme: const ColorScheme.dark(
+      surface: QLColors.ironGray,
+      primary: QLColors.calmTeal,
+      secondary: QLColors.fadedSky,
+      error: QLColors.softCrimson,
+      onSurface: QLColors.sandWhite,
+      onPrimary: Colors.white,
     ),
     textTheme: const TextTheme(
       headlineSmall: TextStyle(
         fontSize: 24,
         fontWeight: FontWeight.w600,
-        color: QLColors.textHigh,
+        color: QLColors.sandWhite,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: QLColors.sandWhite,
       ),
       bodyMedium: TextStyle(
         fontSize: 14,
-        color: QLColors.textHigh,
+        color: QLColors.sandWhite,
       ),
       bodySmall: TextStyle(
         fontSize: 12,
-        color: QLColors.textLow,
+        color: QLColors.cloudGray,
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: QLColors.primaryTeal,
+        backgroundColor: QLColors.calmTeal,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
@@ -137,7 +157,120 @@ class QLTheme {
         minimumSize: const Size.fromHeight(52),
       ),
     ),
+    dividerTheme: const DividerThemeData(
+      color: QLColors.steelGray,
+      thickness: 1,
+    ),
   );
+
+  static ThemeData quietLight = ThemeData(
+    brightness: Brightness.light,
+    scaffoldBackgroundColor: QLColors.offWhiteFog,
+    colorScheme: const ColorScheme.light(
+      surface: QLColors.paleStone,
+      primary: QLColors.slateBlue,
+      secondary: QLColors.quietAqua,
+      error: QLColors.brickRed,
+      onSurface: QLColors.charcoalInk,
+      onPrimary: Colors.white,
+    ),
+    textTheme: const TextTheme(
+      headlineSmall: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w600,
+        color: QLColors.charcoalInk,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w600,
+        color: QLColors.charcoalInk,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14,
+        color: QLColors.charcoalInk,
+      ),
+      bodySmall: TextStyle(
+        fontSize: 12,
+        color: QLColors.graphiteGray,
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: QLColors.quietAqua,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        minimumSize: const Size.fromHeight(52),
+      ),
+    ),
+    dividerTheme: const DividerThemeData(
+      color: QLColors.skyAsh,
+      thickness: 1,
+    ),
+  );
+
+  // Black & White Adaptive Framework
+  static ThemeData blackAndWhite(bool isDark) {
+    if (isDark) {
+      return ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0F1114),
+        colorScheme: const ColorScheme.dark(
+          surface: Color(0xFF1A1A1A),
+          primary: Colors.white,
+          secondary: Color(0xFFBDBDBD),
+          onSurface: Color(0xFFE8E8E8),
+        ),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Color(0xFFE8E8E8)),
+          bodySmall: TextStyle(color: Color(0xFF707070)),
+        ),
+      );
+    } else {
+      return ThemeData(
+        brightness: Brightness.light,
+        scaffoldBackgroundColor: const Color(0xFFF8F8F8),
+        colorScheme: const ColorScheme.light(
+          surface: Colors.white,
+          primary: Colors.black,
+          secondary: Color(0xFF333333),
+          onSurface: Color(0xFF111111),
+        ),
+        textTheme: const TextTheme(
+          bodyMedium: TextStyle(color: Color(0xFF333333)),
+          bodySmall: TextStyle(color: Color(0xFF999999)),
+        ),
+      );
+    }
+  }
+
+  static ThemeData getTheme(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.quietLine:
+        return dark;
+      case ThemeVariant.quietLineLight:
+        return quietLight;
+    }
+  }
+
+  static Color getPrimaryColor(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.quietLine:
+        return QLColors.calmTeal;
+      case ThemeVariant.quietLineLight:
+        return QLColors.slateBlue;
+    }
+  }
+
+  static Color getBackgroundColor(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.quietLine:
+        return QLColors.midnightBlue; // Anchors dark mode in primary
+      case ThemeVariant.quietLineLight:
+        return QLColors.offWhiteFog;
+    }
+  }
 
   static String labelForPhase(BreathPhaseType phase) {
     switch (phase) {
@@ -161,19 +294,19 @@ class QLTheme {
   static Color colorForPhase(BreathPhaseType phase) {
     switch (phase) {
       case BreathPhaseType.inhale:
-        return QLColors.primaryTeal;
+        return QLColors.calmTeal;
       case BreathPhaseType.hold:
-        return const Color(0xFF6D747C);
+        return QLColors.steelGray;
       case BreathPhaseType.exhale:
-        return QLColors.primaryTeal.withValues(alpha: 0.85);
+        return QLColors.calmTeal.withValues(alpha: 0.8);
       case BreathPhaseType.rest:
-        return QLColors.primaryTeal.withValues(alpha: 0.35);
+        return QLColors.steelGray.withValues(alpha: 0.5);
       case BreathPhaseType.power:
-        return QLColors.primaryTeal;
+        return QLColors.calmTeal;
       case BreathPhaseType.retention:
-        return QLColors.textLow;
+        return QLColors.steelGray;
       case BreathPhaseType.recovery:
-        return QLColors.primaryTeal;
+        return QLColors.calmTeal;
     }
   }
 }
