@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/reminder/reminder_service.dart';
+import 'core/practices/practice_access_service.dart';
 import 'core/notifications/notification_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 // import 'screens/quiet_breath/quiet_breath_screen.dart';
@@ -40,6 +41,7 @@ void main() async {
   );
 
   QuietStreakService.repo = quietStreakRepo;
+  await PracticeAccessService.instance.initialize();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

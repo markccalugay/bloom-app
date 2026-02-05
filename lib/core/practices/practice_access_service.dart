@@ -1,17 +1,22 @@
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/practices/practice_model.dart';
 import '../entitlements/premium_entitlement.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../../screens/quiet_breath/models/breath_phase_contracts.dart';
 
 class PracticeAccessService {
   static const _activePracticeKey = 'active_practice_id';
-  static String _activePracticeId = 'core_quiet';
 
-  const PracticeAccessService();
+  // Singleton instance
+  static final PracticeAccessService instance = PracticeAccessService._internal();
+  PracticeAccessService._internal();
+
+  final ValueNotifier<String> activePracticeId = ValueNotifier<String>('core_quiet');
 
   /// Call once at app start
-  static Future<void> initialize() async {
+  Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
-    _activePracticeId =
+    activePracticeId.value =
         prefs.getString(_activePracticeKey) ?? 'core_quiet';
   }
 
@@ -21,14 +26,19 @@ class PracticeAccessService {
   }
 
   bool isActive(String practiceId) {
-    return practiceId == _activePracticeId;
+    return practiceId == activePracticeId.value;
   }
 
-  String get activePracticeId => _activePracticeId;
+  BreathingPracticeContract getActiveContract() {
+    return allBreathingPractices.firstWhere(
+      (p) => p.id == activePracticeId.value,
+      orElse: () => coreQuietContract,
+    );
+  }
 
   Future<void> setActivePractice(String practiceId) async {
     final prefs = await SharedPreferences.getInstance();
-    _activePracticeId = practiceId;
+    activePracticeId.value = practiceId;
     await prefs.setString(_activePracticeKey, practiceId);
   }
 }

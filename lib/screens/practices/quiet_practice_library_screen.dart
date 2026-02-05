@@ -4,10 +4,6 @@ import 'package:quietline_app/data/practices/practice_catalog.dart';
 import 'package:quietline_app/data/practices/practice_model.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
-// TODO(StoreKit): Reconnect practice selection to QuietBreathScreen
-// once premium entitlement is driven by StoreKit.
-import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietPracticeLibraryScreen extends StatefulWidget {
@@ -21,25 +17,11 @@ class QuietPracticeLibraryScreen extends StatefulWidget {
 class _QuietPracticeLibraryScreenState
     extends State<QuietPracticeLibraryScreen> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    // Cold Resolve is now re-enabled in the UI.
-    // Access and gating are still handled by PracticeAccessService and StoreKit.
     final theme = Theme.of(context);
     final onSurface = theme.colorScheme.onSurface;
     final practices = PracticeCatalog.all.toList();
-    // NOTE: active practice state is resolved via accessService.isActive()
-    // activePracticeId is intentionally not read here to avoid unused state.
-    final accessService = const PracticeAccessService();
+    final accessService = PracticeAccessService.instance;
 
     return Scaffold(
       appBar: AppBar(
@@ -49,63 +31,90 @@ class _QuietPracticeLibraryScreenState
       body: ValueListenableBuilder<bool>(
         valueListenable: StoreKitService.instance.isPremium,
         builder: (context, isPremium, _) {
-          return ListView.separated(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-            itemCount: practices.length,
-            separatorBuilder: (context, index) {
-              if (index == 0) {
-                return Column(
-                  children: [
-                    const SizedBox(height: 16),
-                    Divider(color: onSurface.withValues(alpha: 0.08)),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              }
-              return const SizedBox(height: 12);
-            },
-            itemBuilder: (context, index) {
-              final practice = practices[index];
-              final bool canAccess = accessService.canAccess(practice);
-
-              return _PracticeTile(
-                practice: practice,
-                locked: !canAccess,
-                isActive: accessService.isActive(practice.id),
-                onTap: () async {
-                  if (!canAccess) {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
+          return ValueListenableBuilder<String>(
+            valueListenable: accessService.activePracticeId,
+            builder: (context, activeId, _) {
+              return ListView.separated(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                itemCount: practices.length,
+                separatorBuilder: (context, index) {
+                  if (index == 0) {
+                    return Column(
+                      children: [
+                        const SizedBox(height: 16),
+                        Divider(color: onSurface.withValues(alpha: 0.08)),
+                        const SizedBox(height: 16),
+                      ],
                     );
-                    return;
                   }
+                  return const SizedBox(height: 12);
+                },
+                itemBuilder: (context, index) {
+                  final practice = practices[index];
+                  final bool canAccess = accessService.canAccess(practice);
+                  final bool isActive = practice.id == activeId;
 
-                  await showModalBottomSheet(
-                    context: context,
-                    shape: const RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-                    ),
-                    builder: (_) => _PracticeDetailSheet(
-                      practice: practice,
-                      isActive: accessService.isActive(practice.id),
-                      onActivate: () async {
-                        await accessService.setActivePractice(practice.id);
-                        if (!context.mounted) return;
-
-                        Navigator.of(context).pop();
-
-                        final contract = _contractForPractice(practice.id);
-
+                  return _PracticeTile(
+                    practice: practice,
+                    locked: !canAccess,
+                    isActive: isActive,
+                    onTap: () async {
+                      if (!canAccess) {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => QuietBreathScreen(
-                              sessionId: practice.id,
-                              contract: contract,
-                            ),
-                          ),
+                          MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
                         );
-                      },
-                    ),
+                        return;
+                      }
+
+                      await showModalBottomSheet(
+                        context: context,
+                        backgroundColor: theme.colorScheme.surface,
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                        ),
+                        builder: (_) => _PracticeDetailSheet(
+                          practice: practice,
+                          isActive: isActive,
+                          onActivate: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (context) => AlertDialog(
+                                backgroundColor: theme.colorScheme.surface,
+                                title: const Text('Change Practice?'),
+                                content: Text('Set ${practice.id.replaceAll('_', ' ')} as your current active practice?'),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                    child: Text(
+                                      'Cancel',
+                                      style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
+                                    ),
+                                  ),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: theme.colorScheme.primary,
+                                      foregroundColor: theme.colorScheme.onPrimary,
+                                      minimumSize: const Size(100, 44),
+                                    ),
+                                    child: const Text('Confirm'),
+                                  ),
+                                ],
+                              ),
+                            );
+
+                            if (confirmed == true) {
+                              await accessService.setActivePractice(practice.id);
+                              if (!context.mounted) return;
+                              Navigator.of(context).pop(); // Close detail sheet
+                            }
+                          },
+                        ),
+                      );
+                    },
                   );
                 },
               );
@@ -302,22 +311,3 @@ class _PracticeDetailSheet extends StatelessWidget {
     }
   }
 }
-
-  BreathingPracticeContract _contractForPractice(String id) {
-    switch (id) {
-      case 'core_quiet':
-        return coreQuietContract;
-      case 'steady_discipline':
-        return steadyDisciplineContract;
-      case 'monk_calm':
-        return monkCalmContract;
-      case 'navy_calm':
-        return navyCalmContract;
-      case 'athlete_focus':
-        return athleteFocusContract;
-      case 'cold_resolve':
-        return coldResolveContract;
-      default:
-        return coreQuietContract;
-    }
-  }
