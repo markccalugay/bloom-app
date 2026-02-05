@@ -4,7 +4,6 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietAffirmationsLibraryScreen extends StatefulWidget {
   const QuietAffirmationsLibraryScreen({super.key});
@@ -96,7 +95,7 @@ class _QuietAffirmationsLibraryScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const Color baseTextColor = QLColors.offWhiteFog;
+    final Color baseTextColor = theme.colorScheme.onSurface;
 
     final today = DateTime.now();
     final unlockedLabel =
@@ -106,7 +105,7 @@ class _QuietAffirmationsLibraryScreenState
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        iconTheme: const IconThemeData(color: baseTextColor),
+        iconTheme: IconThemeData(color: baseTextColor),
         title: Text(
           'Affirmations',
           style: theme.textTheme.titleMedium?.copyWith(
@@ -129,12 +128,24 @@ class _QuietAffirmationsLibraryScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Daily Affirmations',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: baseTextColor,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Daily Affirmations',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: baseTextColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              '${_streak > 0 ? _streak : 0}/${coreAffirmations.length}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(

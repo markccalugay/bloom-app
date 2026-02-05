@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import '../controllers/quiet_breath_controller.dart';
 import '../quiet_breath_constants.dart';
 
@@ -39,9 +38,9 @@ class QuietBreathTimerTitle extends StatelessWidget {
         const SizedBox(height: kQBHeaderToInstructionGap),
         Text(
           instruction,
-          style: const TextStyle(
-            color: QLColors.mutedSand,
-            fontSize: 14,
+          style: TextStyle(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            fontSize: 16.8, // 14 * 1.2
             fontWeight: FontWeight.w400,
             letterSpacing: 0.2,
           ),

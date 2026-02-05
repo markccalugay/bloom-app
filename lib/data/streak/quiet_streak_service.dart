@@ -15,9 +15,50 @@ class QuietStreakService {
     try {
       return await repo.getCurrentStreak();
     } catch (_) {
-      // MVP stability: if repo isn't initialized yet or storage fails,
-      // fall back to 0 instead of crashing the UI.
       return 0;
+    }
+  }
+
+  /// Get the total number of sessions completed.
+  static Future<int> getTotalSessions() async {
+    try {
+      return await repo.getTotalSessions();
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Get the total meditation time in seconds.
+  static Future<int> getTotalSeconds() async {
+    try {
+      return await repo.getTotalSeconds();
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  /// Record a completed session with the given duration in seconds.
+  static Future<void> recordSession(int seconds, {String? practiceId}) async {
+    try {
+      await repo.recordSession(seconds, practiceId: practiceId);
+    } catch (_) {
+      // Ignore
+    }
+  }
+
+  static Future<List<String>> getSessionDates() async {
+    try {
+      return await repo.getSessionDates();
+    } catch (_) {
+      return [];
+    }
+  }
+
+  static Future<Map<String, int>> getPracticeUsage() async {
+    try {
+      return await repo.getPracticeUsage();
+    } catch (_) {
+      return {};
     }
   }
 

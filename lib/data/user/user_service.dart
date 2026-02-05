@@ -97,10 +97,23 @@ class UserService {
 
   UserProfile _generateAnonymousProfile() {
     final now = DateTime.now().millisecondsSinceEpoch;
-    final rand = Random(now);
-
     // Internal ID – local for now, later this can be a server/user ID.
     final id = 'user_$now';
+
+    final username = generateRandomUsername();
+
+    // Simple avatar ID – later map this to an actual asset.
+    final avatarId = 'viking'; // Default to viking for new users
+
+    return UserProfile(
+      id: id,
+      username: username,
+      avatarId: avatarId,
+    );
+  }
+
+  static String generateRandomUsername() {
+    final rand = Random();
 
     const adjectives = [
       'quiet',
@@ -126,18 +139,7 @@ class UserService {
     final noun = nouns[rand.nextInt(nouns.length)];
     final number = rand.nextInt(900) + 100; // 100–999
 
-    // You can change this format to kebab-case if you prefer.
-    final username =
-        '${_capitalize(adjective)}${_capitalize(noun)}$number'; // e.g. "QuietEmber472"
-
-    // Simple avatar ID – later map this to an actual asset.
-    final avatarId = 'avatar_${rand.nextInt(6) + 1}'; // avatar_1 .. avatar_6
-
-    return UserProfile(
-      id: id,
-      username: username,
-      avatarId: avatarId,
-    );
+    return '${_capitalize(adjective)}${_capitalize(noun)}$number';
   }
 
   Future<void> _saveProfile(
@@ -155,8 +157,20 @@ class UserService {
     return value.replaceAll(' ', '').trim();
   }
 
-  String _capitalize(String value) {
+  static String _capitalize(String value) {
     if (value.isEmpty) return value;
     return value[0].toUpperCase() + value.substring(1);
   }
 }
+
+const Map<String, String> avatarPresets = {
+  'viking': '🛡️',
+  'cowboy': '🤠',
+  'wizard': '🧙',
+  'worker': '👷',
+  'king': '👑',
+  'badboy': '🧢',
+  'gentle': '🎩',
+  'geek': '🚁',
+  'oddball': '🗼',
+};

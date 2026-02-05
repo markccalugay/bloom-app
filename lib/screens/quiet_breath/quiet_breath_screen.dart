@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
@@ -40,6 +41,74 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
   bool _hasStarted = false;
   bool _showPauseIcon = false;
+  int? _countdownValue;
+  Timer? _countdownTimer;
+
+  void _startCountdown() {
+    setState(() {
+      _countdownValue = 3;
+    });
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) return;
+      setState(() {
+        if (_countdownValue! > 1) {
+          _countdownValue = _countdownValue! - 1;
+        } else {
+          _countdownValue = null;
+          _countdownTimer?.cancel();
+          controller.play();
+        }
+      });
+    });
+  }
+
+  Future<void> _handleCancel() async {
+    final theme = Theme.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        title: Text(
+          'End your session early?',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: Text(
+          'Discipline is built in the moments we choose to stay. Stopping now will not count toward your daily goals.',
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(
+              'Stay',
+              style: TextStyle(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(
+              'End Session',
+              style: TextStyle(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && mounted) {
+      Navigator.of(context).pop(); // Go back to home
+    }
+  }
 
   @override
   void initState() {
@@ -68,6 +137,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     controller.dispose();
     super.dispose();
   }
@@ -98,6 +168,14 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     // FTUE flow: 0 -> 1 happens exactly once.
     final int previous = widget.streak; // 0 on first install
     final int current = await QuietStreakService.registerSessionCompletedToday();
+
+    // Record metrics (total sessions + total time + practice usage)
+    final int durationSeconds = controller.contract.cycles *
+        controller.contract.phases.fold(0, (int sum, p) => sum + p.seconds);
+    await QuietStreakService.recordSession(
+      durationSeconds,
+      practiceId: controller.contract.id,
+    );
 
     if (!mounted) return;
 
@@ -150,62 +228,38 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                 duration: const Duration(milliseconds: 220),
                 curve: Curves.easeOut,
                 child: IgnorePointer(
-                  ignoring: _hasStarted,
+                  ignoring: _hasStarted || _countdownValue != null,
                   child: QuietBreathControls(
                     controller: controller,
                     hasStarted: _hasStarted,
                     isPlaying: controller.isPlaying,
+                    onStart: _startCountdown,
                   ),
                 ),
               ),
             ),
-            if (kDebugMode)
+            // PRE-SESSION BACK BUTTON
+            if (!_hasStarted && _countdownValue == null)
               Positioned(
-                top: 12,
-                right: 12,
-                child: TextButton(
-                  onPressed: () {
-                    controller.completeSessionImmediately();
-                  },
-                  child: const Text(
-                    'DEBUG: Skip Session',
-                    style: TextStyle(color: Colors.redAccent),
+                top: 8,
+                left: 8,
+                child: IconButton(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    size: 22,
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6),
                   ),
+                  onPressed: () => Navigator.of(context).pop(),
+                  tooltip: 'Go back',
+                  splashRadius: 24,
                 ),
               ),
-            if (kDebugMode)
-              Positioned(
-                top: 48,
-                left: 12,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: DefaultTextStyle(
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Colors.white,
-                      height: 1.3,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('DEBUG · ${controller.contract.name}'),
-                        const SizedBox(height: 4),
-                        for (final phase in controller.contract.phases)
-                          Text(
-                            '${phase.type.name[0].toUpperCase()}${phase.type.name.substring(1)}: ${phase.seconds}s',
-                          ),
-                        const SizedBox(height: 4),
-                        Text('Cycles: ${controller.contract.cycles}'),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            if (_showPauseIcon)
+
+            // IN-SESSION PAUSE/PLAY (TOP LEFT)
+            if (_showPauseIcon && _countdownValue == null)
               Positioned(
                 top: 8,
                 left: 8,
@@ -232,6 +286,97 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   ),
                 ),
               ),
+
+            // IN-SESSION CANCEL (TOP RIGHT)
+            Positioned(
+              top: 8,
+              right: 8,
+              child: AnimatedBuilder(
+                animation: controller.listenable,
+                builder: (context, _) {
+                  if (_hasStarted && !controller.isPlaying && _countdownValue == null) {
+                    return TextButton(
+                      onPressed: _handleCancel,
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+
+            // COUNTDOWN OVERLAY
+            if (_countdownValue != null)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  child: Center(
+                    child: Text(
+                      '$_countdownValue',
+                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 80,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // DEBUG LAYER (HIDDEN UNLESS IN DEBUG)
+            if (kDebugMode && _countdownValue == null) ...[
+              // Move debug info and skip session here
+              Positioned(
+                bottom: 80,
+                right: 12,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        controller.completeSessionImmediately();
+                      },
+                      child: const Text(
+                        'DEBUG: Skip Session',
+                        style: TextStyle(color: Colors.redAccent, fontSize: 10),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: DefaultTextStyle(
+                        style: const TextStyle(
+                          fontSize: 9,
+                          color: Colors.white70,
+                          height: 1.2,
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('DEBUG · ${controller.contract.name}'),
+                            for (final phase in controller.contract.phases)
+                              Text(
+                                '${phase.type.name[0].toUpperCase()}${phase.type.name.substring(1)}: ${phase.seconds}s',
+                              ),
+                            Text('Cycles: ${controller.contract.cycles}'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ],
         ),
       ),

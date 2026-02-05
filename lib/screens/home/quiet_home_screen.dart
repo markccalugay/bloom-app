@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../home/widgets/quiet_home_app_bar.dart';
 import '../home/widgets/quiet_home_streak_row.dart';
+import '../results/quiet_results_ok_screen.dart';
+import 'package:flutter/foundation.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 import 'package:quietline_app/widgets/affirmations/quiet_home_affirmations_carousel.dart';
@@ -42,37 +44,63 @@ Widget _buildHomeBody({
   required String? affirmationText,
   required VoidCallback? onMenu,
 }) {
-  return SafeArea(
-    child: Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          QuietHomeAppBar(
-            onMenuTap: () {
-              onMenu?.call();
-            },
+  return Stack(
+    children: [
+      SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              QuietHomeAppBar(
+                onMenuTap: () {
+                  onMenu?.call();
+                },
+              ),
+
+              const SizedBox(height: kHomeTopSpacing),
+
+              QuietHomeStreakRow(streak: streak),
+
+              const SizedBox(height: 40.0),
+
+              const QuietHomeIngotBackground(),
+
+              const SizedBox(height: 32.0),
+
+              QuietHomeAffirmationsCarousel(
+                streak: streak,
+              ),
+
+              const Spacer(),
+              const SizedBox(height: kHomeBottomSpacing),
+            ],
           ),
-
-          const SizedBox(height: kHomeTopSpacing),
-
-          QuietHomeStreakRow(streak: streak),
-
-          const SizedBox(height: 40.0),
-
-          const QuietHomeIngotBackground(),
-
-          const SizedBox(height: 32.0),
-
-          QuietHomeAffirmationsCarousel(
-            streak: streak,
-          ),
-
-          const Spacer(),
-          const SizedBox(height: kHomeBottomSpacing),
-        ],
+        ),
       ),
-    ),
+      if (kDebugMode)
+        Positioned(
+          bottom: 110,
+          left: 12,
+          child: TextButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const QuietResultsOkScreen(
+                    streak: 10,
+                    previousStreak: 9,
+                    isNew: true,
+                  ),
+                ),
+              );
+            },
+            child: const Text(
+              'DEBUG: Open Streak',
+              style: TextStyle(color: Colors.redAccent, fontSize: 10),
+            ),
+          ),
+        ),
+    ],
   );
 }
 

@@ -44,6 +44,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
   String _displayName = 'Quiet guest';
+  String _avatarId = 'viking';
 
   TimeOfDay? _reminderTime;
   String _reminderLabel = 'Daily reminder · Not set';
@@ -125,12 +126,14 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       if (!mounted) return;
       setState(() {
         _displayName = user.username;
+        _avatarId = user.avatarId;
       });
     } catch (_) {
       // Silent fallback for MVP.
       if (!mounted) return;
       setState(() {
         _displayName = 'Quiet guest';
+        _avatarId = 'viking';
       });
     }
   }
@@ -503,23 +506,36 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           width: menuWidth,
           child: QLSideMenu(
             displayName: _displayName,
-            reminderLabel: _reminderLabel,
-            onEditReminder: () async {
-              _toggleMenu();
-              await _editReminderTime();
-            },
-
-
+            avatarId: _avatarId,
             onClose: _toggleMenu,
             onOpenAccount: () async {
               _toggleMenu();
               await Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const QuietAccountScreen()),
+                MaterialPageRoute(
+                  builder: (_) => QuietAccountScreen(
+                    reminderLabel: _reminderLabel,
+                    onEditReminder: _editReminderTime,
+                    currentThemeLabel:
+                        ThemeService.instance.currentThemeLabel,
+                    onOpenThemeSelection: () async {
+                      await showModalBottomSheet(
+                        context: context,
+                        backgroundColor: Colors.transparent,
+                        isScrollControlled: true,
+                        builder: (_) => const QuietThemeSelectionSheet(),
+                      );
+                    },
+                    onSettingsChanged: () {
+                      if (mounted) setState(() {});
+                    },
+                  ),
+                ),
               );
 
-              // If the user updated their display name, refresh it when we return.
+              // Refresh states when returning.
               if (!mounted) return;
               await _loadDisplayName();
+              await _loadReminderState();
             },
             onNavigateBrotherhood: () {
               setState(() {
@@ -563,16 +579,6 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             onCall988: SupportCallService.call988,
             onOpenPrivacy: _web.openPrivacy,
             onOpenTerms: _web.openTerms,
-            currentThemeLabel: ThemeService.instance.currentThemeLabel,
-            onOpenThemeSelection: () async {
-              _toggleMenu();
-              await showModalBottomSheet(
-                context: context,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                builder: (_) => const QuietThemeSelectionSheet(),
-              );
-            },
           ),
         ),
       ],

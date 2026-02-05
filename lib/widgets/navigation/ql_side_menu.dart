@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:quietline_app/data/user/user_service.dart';
 
 /// Slide-in side menu used by the shell.
 /// The shell owns the open/close state and passes callbacks down.
@@ -9,6 +10,7 @@ Future<String> _getVersionLabel() async {
 }
 class QLSideMenu extends StatelessWidget {
   final String displayName;
+  final String avatarId;
   final VoidCallback onClose;
 
   // Navigation callbacks (optional so we can wire them gradually)
@@ -32,19 +34,12 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onOpenPrivacy;
   final VoidCallback? onOpenTerms;
 
-  final String? reminderLabel;
-  final VoidCallback? onEditReminder;
-
-  final bool? debugPremiumEnabled;
-  final VoidCallback? onToggleDebugPremium;
-
   final String? debugPremiumLabel;
-  final String? currentThemeLabel;
-  final VoidCallback? onOpenThemeSelection;
 
   const QLSideMenu({
     super.key,
     required this.displayName,
+    required this.avatarId,
     required this.onClose,
     this.onNavigateJourney,
     this.onNavigateBrotherhood,
@@ -59,13 +54,7 @@ class QLSideMenu extends StatelessWidget {
     this.onOpenAccount,
     this.showBrotherhood = false,
     this.showJourney = false,
-    this.reminderLabel,
-    this.onEditReminder,
-    this.debugPremiumEnabled,
-    this.onToggleDebugPremium,
     this.debugPremiumLabel,
-    this.currentThemeLabel,
-    this.onOpenThemeSelection,
   });
 
   @override
@@ -85,43 +74,60 @@ class QLSideMenu extends StatelessWidget {
           children: [
             // Header: avatar + name + close
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 16),
+              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: theme.colorScheme.primary.withValues(
-                      alpha: 0.2,
-                    ),
-                    child: const Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName.trim().isNotEmpty
-                              ? displayName.trim()
-                              : 'Quiet guest',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: baseTextColor,
-                          ),
+                    child: InkWell(
+                      onTap: onOpenAccount,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Anonymous by default',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: baseTextColor.withValues(alpha: 0.6),
-                          ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor:
+                                  theme.colorScheme.primary.withValues(
+                                alpha: 0.2,
+                              ),
+                              child: Text(
+                                avatarPresets[avatarId] ?? '👤',
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayName.trim().isNotEmpty
+                                        ? displayName.trim()
+                                        : 'Quiet guest',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: baseTextColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Anonymous by default',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: baseTextColor.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   IconButton(
@@ -160,7 +166,7 @@ class QLSideMenu extends StatelessWidget {
                       ),
                     _MenuItem(
                       icon: Icons.person_rounded,
-                      label: 'Your account',
+                      label: 'My account',
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onOpenAccount,
@@ -236,33 +242,6 @@ class QLSideMenu extends StatelessWidget {
                       onTap: onOpenTerms,
                     ),
 
-                    const SizedBox(height: 16),
-                    const _SectionLabel('Preferences'),
-                    _MenuItem(
-                      icon: Icons.notifications_none_rounded,
-                      label: reminderLabel ?? 'Daily reminder',
-                      iconColor: iconColor,
-                      textColor: baseTextColor,
-                      onTap: onEditReminder,
-                      enabled: onEditReminder != null,
-                    ),
-                    _MenuItem(
-                      icon: Icons.palette_outlined,
-                      label: currentThemeLabel ?? 'Theme',
-                      iconColor: iconColor,
-                      textColor: baseTextColor,
-                      onTap: onOpenThemeSelection,
-                      enabled: onOpenThemeSelection != null,
-                    ),
-                    if (debugPremiumLabel != null)
-                      _MenuItem(
-                        icon: Icons.lock_open_rounded,
-                        label: debugPremiumLabel!,
-                        iconColor: iconColor,
-                        textColor: baseTextColor,
-                        onTap: onToggleDebugPremium,
-                        enabled: onToggleDebugPremium != null,
-                      ),
 
                     const SizedBox(height: 24),
                     Padding(
