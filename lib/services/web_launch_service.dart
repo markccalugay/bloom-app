@@ -5,7 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 class WebLaunchService {
   // TODO: replace these with your real URLs when the website is live.
   static final Uri _websiteUri = Uri.parse('https://quietline.app/');
-  static final Uri _aboutUri = Uri.parse('https://quietline.app/about-us/');
+  static final Uri _aboutUri = Uri.parse('https://quietline.app/what-is-quietline/');
   static final Uri _supportUri = Uri.parse('https://quietline.app/support/');
   static final Uri _privacyUri = Uri.parse(
     'https://quietline.app/privacy-policy/',
