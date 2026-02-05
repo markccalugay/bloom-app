@@ -22,7 +22,7 @@ import 'package:quietline_app/core/app_restart.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 import 'package:quietline_app/core/theme/theme_service.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:quietline_app/core/timezone/timezone_service.dart';
 
 late QuietStreakRepository quietStreakRepo;
 
@@ -32,7 +32,7 @@ void main() async {
   await PremiumEntitlement.instance.initialize();
   await ThemeService.instance.initialize();
   debugPrint('[BOOT] premium=${PremiumEntitlement.instance.isPremium}');
-  tz.initializeTimeZones();
+  await TimezoneService.initialize();
 
   final prefs = await SharedPreferences.getInstance();
   quietStreakRepo = QuietStreakRepository(
@@ -128,6 +128,7 @@ class _ReminderTimezoneObserver extends WidgetsBindingObserver {
       time: TimeOfDay(hour: hour, minute: minute),
     );
 
+    await TimezoneService.initialize();
     final currentTimezone =
         await FlutterTimezone.getLocalTimezone();
     await reminderService.updateStoredTimezone(currentTimezone);
