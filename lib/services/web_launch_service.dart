@@ -13,12 +13,16 @@ class WebLaunchService {
   static final Uri _termsUri = Uri.parse(
     'https://quietline.app/terms-of-service/',
   );
+  static final Uri _whatsNewUri = Uri.parse(
+    'https://quietline.app/whats-new/',
+  );
 
   Future<void> openWebsite() => _open(_websiteUri);
   Future<void> openAbout() => _open(_aboutUri);
   Future<void> openSupport() => _open(_supportUri);
   Future<void> openPrivacy() => _open(_privacyUri);
   Future<void> openTerms() => _open(_termsUri);
+  Future<void> openWhatsNew() => _open(_whatsNewUri);
 
   Future<void> _open(Uri uri) async {
     try {
