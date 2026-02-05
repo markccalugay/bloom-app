@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 /// Placeholder Brotherhood / community page.
 /// This gives the bottom nav a real destination and avoids build errors

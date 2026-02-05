@@ -8,7 +8,6 @@ import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 // once premium entitlement is driven by StoreKit.
 import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 class QuietPracticeLibraryScreen extends StatefulWidget {
@@ -35,6 +34,8 @@ class _QuietPracticeLibraryScreenState
   Widget build(BuildContext context) {
     // Cold Resolve is now re-enabled in the UI.
     // Access and gating are still handled by PracticeAccessService and StoreKit.
+    final theme = Theme.of(context);
+    final onSurface = theme.colorScheme.onSurface;
     final practices = PracticeCatalog.all.toList();
     // NOTE: active practice state is resolved via accessService.isActive()
     // activePracticeId is intentionally not read here to avoid unused state.
@@ -157,7 +158,7 @@ class _PracticeTile extends StatelessWidget {
                       : theme.colorScheme.primary,
                 ),
                 if (isActive)
-                  const Positioned(
+                  Positioned(
                     bottom: -2,
                     right: -2,
                     child: Icon(

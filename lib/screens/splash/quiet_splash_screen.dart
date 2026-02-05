@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietSplashScreen extends StatefulWidget {
   final VoidCallback onDone;

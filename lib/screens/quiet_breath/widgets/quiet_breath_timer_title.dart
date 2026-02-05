@@ -27,8 +27,8 @@ class QuietBreathTimerTitle extends StatelessWidget {
         const SizedBox(height: kQBHeaderTopGap),
         Text(
           header,
-          style: const TextStyle(
-            color: kQBTextColor,
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurface,
             fontSize: 22,
             fontWeight: FontWeight.w700,
           ),
@@ -38,7 +38,7 @@ class QuietBreathTimerTitle extends StatelessWidget {
         Text(
           instruction,
           style: TextStyle(
-            color: kQBTextColor.withValues(alpha: 0.80),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.80),
             fontSize: 14,
             fontWeight: FontWeight.w400,
           ),

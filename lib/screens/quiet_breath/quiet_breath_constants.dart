@@ -1,6 +1,4 @@
 import 'dart:math' as math;
-import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 // -----------------------------------------------------------------------------
 // Quiet Breath • Constants

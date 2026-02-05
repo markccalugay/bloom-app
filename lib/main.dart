@@ -6,7 +6,6 @@ import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 // import 'screens/quiet_breath/quiet_breath_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_strings.dart';
-import 'theme/ql_theme.dart';
 import 'screens/entry/quiet_entry_screen.dart';
 
 import 'screens/results/quiet_results_ok_screen.dart';

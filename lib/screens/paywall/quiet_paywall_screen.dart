@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../theme/ql_theme.dart';
 
 class QuietPaywallScreen extends StatefulWidget {
   const QuietPaywallScreen({super.key});

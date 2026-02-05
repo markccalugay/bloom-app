@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 /// Slide-in side menu used by the shell.
@@ -388,6 +387,7 @@ class _ComingSoonPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       decoration: BoxDecoration(
