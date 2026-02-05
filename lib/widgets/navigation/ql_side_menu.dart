@@ -85,43 +85,59 @@ class QLSideMenu extends StatelessWidget {
           children: [
             // Header: avatar + name + close
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 8, 16),
+              padding: const EdgeInsets.fromLTRB(8, 16, 8, 16),
               child: Row(
                 children: [
-                  CircleAvatar(
-                    radius: 20,
-                    backgroundColor: theme.colorScheme.primary.withValues(
-                      alpha: 0.2,
-                    ),
-                    child: const Icon(
-                      Icons.person_rounded,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          displayName.trim().isNotEmpty
-                              ? displayName.trim()
-                              : 'Quiet guest',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: baseTextColor,
-                          ),
+                    child: InkWell(
+                      onTap: onOpenAccount,
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Anonymous by default',
-                          style: textTheme.bodySmall?.copyWith(
-                            color: baseTextColor.withValues(alpha: 0.6),
-                          ),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: theme.colorScheme.primary.withValues(
+                                alpha: 0.2,
+                              ),
+                              child: const Icon(
+                                Icons.person_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    displayName.trim().isNotEmpty
+                                        ? displayName.trim()
+                                        : 'Quiet guest',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: textTheme.titleMedium?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: baseTextColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Anonymous by default',
+                                    style: textTheme.bodySmall?.copyWith(
+                                      color: baseTextColor.withValues(alpha: 0.6),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                   ),
                   IconButton(
