@@ -35,6 +35,7 @@ class QLSideMenu extends StatelessWidget {
   // Legal callbacks
   final VoidCallback? onOpenPrivacy;
   final VoidCallback? onOpenTerms;
+  final VoidCallback? onOpenWhatsNew;
 
   final String? debugPremiumLabel;
 
@@ -53,6 +54,7 @@ class QLSideMenu extends StatelessWidget {
     this.onCall988,
     this.onOpenPrivacy,
     this.onOpenTerms,
+    this.onOpenWhatsNew,
     this.onOpenAccount,
     this.showBrotherhood = false,
     this.showJourney = false,
@@ -225,6 +227,13 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onCall988,
+                    ),
+                    _MenuItem(
+                      icon: Icons.history_rounded,
+                      label: "What's New",
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onOpenWhatsNew,
                     ),
 
                     const SizedBox(height: 16),

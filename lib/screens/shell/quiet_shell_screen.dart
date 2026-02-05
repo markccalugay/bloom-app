@@ -579,6 +579,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             onCall988: SupportCallService.call988,
             onOpenPrivacy: _web.openPrivacy,
             onOpenTerms: _web.openTerms,
+            onOpenWhatsNew: _web.openWhatsNew,
           ),
         ),
       ],
