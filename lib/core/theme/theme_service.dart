@@ -17,12 +17,8 @@ class ThemeService extends ChangeNotifier {
     switch (_variant) {
       case ThemeVariant.quietLine:
         return 'Theme · QuietLine Teal';
-      case ThemeVariant.nordic:
-        return 'Theme · Nordic Slate';
       case ThemeVariant.quietLineLight:
         return 'Theme · QuietLine Light';
-      case ThemeVariant.orchidBreeze:
-        return 'Theme · Orchid Breeze';
     }
   }
 
@@ -30,12 +26,8 @@ class ThemeService extends ChangeNotifier {
     switch (v) {
       case ThemeVariant.quietLine:
         return 'QuietLine Teal';
-      case ThemeVariant.nordic:
-        return 'Nordic Slate';
       case ThemeVariant.quietLineLight:
         return 'QuietLine Light';
-      case ThemeVariant.orchidBreeze:
-        return 'Orchid Breeze';
     }
   }
 

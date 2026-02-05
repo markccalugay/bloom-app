@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 import '../controllers/quiet_breath_controller.dart';
 import '../painters/quiet_breath_wave_painter.dart';
 import '../painters/quiet_breath_ring_painter.dart';
@@ -18,16 +19,16 @@ class QuietBreathCircle extends StatelessWidget {
       builder: (context, child) {
         final ringSize = kQBCircleSize + 2 * (kQBRingOuterPadding + kQBRingThickness);
         
-        final ringTrackColor = theme.brightness == Brightness.dark
-            ? const Color(0xFF3A434B)
-            : theme.colorScheme.onSurface.withValues(alpha: 0.1);
+        final ringTrackColor = theme.brightness == Brightness.light
+            ? Colors.black.withValues(alpha: 0.08)
+            : QLColors.ringTrack;
         
         final ellipseBgColor = theme.brightness == Brightness.dark
-            ? const Color(0xFF5E6874)
-            : theme.colorScheme.onSurface.withValues(alpha: 0.15);
+            ? QLColors.ironGray
+            : QLColors.paleStone;
 
         final waveDim = theme.colorScheme.primary.withValues(
-          alpha: theme.brightness == Brightness.dark ? 0.7 : 0.4,
+          alpha: theme.brightness == Brightness.dark ? 0.6 : 0.3,
         );
 
         return Center(

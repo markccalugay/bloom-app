@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/data/affirmations/affirmations_model.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 class AffirmationGridTile extends StatelessWidget {
   final Affirmation affirmation;
@@ -27,10 +28,12 @@ class AffirmationGridTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final baseTextColor = theme.textTheme.bodyMedium?.color ?? Colors.white;
+    final isDark = theme.brightness == Brightness.dark;
+    
+    // Primary brand text color
+    final Color baseTextColor = theme.colorScheme.onSurface;
 
-    // Keep tiles visually consistent even when locked.
-    final BorderRadius radius = BorderRadius.circular(10);
+    final BorderRadius radius = BorderRadius.circular(12);
 
     return Material(
       color: Colors.transparent,
@@ -46,18 +49,19 @@ class AffirmationGridTile extends StatelessWidget {
         child: Ink(
           decoration: BoxDecoration(
             borderRadius: radius,
-            gradient: const LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFF1A2228),
-                Color(0xFF11171D),
-              ],
-            ),
+            color: theme.colorScheme.surface,
             border: Border.all(
-              color: Colors.white.withValues(alpha: 0.06),
+              color: (isDark ? QLColors.steelGray : QLColors.skyAsh).withValues(alpha: 0.5),
               width: 1,
             ),
+            boxShadow: [
+              if (isUnlocked)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
           ),
           child: Stack(
             children: [
@@ -65,14 +69,14 @@ class AffirmationGridTile extends StatelessWidget {
               ClipRRect(
                 borderRadius: radius,
                 child: Opacity(
-                  opacity: isUnlocked ? 1.0 : 0.35,
+                  opacity: isUnlocked ? 1.0 : 0.25,
                   child: ImageFiltered(
                     imageFilter: ImageFilter.blur(
-                      sigmaX: isUnlocked ? 0 : 6,
-                      sigmaY: isUnlocked ? 0 : 6,
+                      sigmaX: isUnlocked ? 0 : 8,
+                      sigmaY: isUnlocked ? 0 : 8,
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -81,18 +85,18 @@ class AffirmationGridTile extends StatelessWidget {
                             alignment: Alignment.topRight,
                             child: SvgPicture.asset(
                               AppAssets.quietlineLogo,
-                              width: 14,
-                              height: 14,
+                              width: 12,
+                              height: 12,
                               colorFilter: ColorFilter.mode(
-                                Colors.white.withValues(alpha: 0.85),
+                                baseTextColor.withValues(alpha: 0.4),
                                 BlendMode.srcIn,
                               ),
                             ),
                           ),
 
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 4),
 
-                          // Center-ish affirmation text (trimmed for tile size)
+                          // Center-ish affirmation text
                           Expanded(
                             child: Center(
                               child: Text(
@@ -101,24 +105,25 @@ class AffirmationGridTile extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.center,
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: baseTextColor.withValues(alpha: 0.95),
-                                  height: 1.25,
+                                  color: baseTextColor.withValues(alpha: 0.9),
+                                  height: 1.3,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ),
                           ),
 
-                          // Bottom-left unlocked label (only when unlocked)
+                          // Bottom-left unlocked label
                           if (isUnlocked && unlockedLabel != null) ...[
-                            const SizedBox(height: 6),
+                            const SizedBox(height: 4),
                             Text(
                               unlockedLabel!,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: Colors.white.withValues(alpha: 0.65),
-                                fontSize: 10,
+                                color: (isDark ? QLColors.mutedSand : QLColors.slateBlue).withValues(alpha: 0.8),
+                                fontSize: 9,
+                                letterSpacing: 0.1,
                               ),
                             ),
                           ],
@@ -132,73 +137,41 @@ class AffirmationGridTile extends StatelessWidget {
               // LOCK OVERLAY
               if (!isUnlocked)
                 Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: radius,
-                      color: Colors.black.withValues(alpha: 0.45),
-                    ),
-                    child: Center(
-                      child: Column(
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: (isDark ? QLColors.midnightBlue : QLColors.slateBlue).withValues(alpha: 0.8),
+                        border: Border.all(
+                          color: (isDark ? QLColors.steelGray : QLColors.skyAsh).withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(999),
-                              color: Colors.white.withValues(alpha: 0.08),
-                              border: Border.all(
-                                color: Colors.white.withValues(alpha: 0.10),
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  isPremiumLocked
-                                      ? Icons.workspace_premium_rounded
-                                      : Icons.lock_rounded,
-                                  size: 16,
-                                  color: Colors.white.withValues(alpha: 0.85),
-                                ),
-                                const SizedBox(width: 6),
-                                Text(
-                                  isPremiumLocked
-                                      ? 'Premium'
-                                      : 'Locked',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: Colors.white.withValues(alpha: 0.85),
-                                    fontWeight: FontWeight.w600,
-                                    letterSpacing: 0.2,
-                                  ),
-                                ),
-                              ],
+                          Icon(
+                            isPremiumLocked
+                                ? Icons.workspace_premium_rounded
+                                : Icons.lock_outline_rounded,
+                            size: 14,
+                            color: isDark ? QLColors.sandWhite : Colors.white,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isPremiumLocked ? 'QuietLine+' : 'Locked',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                                color: isDark ? QLColors.sandWhite : Colors.white,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 10,
+                              letterSpacing: 0.5,
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              // Optional subtle press affordance when unlocked
-              if (isUnlocked)
-                Positioned.fill(
-                  child: IgnorePointer(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: radius,
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.white.withValues(alpha: 0.02),
-                            Colors.transparent,
-                          ],
-                        ),
                       ),
                     ),
                   ),

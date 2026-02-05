@@ -4,6 +4,7 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietAffirmationsLibraryScreen extends StatefulWidget {
   const QuietAffirmationsLibraryScreen({super.key});
@@ -95,7 +96,7 @@ class _QuietAffirmationsLibraryScreenState
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final baseTextColor = theme.textTheme.bodyMedium?.color ?? Colors.white;
+    const Color baseTextColor = QLColors.offWhiteFog;
 
     final today = DateTime.now();
     final unlockedLabel =
@@ -104,7 +105,8 @@ class _QuietAffirmationsLibraryScreenState
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        iconTheme: IconThemeData(color: baseTextColor),
+        backgroundColor: Colors.transparent,
+        iconTheme: const IconThemeData(color: baseTextColor),
         title: Text(
           'Affirmations',
           style: theme.textTheme.titleMedium?.copyWith(
@@ -256,8 +258,8 @@ class _QuietAffirmationsLibraryScreenState
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             final a = items[index];
-                            final bool isPremiumLocked = !isPremium;
-                            final bool unlocked = isPremium;
+                            final bool isPremiumLocked = a.isPremium && !isPremium;
+                            final bool unlocked = !a.isPremium || isPremium;
 
                             return AffirmationGridTile(
                               affirmation: a,
