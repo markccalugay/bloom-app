@@ -7,11 +7,14 @@ class QuietBreathControls extends StatelessWidget {
   final QuietBreathController controller;
   final bool hasStarted;
   final bool isPlaying;
+  final VoidCallback? onStart;
+
   const QuietBreathControls({
     super.key,
     required this.controller,
     required this.hasStarted,
     required this.isPlaying,
+    this.onStart,
   });
 
   @override
@@ -22,7 +25,7 @@ class QuietBreathControls extends StatelessWidget {
         if (!hasStarted) {
           return QLPrimaryButton(
             label: 'Start Quiet Time',
-            onPressed: controller.toggle,
+            onPressed: onStart,
             backgroundColor: Theme.of(context).colorScheme.primary,
             textColor: Colors.white,
             margin: const EdgeInsets.symmetric(horizontal: 36, vertical: 8),

@@ -10,8 +10,8 @@ class QuietResultsConstants {
   static const double okScreenStreakTopGap = 56.0;
 
   // Sizes
-  static const double streakBadgeSize = 136.0;
-  static const double smallFlameSize = 36.0;
+  static const double streakBadgeSize = 220.0;
+  static const double smallFlameSize = 48.0;
 
   // Colors (tweak values to better match your palette)
   static const Color activeFlameTop = Color(0xFF3BA89C);   // teal-ish
