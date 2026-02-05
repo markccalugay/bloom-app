@@ -41,6 +41,21 @@ class QuietStreakRepository {
     return _local.getCurrentStreak();
   }
 
+  /// Returns total sessions from local storage.
+  Future<int> getTotalSessions() {
+    return _local.getTotalSessions();
+  }
+
+  /// Returns total seconds from local storage.
+  Future<int> getTotalSeconds() {
+    return _local.getTotalSeconds();
+  }
+
+  /// Records a completed session's duration.
+  Future<void> recordSession(int seconds) {
+    return _local.incrementMetrics(seconds);
+  }
+
   /// Returns true if a quiet session has already been completed today (local date-only).
   Future<bool> hasCompletedToday(DateTime today) {
     return _local.hasCompletedToday(today);

@@ -9,10 +9,22 @@ class QuietStreakLocalStore {
 
   static const String _kStreakCountKey = 'quiet_streak_count';
   static const String _kLastDateKey = 'quiet_streak_last_date'; // yyyy-MM-dd
+  static const String _kTotalSessionsKey = 'quiet_total_sessions';
+  static const String _kTotalSecondsKey = 'quiet_total_seconds';
 
   /// Returns the current streak count, or 0 if none saved.
   Future<int> getCurrentStreak() async {
     return _prefs.getInt(_kStreakCountKey) ?? 0;
+  }
+
+  /// Returns total number of sessions completed.
+  Future<int> getTotalSessions() async {
+    return _prefs.getInt(_kTotalSessionsKey) ?? 0;
+  }
+
+  /// Returns total seconds spent in meditation.
+  Future<int> getTotalSeconds() async {
+    return _prefs.getInt(_kTotalSecondsKey) ?? 0;
   }
 
   /// Returns the last streak date as a DateTime, or null if none/invalid.
@@ -44,6 +56,14 @@ class QuietStreakLocalStore {
   }) async {
     await _prefs.setInt(_kStreakCountKey, count);
     await _prefs.setString(_kLastDateKey, _formatDate(lastDate));
+  }
+
+  /// Increments session count and adds meditation duration.
+  Future<void> incrementMetrics(int seconds) async {
+    final currentSessions = await getTotalSessions();
+    final currentSeconds = await getTotalSeconds();
+    await _prefs.setInt(_kTotalSessionsKey, currentSessions + 1);
+    await _prefs.setInt(_kTotalSecondsKey, currentSeconds + seconds);
   }
 
   /// Optional: clear streak completely (for debugging / reset).
