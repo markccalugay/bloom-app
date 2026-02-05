@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/reminder/reminder_service.dart';
 import 'core/notifications/notification_service.dart';
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 // import 'screens/quiet_breath/quiet_breath_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_screen.dart';
 // import 'screens/mood_checkin/mood_checkin_strings.dart';
@@ -129,7 +129,7 @@ class _ReminderTimezoneObserver extends WidgetsBindingObserver {
     );
 
     final currentTimezone =
-        await FlutterNativeTimezone.getLocalTimezone();
+        await FlutterTimezone.getLocalTimezone();
     await reminderService.updateStoredTimezone(currentTimezone);
   }
 }
