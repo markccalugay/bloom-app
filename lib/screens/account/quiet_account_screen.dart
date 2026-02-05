@@ -378,6 +378,64 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
       ),
     );
   }
+
+  Widget _buildFavoritePractices(
+    Map<String, int> usage,
+    Color baseTextColor,
+    ThemeData theme,
+  ) {
+    if (usage.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: baseTextColor.withValues(alpha: 0.08),
+          ),
+        ),
+        child: Center(
+          child: Text(
+            'Start a session to see favorites.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: baseTextColor.withValues(alpha: 0.4),
+            ),
+          ),
+        ),
+      );
+    }
+
+    final isPremium = PremiumEntitlement.instance.isPremium;
+    final int limit = isPremium ? 3 : 1;
+
+    final sortedUsage = usage.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    final topPractices = sortedUsage.take(limit).toList();
+
+    return Column(
+      children: topPractices.map((entry) {
+        final practice = allBreathingPractices.firstWhere(
+          (p) => p.id == entry.key,
+          orElse: () => BreathingPracticeContract(
+            id: entry.key,
+            name: 'Unknown',
+            phases: [],
+            cycles: 0,
+          ),
+        );
+
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: _MetricRow(
+            label: practice.name,
+            value: '${entry.value} times',
+            textColor: baseTextColor,
+          ),
+        );
+      }).toList(),
+    );
+  }
 }
 
 class _MetricRow extends StatelessWidget {
