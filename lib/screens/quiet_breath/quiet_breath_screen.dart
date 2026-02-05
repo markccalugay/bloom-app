@@ -169,10 +169,13 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     final int previous = widget.streak; // 0 on first install
     final int current = await QuietStreakService.registerSessionCompletedToday();
 
-    // Record metrics (total sessions + total time)
+    // Record metrics (total sessions + total time + practice usage)
     final int durationSeconds = controller.contract.cycles *
         controller.contract.phases.fold(0, (int sum, p) => sum + p.seconds);
-    await QuietStreakService.recordSession(durationSeconds);
+    await QuietStreakService.recordSession(
+      durationSeconds,
+      practiceId: controller.contract.id,
+    );
 
     if (!mounted) return;
 

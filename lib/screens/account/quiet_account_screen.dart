@@ -4,6 +4,11 @@ import 'package:quietline_app/data/user/user_service.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/core/app_restart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:quietline_app/screens/account/quiet_edit_profile_screen.dart';
+import 'package:quietline_app/screens/account/widgets/mindful_days_heatmap.dart';
+import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
+import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
+import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
 
 /// Simple MVP account screen.
 /// Shows the anonymous user's display name.
@@ -42,10 +47,14 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
     final streak = await QuietStreakService.getCurrentStreak();
     final sessions = await QuietStreakService.getTotalSessions();
     final seconds = await QuietStreakService.getTotalSeconds();
+    final dates = await QuietStreakService.getSessionDates();
+    final usage = await QuietStreakService.getPracticeUsage();
     return {
       'streak': streak,
       'sessions': sessions,
       'seconds': seconds,
+      'dates': dates,
+      'usage': usage,
     };
   }
 
@@ -136,6 +145,10 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
               final user = snapshot.data!;
               final displayName = user.username;
+              final avatarId = user.avatarId;
+
+              // Map avatarId to emoji (shared logic from UserService)
+              final emoji = avatarPresets[avatarId] ?? '👤';
 
               // -------- Normal content --------
               return Padding(
@@ -150,10 +163,9 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                       radius: 32,
                       backgroundColor:
                           QLColors.primaryTeal.withValues(alpha: 0.2),
-                      child: const Icon(
-                        Icons.person_rounded,
-                        color: Colors.white,
-                        size: 32,
+                      child: Text(
+                        emoji,
+                        style: const TextStyle(fontSize: 32),
                       ),
                     ),
 
@@ -170,11 +182,46 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
                     // Caption
                     Text(
-                      'You’re anonymous to other members.\n'
-                      'You can customize this later.',
+                      'You’re anonymous to other members.',
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
                         color: baseTextColor.withValues(alpha: 0.8),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Edit Profile Button
+                    OutlinedButton(
+                      onPressed: () async {
+                        final updated = await Navigator.of(context).push<bool>(
+                          MaterialPageRoute(
+                            builder: (context) => const QuietEditProfileScreen(),
+                          ),
+                        );
+                        if (updated == true) {
+                          if (!context.mounted) return;
+                          AppRestart.restart(context); // Simple way to refresh everything
+                        }
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: baseTextColor.withValues(alpha: 0.1),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 8,
+                        ),
+                      ),
+                      child: Text(
+                        'Edit Profile',
+                        style: textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: baseTextColor,
+                        ),
                       ),
                     ),
 
@@ -219,6 +266,51 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                               value: _formatDuration(seconds),
                               textColor: baseTextColor,
                             ),
+                            const SizedBox(height: 12),
+                            _MetricRow(
+                              label: 'Affirmations Collected',
+                              value: '${streak > 0 ? streak : 0}/${coreAffirmations.length}',
+                              textColor: baseTextColor,
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Mindful Days Heatmap
+                            Text(
+                              'MINDFUL DAYS',
+                              style: textTheme.labelSmall?.copyWith(
+                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w600,
+                                color: baseTextColor.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: theme.colorScheme.surface,
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: baseTextColor.withValues(alpha: 0.08),
+                                ),
+                              ),
+                              child: MindfulDaysHeatmap(
+                                sessionDates: metrics['dates'] as List<String>,
+                                baseTextColor: baseTextColor,
+                              ),
+                            ),
+                            const SizedBox(height: 32),
+
+                            // Favorite Practices
+                            Text(
+                              'FAVORITE PRACTICES',
+                              style: textTheme.labelSmall?.copyWith(
+                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w600,
+                                color: baseTextColor.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            _buildFavoritePractices(metrics['usage'] as Map<String, int>, baseTextColor, theme),
                             const SizedBox(height: 48),
                           ],
                         );

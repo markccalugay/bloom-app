@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:quietline_app/data/user/user_service.dart';
 
 /// Slide-in side menu used by the shell.
 /// The shell owns the open/close state and passes callbacks down.
@@ -9,6 +10,7 @@ Future<String> _getVersionLabel() async {
 }
 class QLSideMenu extends StatelessWidget {
   final String displayName;
+  final String avatarId;
   final VoidCallback onClose;
 
   // Navigation callbacks (optional so we can wire them gradually)
@@ -37,6 +39,7 @@ class QLSideMenu extends StatelessWidget {
   const QLSideMenu({
     super.key,
     required this.displayName,
+    required this.avatarId,
     required this.onClose,
     this.onNavigateJourney,
     this.onNavigateBrotherhood,
@@ -87,12 +90,13 @@ class QLSideMenu extends StatelessWidget {
                           children: [
                             CircleAvatar(
                               radius: 20,
-                              backgroundColor: theme.colorScheme.primary.withValues(
+                              backgroundColor:
+                                  theme.colorScheme.primary.withValues(
                                 alpha: 0.2,
                               ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                color: Colors.white,
+                              child: Text(
+                                avatarPresets[avatarId] ?? '👤',
+                                style: const TextStyle(fontSize: 20),
                               ),
                             ),
                             const SizedBox(width: 12),

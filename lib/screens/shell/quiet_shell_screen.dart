@@ -44,6 +44,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
   String _displayName = 'Quiet guest';
+  String _avatarId = 'viking';
 
   TimeOfDay? _reminderTime;
   String _reminderLabel = 'Daily reminder · Not set';
@@ -125,12 +126,14 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       if (!mounted) return;
       setState(() {
         _displayName = user.username;
+        _avatarId = user.avatarId;
       });
     } catch (_) {
       // Silent fallback for MVP.
       if (!mounted) return;
       setState(() {
         _displayName = 'Quiet guest';
+        _avatarId = 'viking';
       });
     }
   }
@@ -503,6 +506,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           width: menuWidth,
           child: QLSideMenu(
             displayName: _displayName,
+            avatarId: _avatarId,
             onClose: _toggleMenu,
             onOpenAccount: () async {
               _toggleMenu();

@@ -51,9 +51,17 @@ class QuietStreakRepository {
     return _local.getTotalSeconds();
   }
 
-  /// Records a completed session's duration.
-  Future<void> recordSession(int seconds) {
-    return _local.incrementMetrics(seconds);
+  /// Records a completed session's duration and practice ID.
+  Future<void> recordSession(int seconds, {String? practiceId}) {
+    return _local.incrementMetrics(seconds, practiceId: practiceId);
+  }
+
+  Future<List<String>> getSessionDates() {
+    return _local.getSessionDates();
+  }
+
+  Future<Map<String, int>> getPracticeUsage() {
+    return _local.getPracticeUsage();
   }
 
   /// Returns true if a quiet session has already been completed today (local date-only).

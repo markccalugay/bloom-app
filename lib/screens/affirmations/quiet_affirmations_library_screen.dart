@@ -128,12 +128,24 @@ class _QuietAffirmationsLibraryScreenState
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          'Daily Affirmations',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            color: baseTextColor,
-                            fontWeight: FontWeight.w700,
-                          ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Daily Affirmations',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: baseTextColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            Text(
+                              '${_streak > 0 ? _streak : 0}/${coreAffirmations.length}',
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.colorScheme.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 4),
                         Text(
