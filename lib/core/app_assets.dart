@@ -28,4 +28,5 @@ class AppAssets {
   static const hammerSfx2 = 'sfx/ql_sfx_hammer_anvil_2.wav';
   static const hammerSfx3 = 'sfx/ql_sfx_hammer_anvil_3.wav';
   static const oreDropSfx = 'sfx/ql_sfx_ore_drop.wav';
+  static const affirmationRevealSfx = 'sfx/ql_sfx_affirmation_card_reveal.wav';
 }

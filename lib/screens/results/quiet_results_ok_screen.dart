@@ -15,6 +15,8 @@ import 'widgets/quiet_results_streak_badge.dart';
 import 'widgets/quiet_results_streak_row.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/screens/forge/quiet_forge_screen.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/app_assets.dart';
 
 /// “You showed up again” results screen shown when mood >= 3.
 ///
@@ -563,6 +565,11 @@ class _QuietAffirmationUnlockedScreenState
       Future.delayed(const Duration(milliseconds: 1180), () {
         if (!mounted) return;
         HapticFeedback.heavyImpact();
+      });
+
+      Future<void>.delayed(const Duration(milliseconds: 880), () {
+        if (!mounted) return;
+        SoundscapeService.instance.playSfx(AppAssets.affirmationRevealSfx);
       });
 
       _controller.forward();
