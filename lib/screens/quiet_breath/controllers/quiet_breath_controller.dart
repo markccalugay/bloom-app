@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../quiet_breath_constants.dart';
 import '../models/breath_phase_contracts.dart';
 import '../../../theme/ql_theme.dart';
+import '../../../core/soundscapes/soundscape_service.dart';
 
 /// Central brain for the Quiet Breath screen.
 /// Manages: play/pause, wave phase, rising water, countdown timer.
@@ -56,6 +57,7 @@ class QuietBreathController extends ChangeNotifier {
             _sessionCompleted = true;
             // End the session exactly when the fill finishes.
             pause();
+            SoundscapeService.instance.stop(); // Fade out soundscape
             final cb = onSessionComplete;
             if (cb != null) cb();
           }
@@ -153,6 +155,7 @@ class QuietBreathController extends ChangeNotifier {
         _secondsLeft == _sessionTotalSeconds && _introCtrl.value == 0.0;
     if (isFreshStart) {
       _introCtrl.forward(from: 0.0);
+      SoundscapeService.instance.play(); // Fade in soundscape
     }
 
     // Prepare/continue rising water
@@ -230,6 +233,8 @@ class QuietBreathController extends ChangeNotifier {
     _riseCtrl.value = 1.0;
     _secondsLeft = 0;
 
+    SoundscapeService.instance.stop();
+
     notifyListeners();
 
     final cb = onSessionComplete;
@@ -256,6 +261,7 @@ class QuietBreathController extends ChangeNotifier {
     _introCtrl.reset();
     _boxCtrl.value = 0.0;
     _secondsLeft = _sessionTotalSeconds;
+    SoundscapeService.instance.stop();
     notifyListeners();
   }
 
@@ -291,6 +297,7 @@ class QuietBreathController extends ChangeNotifier {
     _riseCtrl.dispose();
     _introCtrl.dispose();
     _boxCtrl.dispose();
+    SoundscapeService.instance.stop(); // Stop soundscape when screen is closed
     super.dispose();
   }
 }
