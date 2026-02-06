@@ -261,6 +261,22 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     });
   }
 
+  Future<void> _navigateToPractices() async {
+    // Close the menu if it's open.
+    if (_isMenuOpen) {
+      setState(() {
+        _isMenuOpen = false;
+      });
+    }
+
+    // Open the Practice Library.
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => QuietPracticeLibraryScreen(),
+      ),
+    );
+  }
+
   Widget _buildBody() {
     switch (_currentIndex) {
       case 0:
@@ -268,6 +284,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
         return QuietHomeScreen(
           streak: _streak ?? 0,
           onMenu: _toggleMenu,
+          onPracticeTap: _navigateToPractices,
         );
       case 2:
         // Brotherhood / community
@@ -276,6 +293,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
         return QuietHomeScreen(
           streak: _streak ?? 0,
           onMenu: _toggleMenu,
+          onPracticeTap: _navigateToPractices,
         );
     }
   }
@@ -543,21 +561,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
                 _isMenuOpen = false;
               });
             },
-            onNavigatePractices: () async {
-              // Close the menu first.
-              if (_isMenuOpen) {
-                setState(() {
-                  _isMenuOpen = false;
-                });
-              }
-
-              // Open the Practice Library.
-              await Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => QuietPracticeLibraryScreen(),
-                ),
-              );
-            },
+            onNavigatePractices: _navigateToPractices,
             onNavigateAffirmations: () async {
               // Close the menu first.
               if (_isMenuOpen) {

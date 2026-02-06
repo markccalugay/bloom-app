@@ -43,6 +43,7 @@ Widget _buildHomeBody({
   required String unlockedLabel,
   required String? affirmationText,
   required VoidCallback? onMenu,
+  required VoidCallback? onPracticeTap,
 }) {
   return Stack(
     children: [
@@ -56,6 +57,7 @@ Widget _buildHomeBody({
                 onMenuTap: () {
                   onMenu?.call();
                 },
+                onPracticeTap: onPracticeTap,
               ),
 
               const SizedBox(height: kHomeTopSpacing),
@@ -114,11 +116,13 @@ Widget _buildHomeBody({
 class QuietHomeScreen extends StatefulWidget {
   final int streak;
   final VoidCallback? onMenu;
+  final VoidCallback? onPracticeTap;
 
   const QuietHomeScreen({
     super.key,
     required this.streak,
     this.onMenu,
+    this.onPracticeTap,
   });
 
   @override
@@ -144,6 +148,7 @@ class _QuietHomeScreenState extends State<QuietHomeScreen> {
       unlockedLabel: unlockedLabel,
       affirmationText: todayAffirmation?.text,
       onMenu: widget.onMenu,
+      onPracticeTap: widget.onPracticeTap,
     );
   }
 }
