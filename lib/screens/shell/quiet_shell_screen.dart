@@ -14,6 +14,8 @@ import 'package:quietline_app/screens/account/quiet_account_screen.dart';
 import 'package:quietline_app/screens/affirmations/quiet_affirmations_library_screen.dart';
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:quietline_app/screens/forge/quiet_armor_room_screen.dart';
+import 'package:quietline_app/screens/forge/quiet_forge_screen.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
@@ -259,6 +261,13 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     setState(() {
       _showHomeHint = false;
     });
+
+    // Special FTUE bridge: after home hint, fade and show forge.
+    await Future.delayed(const Duration(milliseconds: 500));
+    if (!mounted) return;
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const QuietForgeScreen()),
+    );
   }
 
   Future<void> _navigateToPractices() async {
@@ -574,6 +583,18 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => QuietAffirmationsLibraryScreen(),
+                ),
+              );
+            },
+            onNavigateArmorRoom: () async {
+              if (_isMenuOpen) {
+                setState(() {
+                  _isMenuOpen = false;
+                });
+              }
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const QuietArmorRoomScreen(),
                 ),
               );
             },

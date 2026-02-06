@@ -2,4 +2,30 @@ class AppAssets {
   static const flame = 'assets/images/icon-flame.svg';
   static const quietlineLogo = 'assets/images/logo-quietline.svg';
   static const ingot = 'assets/images/icon-ingot.svg';
+
+  // Forge - Raw Materials
+  static const ironRaw = 'assets/tools/iron_raw.svg';
+  static const ironForged = 'assets/tools/iron_forged.svg';
+  static const ironPolished = 'assets/tools/iron_polished.svg';
+
+  // Forge - Armor (Knight)
+  static const knightHelmet = 'assets/armor/knight/knight_helmet.svg';
+  static const knightChestplate = 'assets/armor/knight/knight_chestplate.svg';
+  static const knightPauldrons = 'assets/armor/knight/knight_pauldrons.svg';
+
+  // Forge - Armor (Legionary)
+  static const legionaryHelmet = 'assets/armor/legionary/legionary_helmet.svg';
+  static const legionaryChestplate = 'assets/armor/legionary/legionary_chestplate.svg';
+  static const legionaryPauldrons = 'assets/armor/legionary/legionary_pauldrons.svg';
+
+  // Forge - Armor (Samurai)
+  static const samuraiHelmet = 'assets/armor/samurai/samurai_helmet.svg';
+  static const samuraiChestplate = 'assets/armor/samurai/samurai_chestplate.svg';
+  static const samuraiPauldrons = 'assets/armor/samurai/samurai_pauldrons.svg';
+
+  // SFX
+  static const hammerSfx1 = 'sfx/ql_sfx_hammer_anvil_1.wav';
+  static const hammerSfx2 = 'sfx/ql_sfx_hammer_anvil_2.wav';
+  static const hammerSfx3 = 'sfx/ql_sfx_hammer_anvil_3.wav';
+  static const oreDropSfx = 'sfx/ql_sfx_ore_drop.wav';
 }

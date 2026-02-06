@@ -25,6 +25,7 @@ import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'package:quietline_app/core/theme/theme_service.dart';
 import 'package:quietline_app/core/timezone/timezone_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'data/forge/forge_service.dart';
 
 late QuietStreakRepository quietStreakRepo;
 
@@ -44,6 +45,7 @@ void main() async {
 
   QuietStreakService.repo = quietStreakRepo;
   await PracticeAccessService.instance.initialize();
+  await ForgeService.instance.initialize();
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,

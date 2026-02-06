@@ -75,6 +75,10 @@ flutter:
     - assets/images/icon-flame.svg
     - assets/images/icon-ingot.svg
     - assets/sfx/
+    - assets/tools/
+    - assets/armor/knight/
+    - assets/armor/legionary/
+    - assets/armor/samurai/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
