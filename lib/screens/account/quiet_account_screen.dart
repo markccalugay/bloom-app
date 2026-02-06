@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
@@ -425,7 +426,10 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                                   ),
                                                   child: Slider(
                                                     value: soundService.volume,
-                                                    onChanged: (val) => soundService.setVolume(val),
+                                                    onChanged: (val) {
+                                                      HapticFeedback.selectionClick();
+                                                      soundService.setVolume(val);
+                                                    },
                                                     activeColor: theme.colorScheme.primary,
                                                     inactiveColor: baseTextColor.withValues(alpha: 0.1),
                                                   ),
@@ -538,7 +542,10 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                                   ),
                                                   child: Slider(
                                                     value: soundService.sfxVolume,
-                                                    onChanged: (val) => soundService.setSfxVolume(val),
+                                                    onChanged: (val) {
+                                                      HapticFeedback.selectionClick();
+                                                      soundService.setSfxVolume(val);
+                                                    },
                                                     activeColor: theme.colorScheme.primary,
                                                     inactiveColor: baseTextColor.withValues(alpha: 0.1),
                                                   ),
