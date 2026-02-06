@@ -24,6 +24,7 @@ import 'package:quietline_app/core/storekit/storekit_service.dart';
 
 import 'package:quietline_app/core/theme/theme_service.dart';
 import 'package:quietline_app/core/timezone/timezone_service.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 
 late QuietStreakRepository quietStreakRepo;
 
@@ -32,6 +33,7 @@ void main() async {
   await StoreKitService.instance.initialize();
   await PremiumEntitlement.instance.initialize();
   await ThemeService.instance.initialize();
+  await SoundscapeService.instance.initialize();
   debugPrint('[BOOT] premium=${PremiumEntitlement.instance.isPremium}');
   await TimezoneService.initialize();
 
