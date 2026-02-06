@@ -7,6 +7,8 @@ import 'package:quietline_app/data/affirmations/affirmations_model.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
+import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
+import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietHomeAffirmationsCarousel extends StatefulWidget {
@@ -87,24 +89,18 @@ class _QuietHomeAffirmationsCarouselState
 
   List<_AffirmationCardData> _buildCards() {
     final service = const AffirmationsService();
+    final isPremium =
+        PremiumEntitlement.instance.isPremium;
     final rng = Random();
 
+    // 1. First Position: Most recently unlocked Core affirmation
     final primary =
         service.getHomeCoreForStreakDay(widget.streak);
 
-    final allUnlocked = service.getAffirmationsForPack('core')
-        .where((a) => _unlockedIds.contains(a.id) && a.id != primary?.id)
-        .toList();
-
-    allUnlocked.shuffle(rng);
-
-    final secondary = allUnlocked.take(2).toList();
+    final List<_AffirmationCardData> cards = [];
 
     final tier = _backgroundTierForStreak(widget.streak);
-
     final backgrounds = _backgroundsForTier(tier);
-
-    final cards = <_AffirmationCardData>[];
 
     if (primary != null) {
       cards.add(
@@ -115,16 +111,81 @@ class _QuietHomeAffirmationsCarouselState
       );
     }
 
-    for (int i = 0; i < secondary.length; i++) {
+    // 2. Second Position: Premium random (if premium), otherwise random Core
+    Affirmation? secondary;
+    if (isPremium) {
+      // Pick random from Focus, Sleep, or Strength
+      final packs = [
+        AffirmationPackIds.focus,
+        AffirmationPackIds.sleep,
+        AffirmationPackIds.strength
+      ];
+      final randomPack = packs[rng.nextInt(packs.length)];
+      secondary = service.getRandomFromPack(randomPack);
+    } else {
+      // Random unlocked Core (excluding primary)
+      final allUnlockedCore = service
+          .getAffirmationsForPack(AffirmationPackIds.core)
+          .where((a) =>
+              _unlockedIds.contains(a.id) &&
+              a.id != primary?.id)
+          .toList();
+      if (allUnlockedCore.isNotEmpty) {
+        secondary =
+            allUnlockedCore[rng.nextInt(allUnlockedCore.length)];
+      }
+    }
+
+    if (secondary != null) {
       cards.add(
         _AffirmationCardData(
-          affirmation: secondary[i],
-          background: backgrounds.secondary[i % backgrounds.secondary.length],
+          affirmation: secondary,
+          background: backgrounds.secondary[0 % backgrounds.secondary.length],
         ),
       );
     }
 
-    return backgrounds.primary == QLGradients.tealFlame ? cards : cards; // No-op to avoid unused var if needed
+    // 3. Third Position: Random from WHICHEVER library
+    // (Excluding ones already picked)
+    final existingIds = cards.map((c) => c.affirmation.id).toSet();
+    
+    // Aggregate potential candidates from ALL packs
+    final allPacks = [
+      AffirmationPackIds.core,
+      AffirmationPackIds.focus,
+      AffirmationPackIds.sleep,
+      AffirmationPackIds.strength
+    ];
+    
+    final List<Affirmation> candidates = [];
+    for (final packId in allPacks) {
+      final packAffirmations = service.getAffirmationsForPack(packId);
+      for (final a in packAffirmations) {
+        // If it's core, must be unlocked. If premium, user must be premium.
+        bool isEligible = false;
+        if (packId == AffirmationPackIds.core) {
+          isEligible = _unlockedIds.contains(a.id);
+        } else {
+          isEligible = isPremium;
+        }
+
+        if (isEligible && !existingIds.contains(a.id)) {
+          candidates.add(a);
+        }
+      }
+    }
+
+    if (candidates.isNotEmpty) {
+      final tertiary = candidates[rng.nextInt(candidates.length)];
+      cards.add(
+        _AffirmationCardData(
+          affirmation: tertiary,
+          background: backgrounds.secondary[1 % backgrounds.secondary.length],
+        ),
+      );
+    }
+
+    return cards;
   }
 
   @override
