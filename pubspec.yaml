@@ -41,7 +41,7 @@ dependencies:
   package_info_plus: ^9.0.0
   flutter_local_notifications: ^18.0.1
   timezone: ^0.10.1
-  flutter_native_timezone: ^2.0.0
+  flutter_timezone: ^3.0.1
   in_app_purchase: ^3.2.3
 
 dev_dependencies:
@@ -74,6 +74,11 @@ flutter:
     - assets/images/logo-quietline.svg
     - assets/images/icon-flame.svg
     - assets/images/icon-ingot.svg
+    - assets/sfx/
+    - assets/tools/
+    - assets/armor/knight/
+    - assets/armor/legionary/
+    - assets/armor/samurai/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

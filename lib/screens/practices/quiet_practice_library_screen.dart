@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:quietline_app/data/practices/practice_catalog.dart';
 import 'package:quietline_app/data/practices/practice_model.dart';
@@ -87,14 +88,20 @@ class _QuietPracticeLibraryScreenState
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.of(context).pop(false),
+                                    onPressed: () {
+                                      HapticFeedback.selectionClick();
+                                      Navigator.of(context).pop(false);
+                                    },
                                     child: Text(
                                       'Cancel',
                                       style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                                     ),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () => Navigator.of(context).pop(true),
+                                    onPressed: () {
+                                      HapticFeedback.selectionClick();
+                                      Navigator.of(context).pop(true);
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: theme.colorScheme.primary,
                                       foregroundColor: theme.colorScheme.onPrimary,
@@ -275,7 +282,10 @@ class _PracticeDetailSheet extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: isActive ? null : onActivate,
+              onPressed: isActive ? null : () {
+                HapticFeedback.selectionClick();
+                onActivate();
+              },
               child: Text(isActive ? 'Active' : 'Activate'),
             ),
           ),

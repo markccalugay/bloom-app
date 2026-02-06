@@ -20,6 +20,7 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onNavigateBrotherhood;
   final VoidCallback? onNavigatePractices;
   final VoidCallback? onNavigateAffirmations;
+  final VoidCallback? onNavigateArmorRoom;
   final VoidCallback? onOpenAccount;
 
   // MVP toggles
@@ -48,6 +49,7 @@ class QLSideMenu extends StatelessWidget {
     this.onNavigateBrotherhood,
     this.onNavigatePractices,
     this.onNavigateAffirmations,
+    this.onNavigateArmorRoom,
     this.onOpenAbout,
     this.onOpenWebsite,
     this.onOpenSupport,
@@ -196,6 +198,13 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onNavigateAffirmations,
+                    ),
+                    _MenuItem(
+                      icon: Icons.shield_outlined,
+                      label: 'Armor Room',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onNavigateArmorRoom,
                     ),
 
                     const SizedBox(height: 16),

@@ -14,6 +14,7 @@ import 'package:quietline_app/core/feature_flags.dart';
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
 import 'package:quietline_app/screens/results/quiet_session_complete_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -48,12 +49,14 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     setState(() {
       _countdownValue = 3;
     });
+    SoundscapeService.instance.playCountdown(3);
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (!mounted) return;
       setState(() {
         if (_countdownValue! > 1) {
           _countdownValue = _countdownValue! - 1;
+          SoundscapeService.instance.playCountdown(_countdownValue!);
         } else {
           _countdownValue = null;
           _countdownTimer?.cancel();
@@ -269,19 +272,45 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   curve: Curves.easeOut,
                   child: AnimatedBuilder(
                     animation: controller.listenable,
-                    builder: (_, _) => IconButton(
-                      icon: Icon(
-                        controller.isPlaying ? Icons.pause : Icons.play_arrow,
-                        size: 22,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withValues(alpha: 0.6),
-                      ),
-                      onPressed: () {
-                        HapticFeedback.selectionClick();
-                        controller.toggle();
-                      },
+                    builder: (_, _) => Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            controller.isPlaying ? Icons.pause : Icons.play_arrow,
+                            size: 22,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                          ),
+                          onPressed: () {
+                            HapticFeedback.selectionClick();
+                            controller.toggle();
+                          },
+                        ),
+                        const SizedBox(width: 4),
+                        ListenableBuilder(
+                          listenable: SoundscapeService.instance,
+                          builder: (context, _) {
+                            final isMuted = SoundscapeService.instance.isMuted;
+                            return IconButton(
+                              icon: Icon(
+                                isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                                size: 20,
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withValues(alpha: 0.6),
+                              ),
+                              onPressed: () {
+                                HapticFeedback.selectionClick();
+                                SoundscapeService.instance.toggleMute();
+                              },
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ),

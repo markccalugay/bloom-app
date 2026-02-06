@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -64,6 +65,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                     onPressed: (isPremium || _isProcessing)
                         ? null
                         : () async {
+                            HapticFeedback.selectionClick();
                             setState(() => _isProcessing = true);
                             await StoreKitService.instance.purchasePremium();
                             if (mounted) setState(() => _isProcessing = false);
@@ -84,6 +86,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                       onPressed: _isProcessing
                           ? null
                           : () async {
+                              HapticFeedback.selectionClick();
                               setState(() => _isProcessing = true);
                               await StoreKitService.instance.restorePurchases();
                               if (mounted) setState(() => _isProcessing = false);

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
@@ -11,6 +12,8 @@ import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts
 import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/screens/account/widgets/soundscape_selection_modal.dart';
 
 /// Simple MVP account screen.
 /// Shows the anonymous user's display name.
@@ -335,6 +338,260 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                     sessionDates: metrics['dates'] as List<String>,
                                     baseTextColor: baseTextColor,
                                   ),
+                                ),
+                                const SizedBox(height: 32),
+
+                                // Soundscapes Section
+                                Text(
+                                  'SOUNDSCAPES',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: baseTextColor.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                ListenableBuilder(
+                                  listenable: SoundscapeService.instance,
+                                  builder: (context, _) {
+                                    final soundService = SoundscapeService.instance;
+                                    return Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: baseTextColor.withValues(alpha: 0.08),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Active: ${soundService.activeSoundscape.name}',
+                                                    style: textTheme.bodyMedium?.copyWith(
+                                                      fontWeight: FontWeight.w600,
+                                                      color: baseTextColor,
+                                                    ),
+                                                  ),
+                                                  if (soundService.isMuted)
+                                                    Text(
+                                                      'Muted',
+                                                      style: textTheme.bodySmall?.copyWith(
+                                                        color: Colors.redAccent.withValues(alpha: 0.7),
+                                                        fontWeight: FontWeight.w500,
+                                                      ),
+                                                    ),
+                                                ],
+                                              ),
+                                              TextButton(
+                                                onPressed: () {
+                                                  showModalBottomSheet(
+                                                    context: context,
+                                                    isScrollControlled: true,
+                                                    backgroundColor: Colors.transparent,
+                                                    builder: (context) => const SoundscapeSelectionModal(),
+                                                  );
+                                                },
+                                                child: Text(
+                                                  'Change',
+                                                  style: TextStyle(
+                                                    color: theme.colorScheme.primary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                soundService.isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                                                size: 20,
+                                                color: baseTextColor.withValues(alpha: 0.4),
+                                              ),
+                                              Expanded(
+                                                child: SliderTheme(
+                                                  data: SliderTheme.of(context).copyWith(
+                                                    trackHeight: 4,
+                                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                                                  ),
+                                                  child: Slider(
+                                                    value: soundService.volume,
+                                                    onChanged: (val) {
+                                                      HapticFeedback.selectionClick();
+                                                      soundService.setVolume(val);
+                                                    },
+                                                    activeColor: theme.colorScheme.primary,
+                                                    inactiveColor: baseTextColor.withValues(alpha: 0.1),
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                '${(soundService.volume * 100).toInt()}%',
+                                                style: textTheme.labelSmall?.copyWith(
+                                                  color: baseTextColor.withValues(alpha: 0.4),
+                                                  fontFeatures: [const FontFeature.tabularFigures()],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          InkWell(
+                                            onTap: () => soundService.toggleMute(),
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 4),
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(
+                                                    height: 24,
+                                                    width: 24,
+                                                    child: Checkbox(
+                                                      value: soundService.isMuted,
+                                                      onChanged: (_) => soundService.toggleMute(),
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'Mute Soundscape',
+                                                    style: textTheme.bodySmall?.copyWith(
+                                                      color: baseTextColor.withValues(alpha: 0.7),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                                const SizedBox(height: 32),
+
+                                // Sound Effects Section
+                                Text(
+                                  'SOUND EFFECTS',
+                                  style: textTheme.labelSmall?.copyWith(
+                                    letterSpacing: 0.8,
+                                    fontWeight: FontWeight.w600,
+                                    color: baseTextColor.withValues(alpha: 0.4),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                ListenableBuilder(
+                                  listenable: SoundscapeService.instance,
+                                  builder: (context, _) {
+                                    final soundService = SoundscapeService.instance;
+                                    return Container(
+                                      padding: const EdgeInsets.all(16),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surface,
+                                        borderRadius: BorderRadius.circular(16),
+                                        border: Border.all(
+                                          color: baseTextColor.withValues(alpha: 0.08),
+                                        ),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Clicks, Taps & Countdown',
+                                                style: textTheme.bodyMedium?.copyWith(
+                                                  fontWeight: FontWeight.w600,
+                                                  color: baseTextColor,
+                                                ),
+                                              ),
+                                              if (soundService.isSfxMuted)
+                                                Text(
+                                                  'Muted',
+                                                  style: textTheme.bodySmall?.copyWith(
+                                                    color: Colors.redAccent.withValues(alpha: 0.7),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 16),
+                                          Row(
+                                            children: [
+                                              Icon(
+                                                soundService.isSfxMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                                                size: 20,
+                                                color: baseTextColor.withValues(alpha: 0.4),
+                                              ),
+                                              Expanded(
+                                                child: SliderTheme(
+                                                  data: SliderTheme.of(context).copyWith(
+                                                    trackHeight: 4,
+                                                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                                                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+                                                  ),
+                                                  child: Slider(
+                                                    value: soundService.sfxVolume,
+                                                    onChanged: (val) {
+                                                      HapticFeedback.selectionClick();
+                                                      soundService.setSfxVolume(val);
+                                                    },
+                                                    activeColor: theme.colorScheme.primary,
+                                                    inactiveColor: baseTextColor.withValues(alpha: 0.1),
+                                                  ),
+                                                ),
+                                              ),
+                                              Text(
+                                                '${(soundService.sfxVolume * 100).toInt()}%',
+                                                style: textTheme.labelSmall?.copyWith(
+                                                  color: baseTextColor.withValues(alpha: 0.4),
+                                                  fontFeatures: [const FontFeature.tabularFigures()],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          const SizedBox(height: 8),
+                                          InkWell(
+                                            onTap: () => soundService.toggleSfxMute(),
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 4),
+                                              child: Row(
+                                                children: [
+                                                  SizedBox(
+                                                    height: 24,
+                                                    width: 24,
+                                                    child: Checkbox(
+                                                      value: soundService.isSfxMuted,
+                                                      onChanged: (_) => soundService.toggleSfxMute(),
+                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    'Mute Sound Effects',
+                                                    style: textTheme.bodySmall?.copyWith(
+                                                      color: baseTextColor.withValues(alpha: 0.7),
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
                                 ),
                                 const SizedBox(height: 32),
 
