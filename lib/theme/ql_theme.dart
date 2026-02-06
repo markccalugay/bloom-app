@@ -55,6 +55,26 @@ class QLColors {
   static const softCrimson = Color(0xFFB35A57);   // Error
   static const mutedAmber = Color(0xFFD4A758);    // Warning
   static const horizonBlue = Color(0xFF67B4C2);   // Info
+  
+  // ── Armor Design System ──
+  // Core Armor Neutrals (Midnight Composure compatible)
+  static const armorIronDark   = Color(0xFF45515A); // Lightened: deepStone
+  static const armorIronBase   = Color(0xFF708090); // Lightened: slate gray
+  static const armorIronLight  = Color(0xFFD1D7DD); // Lightened: soft silver highlight
+
+  // Armor Outline / Stroke
+  static const armorOutline    = Color(0xFF4A565F); // aligns w/ deepStone
+
+  // Forging / Progress Accents (Warm, restrained)
+  static const armorForgeWarm  = Color(0xFF7A5C3A); // muted bronze
+  static const armorForgeGlow  = Color(0xFFA17E57); // reuses warmBronze
+
+  // Locked State (Silhouette)
+  static const armorLockedFill = Color(0xFF141A20); // near background
+  static const armorLockedLine = Color(0xFF232B33); // ironGray
+
+  // Unlocked / Polished Style
+  static const armorIronSaturated = Color(0xFF89D6CE); // polished metallic teal
 
   // ── Component & Legacy Mapping ──
   static const ringTrack = Color(0x1A000000); // 10% black for Light mode default

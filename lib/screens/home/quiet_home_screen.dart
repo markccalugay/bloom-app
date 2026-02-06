@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 import 'package:quietline_app/widgets/affirmations/quiet_home_affirmations_carousel.dart';
+import 'package:quietline_app/data/forge/forge_service.dart';
 
 const double kHomeHorizontalPadding = 16.0;
 const double kHomeTopSpacing = 20.0;          // space between app bar and streak
@@ -48,58 +49,86 @@ Widget _buildHomeBody({
   return Stack(
     children: [
       SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              QuietHomeAppBar(
-                onMenuTap: () {
-                  onMenu?.call();
-                },
-                onPracticeTap: onPracticeTap,
-              ),
-
-              const SizedBox(height: kHomeTopSpacing),
-
-              QuietHomeStreakRow(streak: streak),
-
-              const SizedBox(height: 40.0),
-
-              const QuietHomeIngotBackground(),
-
-              const SizedBox(height: 32.0),
-
-              QuietHomeAffirmationsCarousel(
-                streak: streak,
-              ),
-
-              const Spacer(),
-              const SizedBox(height: kHomeBottomSpacing),
-            ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                QuietHomeAppBar(
+                  onMenuTap: () {
+                    onMenu?.call();
+                  },
+                  onPracticeTap: onPracticeTap,
+                ),
+  
+                const SizedBox(height: kHomeTopSpacing),
+  
+                QuietHomeStreakRow(streak: streak),
+  
+                const SizedBox(height: 40.0),
+  
+                const QuietHomeIngotBackground(),
+  
+                const SizedBox(height: 32.0),
+  
+                QuietHomeAffirmationsCarousel(
+                  streak: streak,
+                ),
+  
+                const SizedBox(height: kHomeBottomSpacing),
+              ],
+            ),
           ),
         ),
       ),
       if (kDebugMode)
         Positioned(
-          bottom: 110,
+          bottom: 120,
           left: 12,
-          child: TextButton(
-            onPressed: () {
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => const QuietResultsOkScreen(
-                    streak: 10,
-                    previousStreak: 9,
-                    isNew: true,
-                  ),
-                ),
-              );
-            },
-            child: const Text(
-              'DEBUG: Open Streak',
-              style: TextStyle(color: Colors.redAccent, fontSize: 10),
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const QuietResultsOkScreen(
+                        streak: 5, // Mocking a 5-day streak
+                        previousStreak: 4,
+                        isNew: true,
+                      ),
+                    ),
+                  );
+                },
+                child: const Text('DEBUG: Complete Session (Test Flow)',
+                    style: TextStyle(color: Colors.greenAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+              TextButton(
+                onPressed: () => ForgeService.instance.advanceProgress(),
+                child: const Text('DEBUG: Advance Forge Stage',
+                    style: TextStyle(color: Colors.orangeAccent, fontSize: 10)),
+              ),
+              TextButton(
+                onPressed: () => ForgeService.instance.debugReset(),
+                child: const Text('DEBUG: Reset All Progress',
+                    style: TextStyle(color: Colors.white70, fontSize: 10)),
+              ),
+              TextButton(
+                onPressed: () => ForgeService.instance.setCurrentSet(ArmorSet.samurai),
+                child: const Text('DEBUG: Set Samurai Armor',
+                    style: TextStyle(color: Colors.blueAccent, fontSize: 10)),
+              ),
+              TextButton(
+                onPressed: () async {
+                  await ForgeService.instance.debugReset();
+                  await ForgeService.instance.debugSetStage(IronStage.polished);
+                  await ForgeService.instance.advanceProgress();
+                },
+                child: const Text('DEBUG: Force Unlock Helmet',
+                    style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
         ),
     ],

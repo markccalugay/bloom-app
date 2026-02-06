@@ -13,6 +13,10 @@ import 'quiet_results_constants.dart';
 import 'quiet_results_strings.dart';
 import 'widgets/quiet_results_streak_badge.dart';
 import 'widgets/quiet_results_streak_row.dart';
+import 'package:quietline_app/data/forge/forge_service.dart';
+import 'package:quietline_app/screens/forge/quiet_forge_screen.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/app_assets.dart';
 
 /// “You showed up again” results screen shown when mood >= 3.
 ///
@@ -177,284 +181,255 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
 
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: QuietResultsConstants.horizontalPadding,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 24),
-
-              // Headline (centered)
-              Text(
-                QuietResultsStrings.okHeadline,
-                style: textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: QuietResultsConstants.horizontalPadding,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (kDebugMode)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: Wrap(
+                      spacing: 8,
+                      children: [
+                        TextButton(
+                          onPressed: () async {
+                            final int streak = _debugStreakOverride ?? widget.streak;
+                            final int prevStreak = (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
+                                .clamp(0, 999999);
+  
+                            setState(() {
+                              _debugForceAnimate = true;
+                              _shouldAnimateStreak = true;
+                              _animateRow = false;
+                              _animateBadge = false;
+                              _countFrom = prevStreak;
+                              _countTo = streak;
+                              _countController.stop();
+                              _countController.value = 0.0;
+                              _animationSeed++;
+                            });
+  
+                            await Future.delayed(_rowStartDelay);
+                            if (!mounted) return;
+                            setState(() => _animateRow = true);
+  
+                            await Future.delayed(_badgeStartAfterRow);
+                            if (!mounted) return;
+                            setState(() => _animateBadge = true);
+  
+                            _countController.forward(from: 0.0);
+                          },
+                          child: const Text('DEBUG: Replay', style: TextStyle(color: Colors.redAccent, fontSize: 10)),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            final int current = _debugStreakOverride ?? widget.streak;
+                            final int next = (current + 1).clamp(0, 999999);
+                            setState(() {
+                              _debugForceAnimate = true;
+                              _shouldAnimateStreak = true;
+                              _debugPrevOverride = current;
+                              _debugStreakOverride = next;
+                              _animateRow = false;
+                              _animateBadge = false;
+                              _countFrom = current;
+                              _countTo = next;
+                              _countController.stop();
+                              _countController.value = 0.0;
+                              _animationSeed++;
+                            });
+                            await Future.delayed(_rowStartDelay);
+                            if (!mounted) return;
+                            setState(() => _animateRow = true);
+                            await Future.delayed(_badgeStartAfterRow);
+                            if (!mounted) return;
+                            setState(() => _animateBadge = true);
+                            _countController.forward(from: 0.0);
+                          },
+                          child: const Text('DEBUG: +1', style: TextStyle(color: Colors.orangeAccent, fontSize: 10)),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _debugPrevOverride = 0;
+                              _debugStreakOverride = 1;
+                              _debugForceAnimate = false;
+                              _shouldAnimateStreak = false;
+                              _animateRow = false;
+                              _animateBadge = false;
+                              _countController.stop();
+                              _countController.value = 0.0;
+                              _animationSeed++;
+                              _didAutoPlay = false;
+                            });
+                          },
+                          child: const Text('DEBUG: Reset', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                        ),
+                      ],
+                    ),
+                  ),
+                const SizedBox(height: 24),
+  
+                // Headline (centered)
+                Text(
+                  QuietResultsStrings.okHeadline,
+                  style: textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                  textAlign: TextAlign.left,
                 ),
-                textAlign: TextAlign.left,
-              ),
-
-              const SizedBox(height: 8),
-
-              // Subcopy (centered)
-              Text(
-                QuietResultsStrings.okSub,
-                style: textTheme.bodyMedium?.copyWith(
-                  color: (textTheme.bodyMedium?.color ?? Colors.white)
-                      .withValues(alpha: 0.85),
+  
+                const SizedBox(height: 8),
+  
+                // Subcopy (centered)
+                Text(
+                  QuietResultsStrings.okSub,
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: (textTheme.bodyMedium?.color ?? Colors.white)
+                        .withValues(alpha: 0.85),
+                  ),
+                  textAlign: TextAlign.left,
                 ),
-                textAlign: TextAlign.left,
-              ),
-
-              const Spacer(),
-
-              // Center block: day label, big flame, small flames
-              Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Day X of your quiet streak (updated to use displayStreakNow)
-                    Text(
-                      QuietResultsStrings.dayOfStreak(displayStreakNow),
-                      style: textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w500,
+  
+                const SizedBox(height: 80), // Manual Spacer replacement for scrollable
+  
+                // Center block: day label, big flame, small flames
+                Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Day X of your quiet streak (updated to use displayStreakNow)
+                      Text(
+                        QuietResultsStrings.dayOfStreak(displayStreakNow),
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                      textAlign: TextAlign.center,
-                    ),
-
-                    const SizedBox(
-                      height: QuietResultsConstants.verticalSpacingMedium,
-                    ),
-
-                    // Big SVG flame badge
-                    AnimatedBuilder(
-                      animation: _countController,
-                      builder: (context, _) {
-                        int displayStreak;
-                        if (!streakIncreased) {
-                          displayStreak = streak;
-                        } else if (!_shouldAnimateStreak || !_animateBadge) {
-                          displayStreak = prevStreak;
-                        } else {
-                          final t = _countController.value;
-                          final eased = Curves.easeOutCubic.transform(t);
-                          displayStreak = (_countFrom + ((_countTo - _countFrom) * eased).round()).clamp(_countFrom, _countTo);
-                        }
-
-                        final bool badgeShouldAnimate =
-                            (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge;
-                        // Prevent teal -> gray -> teal flicker on continued streak days.
-                        // For continued streaks, treat the badge as already active by setting
-                        // its previousStreak equal to the current streak.
-                        final int badgePreviousStreak = continuedStreak ? streak : prevStreak;
-                        return QuietResultsStreakBadge(
-                          key: ValueKey('streak_badge_$_animationSeed'),
-                          // IMPORTANT: drive the badge's visual state from the displayed value so it
-                          // starts inactive (gray) on FTUE and only turns teal when the count-up begins.
-                          streak: displayStreak,
-                          previousStreak: badgePreviousStreak,
-                          // the badge renders this number (0->1, 1->2, etc)
-                          displayStreak: displayStreak,
-                          // Badge only animates in step 2
-                          animate: badgeShouldAnimate,
-                          // badge should start immediately when step 2 flips true
-                          startDelay: Duration.zero,
-                          // Prevent gray->teal on continued streaks, only FTUE
-                          startInactive: !continuedStreak,
-                          // Play wiggle only on continued streaks (no color transition)
-                          wiggleOnly: continuedStreak,
-                          completedToday: streakIncreased
-                              ? (_shouldAnimateStreak && _animateBadge)
-                              : widget.completedToday,
-                        );
-                      },
-                    ),
-
-                    const SizedBox(
-                      height: QuietResultsConstants.verticalSpacingSmall,
-                    ),
-
-                    // Small flame row
-                    QuietResultsStreakRow(
-                      key: ValueKey('streak_row_$_animationSeed'),
-                      streak: (!streakIncreased)
-                          ? streak
-                          : ((_shouldAnimateStreak && _animateRow) ? streak : prevStreak),
-                      previousStreak: continuedStreak ? streak : prevStreak,
-                      // Row only animates in step 1
-                      animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateRow,
-                      // row starts immediately when step 1 flips true
-                      startDelay: Duration.zero,
-                    ),
-                  ],
+  
+                      const SizedBox(
+                        height: QuietResultsConstants.verticalSpacingMedium,
+                      ),
+  
+                      // Big SVG flame badge
+                      AnimatedBuilder(
+                        animation: _countController,
+                        builder: (context, _) {
+                          int displayStreak;
+                          if (!streakIncreased) {
+                            displayStreak = streak;
+                          } else if (!_shouldAnimateStreak || !_animateBadge) {
+                            displayStreak = prevStreak;
+                          } else {
+                            final t = _countController.value;
+                            final eased = Curves.easeOutCubic.transform(t);
+                            displayStreak = (_countFrom + ((_countTo - _countFrom) * eased).round()).clamp(_countFrom, _countTo);
+                          }
+  
+                          final bool badgeShouldAnimate =
+                              (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge;
+                          // Prevent teal -> gray -> teal flicker on continued streak days.
+                          // For continued streaks, treat the badge as already active by setting
+                          // its previousStreak equal to the current streak.
+                          final int badgePreviousStreak = continuedStreak ? streak : prevStreak;
+                          return QuietResultsStreakBadge(
+                            key: ValueKey('streak_badge_$_animationSeed'),
+                            // IMPORTANT: drive the badge's visual state from the displayed value so it
+                            // starts inactive (gray) on FTUE and only turns teal when the count-up begins.
+                            streak: displayStreak,
+                            previousStreak: badgePreviousStreak,
+                            // the badge renders this number (0->1, 1->2, etc)
+                            displayStreak: displayStreak,
+                            // Badge only animates in step 2
+                            animate: badgeShouldAnimate,
+                            // badge should start immediately when step 2 flips true
+                            startDelay: Duration.zero,
+                            // Prevent gray->teal on continued streaks, only FTUE
+                            startInactive: !continuedStreak,
+                            // Play wiggle only on continued streaks (no color transition)
+                            wiggleOnly: continuedStreak,
+                            completedToday: streakIncreased
+                                ? (_shouldAnimateStreak && _animateBadge)
+                                : widget.completedToday,
+                          );
+                        },
+                      ),
+  
+                      const SizedBox(
+                        height: QuietResultsConstants.verticalSpacingSmall,
+                      ),
+  
+                      // Small flame row
+                      QuietResultsStreakRow(
+                        key: ValueKey('streak_row_$_animationSeed'),
+                        streak: (!streakIncreased)
+                            ? streak
+                            : ((_shouldAnimateStreak && _animateRow) ? streak : prevStreak),
+                        previousStreak: continuedStreak ? streak : prevStreak,
+                        // Row only animates in step 1
+                        animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateRow,
+                        // row starts immediately when step 1 flips true
+                        startDelay: Duration.zero,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-
-              const Spacer(),
-
-              if (showPracticeUnlock) ...[
-                QuietInlineUnlockCard(
-                  title: 'Explore deeper practices',
-                  subtitle:
-                      'Go beyond the core reset with guided discipline, calm, and resilience practices.',
-                  ctaLabel: 'View practices',
-                  onTap: () {
-                    Navigator.of(context).push(
+  
+                const SizedBox(height: 80), // Manual Spacer replacement
+  
+                if (showPracticeUnlock) ...[
+                  QuietInlineUnlockCard(
+                    title: 'Explore deeper practices',
+                    subtitle:
+                        'Go beyond the core reset with guided discipline, calm, and resilience practices.',
+                    ctaLabel: 'View practices',
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const QuietPracticeLibraryScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
+  
+  
+                // Bottom primary button, matching design
+                QLPrimaryButton(
+                  label: QuietResultsStrings.continueButton,
+                  onPressed: () async {
+                    if (streakIncreased) {
+                      final unlockService = AffirmationsUnlockService.instance;
+                      await unlockService.unlockIfEligibleForToday(streak);
+                      if (!context.mounted) return;
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => QuietAffirmationUnlockedScreen(streak: streak),
+                        ),
+                      );
+                      return;
+                    }
+  
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
-                        builder: (_) => const QuietPracticeLibraryScreen(),
+                        builder: (_) => const QuietShellScreen(),
                       ),
+                      (route) => false,
                     );
                   },
-                ),
-                const SizedBox(height: 20),
-              ],
-
-              // DEBUG BUTTONS (TEMPORARY)
-              if (kDebugMode) ...[
-                TextButton(
-                  onPressed: () async {
-                    final int streak = _debugStreakOverride ?? widget.streak;
-                    final int prevStreak = (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
-                        .clamp(0, 999999);
-
-                    setState(() {
-                      _debugForceAnimate = true;
-                      _shouldAnimateStreak = true;
-
-                      // reset sequence
-                      _animateRow = false;
-                      _animateBadge = false;
-
-                      // reset number
-                      _countFrom = prevStreak;
-                      _countTo = streak;
-                      _countController.stop();
-                      _countController.value = 0.0;
-
-                      // restart child controllers
-                      _animationSeed++;
-                    });
-
-                    // Row first
-                    await Future.delayed(_rowStartDelay);
-                    if (!mounted) return;
-                    setState(() => _animateRow = true);
-
-                    // Badge second
-                    await Future.delayed(_badgeStartAfterRow);
-                    if (!mounted) return;
-                    setState(() => _animateBadge = true);
-
-                    _countController.forward(from: 0.0);
-                  },
-                  child: const Text(
-                    'DEBUG: Play Streak Animation',
-                    style: TextStyle(color: Colors.redAccent),
-                  ),
-                ),
-
-                TextButton(
-                  onPressed: () async {
-                    final int current = _debugStreakOverride ?? widget.streak;
-                    final int next = (current + 1).clamp(0, 999999);
-
-                    setState(() {
-                      _debugForceAnimate = true;
-                      _shouldAnimateStreak = true;
-
-                      // Simulate a clean day-to-day increment
-                      _debugPrevOverride = current;
-                      _debugStreakOverride = next;
-
-                      // reset sequence
-                      _animateRow = false;
-                      _animateBadge = false;
-
-                      // number animation
-                      _countFrom = current;
-                      _countTo = next;
-                      _countController.stop();
-                      _countController.value = 0.0;
-
-                      // restart child controllers
-                      _animationSeed++;
-                    });
-
-                    // Row first
-                    await Future.delayed(_rowStartDelay);
-                    if (!mounted) return;
-                    setState(() => _animateRow = true);
-
-                    // Badge second
-                    await Future.delayed(_badgeStartAfterRow);
-                    if (!mounted) return;
-                    setState(() => _animateBadge = true);
-
-                    _countController.forward(from: 0.0);
-                  },
-                  child: const Text(
-                    'DEBUG: Next Day (+1)',
-                    style: TextStyle(color: Colors.orangeAccent),
-                  ),
-                ),
-
-                TextButton(
-                  onPressed: () {
-                    setState(() {
-                      // Reset to FTUE scenario: 0 -> 1
-                      _debugPrevOverride = 0;
-                      _debugStreakOverride = 1;
-
-                      _debugForceAnimate = false;
-                      _shouldAnimateStreak = false;
-                      _animateRow = false;
-                      _animateBadge = false;
-
-                      _countController.stop();
-                      _countController.value = 0.0;
-
-                      _animationSeed++;
-                      _didAutoPlay = false;
-                    });
-                  },
-                  child: const Text(
-                    'DEBUG: Reset FTUE (0→1)',
-                    style: TextStyle(color: Colors.white70),
+                  margin: const EdgeInsets.only(
+                    left: 40,
+                    right: 40,
+                    bottom: 32,
                   ),
                 ),
               ],
-
-              // Bottom primary button, matching design
-              QLPrimaryButton(
-                label: QuietResultsStrings.continueButton,
-                onPressed: () async {
-                  if (streakIncreased) {
-                    final unlockService = AffirmationsUnlockService.instance;
-                    await unlockService.unlockIfEligibleForToday(streak);
-                    if (!context.mounted) return;
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => QuietAffirmationUnlockedScreen(streak: streak),
-                      ),
-                    );
-                    return;
-                  }
-
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (_) => const QuietShellScreen(),
-                    ),
-                    (route) => false,
-                  );
-                },
-                margin: const EdgeInsets.only(
-                  left: 40,
-                  right: 40,
-                  bottom: 32,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -590,6 +565,11 @@ class _QuietAffirmationUnlockedScreenState
       Future.delayed(const Duration(milliseconds: 1180), () {
         if (!mounted) return;
         HapticFeedback.heavyImpact();
+      });
+
+      Future<void>.delayed(const Duration(milliseconds: 880), () {
+        if (!mounted) return;
+        SoundscapeService.instance.playSfx(AppAssets.affirmationRevealSfx);
       });
 
       _controller.forward();
@@ -781,12 +761,13 @@ class _QuietAffirmationUnlockedScreenState
                 child: _showContinue
                     ? QLPrimaryButton(
                         label: QuietResultsStrings.continueButton,
-                        onPressed: () {
-                          Navigator.of(context).pushAndRemoveUntil(
+                        onPressed: () async {
+                          await ForgeService.instance.advanceProgress();
+                          if (!context.mounted) return;
+                          Navigator.of(context).pushReplacement(
                             MaterialPageRoute(
-                              builder: (_) => const QuietShellScreen(),
+                              builder: (_) => const QuietForgeScreen(),
                             ),
-                            (route) => false,
                           );
                         },
                         margin: const EdgeInsets.only(
