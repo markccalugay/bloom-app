@@ -10,9 +10,8 @@ import 'package:quietline_app/widgets/affirmations/quiet_home_affirmations_carou
 import 'package:quietline_app/data/forge/forge_service.dart';
 
 const double kHomeHorizontalPadding = 16.0;
-const double kHomeTopSpacing = 20.0;          // space between app bar and streak
-const double kHomeStreakToCardSpacing = 56.0; // space between streak and affirmation card
-const double kHomeBottomSpacing = 16.0; 
+const double kHomeTopSpacing = 12.0;          // Tightened from 20.0
+const double kHomeBottomSpacing = 8.0;         // Tightened from 16.0
 
 String _formatToday() {
   final now = DateTime.now();
@@ -50,37 +49,35 @@ Widget _buildHomeBody({
   return Stack(
     children: [
       SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                QuietHomeAppBar(
-                  menuKey: menuButtonKey,
-                  onMenuTap: () {
-                    onMenu?.call();
-                  },
-                  onPracticeTap: onPracticeTap,
-                ),
-  
-                const SizedBox(height: kHomeTopSpacing),
-  
-                QuietHomeStreakRow(streak: streak),
-  
-                const SizedBox(height: 40.0),
-  
-                const QuietHomeIngotBackground(),
-  
-                const SizedBox(height: 32.0),
-  
-                QuietHomeAffirmationsCarousel(
-                  streak: streak,
-                ),
-  
-                const SizedBox(height: kHomeBottomSpacing),
-              ],
-            ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: kHomeHorizontalPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              QuietHomeAppBar(
+                menuKey: menuButtonKey,
+                onMenuTap: () {
+                  onMenu?.call();
+                },
+                onPracticeTap: onPracticeTap,
+              ),
+
+              const SizedBox(height: kHomeTopSpacing),
+
+              QuietHomeStreakRow(streak: streak),
+
+              const SizedBox(height: 24.0), // Tightened from 40.0
+
+              const QuietHomeIngotBackground(),
+
+              const SizedBox(height: 12.0), // Tightened from 32.0 (Note: Ingot background itself has internal alignment padding)
+
+              QuietHomeAffirmationsCarousel(
+                streak: streak,
+              ),
+
+              const SizedBox(height: kHomeBottomSpacing),
+            ],
           ),
         ),
       ),

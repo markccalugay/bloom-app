@@ -23,7 +23,7 @@ class QuietHomeAppBar extends StatelessWidget {
     final accessService = PracticeAccessService.instance;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0, left: 4.0, right: 4.0),
+      padding: const EdgeInsets.only(top: 4.0, left: 4.0, right: 4.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.center,
