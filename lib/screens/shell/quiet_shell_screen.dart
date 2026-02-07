@@ -685,12 +685,27 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
               );
             },
             onNavigateArmorRoom: () async {
+              final navigator = Navigator.of(context);
+
+              // Final step of Home FTUE: user navigates to Armor.
+              // We mark the Home tutorial as "seen" now so it won't repeat.
+              await FirstLaunchService.instance.markHomeHintSeen();
+
               if (_isMenuOpen) {
                 setState(() {
                   _isMenuOpen = false;
                 });
               }
-              await Navigator.of(context).push(
+
+              // Update state so the overlay is gone if they return via back button
+              // (though Armor Room uses pushAndRemoveUntil for its dismissal,
+              // it's safer to clear it here too).
+              setState(() {
+                _coachingStep = _CoachingStep.none;
+              });
+
+              if (!mounted) return;
+              await navigator.push(
                 MaterialPageRoute(
                   builder: (_) => const QuietArmorRoomScreen(),
                 ),
