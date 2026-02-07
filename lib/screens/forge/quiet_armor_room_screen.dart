@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:quietline_app/services/first_launch_service.dart';
+import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
@@ -12,6 +14,35 @@ class QuietArmorRoomScreen extends StatefulWidget {
 }
 
 class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
+  bool _showOnboarding = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOnboarding();
+  }
+
+  Future<void> _checkOnboarding() async {
+    final hasSeen = await FirstLaunchService.instance.hasSeenArmorOnboarding();
+    if (!hasSeen && mounted) {
+      setState(() => _showOnboarding = true);
+    }
+  }
+
+  Future<void> _dismissOnboarding() async {
+    await FirstLaunchService.instance.markArmorOnboardingSeen();
+    if (!mounted) return;
+    setState(() => _showOnboarding = false);
+    
+    // As per user request: "After that, then close the window and bring the user back home."
+    if (mounted) {
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const QuietShellScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,19 +51,72 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 1,
-            childAspectRatio: 0.8,
-            mainAxisSpacing: 24,
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 1,
+                childAspectRatio: 0.8,
+                mainAxisSpacing: 24,
+              ),
+              itemCount: ArmorSet.values.length,
+              itemBuilder: (context, index) {
+                final set = ArmorSet.values[index];
+                return _ArmorSetCard(set: set);
+              },
+            ),
           ),
-          itemCount: ArmorSet.values.length,
-          itemBuilder: (context, index) {
-            final set = ArmorSet.values[index];
-            return _ArmorSetCard(set: set);
-          },
+          if (_showOnboarding)
+            _buildOnboardingOverlay(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOnboardingOverlay() {
+    return Container(
+      color: Colors.black.withValues(alpha: 0.85),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Center(
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F141A),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: const Color(0xFF2A3340)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.shield_rounded, size: 64, color: Color(0xFF2FE6D2)),
+              const SizedBox(height: 24),
+              const Text(
+                'Forge Your Resilience',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Every day you show up is a strike of the hammer. Daily practice hardens your mind and unlocks pieces of legendary armor.\n\nKeep growing, and your progress will become visible here.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.5,
+                  color: Color(0xFFB9C3CF),
+                ),
+              ),
+              const SizedBox(height: 32),
+              QLPrimaryButton(
+                label: 'Begin Journey',
+                onPressed: _dismissOnboarding,
+              ),
+            ],
+          ),
         ),
       ),
     );

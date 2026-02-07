@@ -45,6 +45,7 @@ Widget _buildHomeBody({
   required String? affirmationText,
   required VoidCallback? onMenu,
   required VoidCallback? onPracticeTap,
+  GlobalKey? menuButtonKey,
 }) {
   return Stack(
     children: [
@@ -56,6 +57,7 @@ Widget _buildHomeBody({
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 QuietHomeAppBar(
+                  menuKey: menuButtonKey,
                   onMenuTap: () {
                     onMenu?.call();
                   },
@@ -146,12 +148,14 @@ class QuietHomeScreen extends StatefulWidget {
   final int streak;
   final VoidCallback? onMenu;
   final VoidCallback? onPracticeTap;
+  final GlobalKey? menuButtonKey;
 
   const QuietHomeScreen({
     super.key,
     required this.streak,
     this.onMenu,
     this.onPracticeTap,
+    this.menuButtonKey,
   });
 
   @override
@@ -178,6 +182,7 @@ class _QuietHomeScreenState extends State<QuietHomeScreen> {
       affirmationText: todayAffirmation?.text,
       onMenu: widget.onMenu,
       onPracticeTap: widget.onPracticeTap,
+      menuButtonKey: widget.menuButtonKey,
     );
   }
 }

@@ -130,6 +130,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
       // Step 2: after the row has had time to play, animate the badge + number.
       await Future.delayed(_badgeStartAfterRow);
       if (!mounted) return;
+      HapticFeedback.mediumImpact();
       setState(() {
         _animateBadge = true;
       });

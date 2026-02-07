@@ -6,6 +6,7 @@ import 'package:quietline_app/screens/quiet_breath/quiet_breath_screen.dart';
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:quietline_app/services/web_launch_service.dart';
 
 class QuietWelcomeScreen extends StatefulWidget {
   /// Current streak to pass into the first session (for consistent UI).
@@ -124,7 +125,11 @@ class _QuietWelcomeScreenState extends State<QuietWelcomeScreen>
   }
 
   void _learnMore() {
-    widget.onLearnMore?.call();
+    if (widget.onLearnMore != null) {
+      widget.onLearnMore!.call();
+    } else {
+      WebLaunchService().openAbout();
+    }
   }
 
   @override

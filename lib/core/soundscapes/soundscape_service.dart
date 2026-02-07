@@ -8,9 +8,14 @@ class SoundscapeService extends ChangeNotifier {
   static final SoundscapeService instance = SoundscapeService._internal();
   SoundscapeService._internal();
 
-  final AudioPlayer _player = AudioPlayer();
+  final AudioPlayer _player1 = AudioPlayer();
+  final AudioPlayer _player2 = AudioPlayer();
   final AudioPlayer _sfxPlayer = AudioPlayer();
   
+  bool _usePlayer1 = true;
+  AudioPlayer get _currentPlayer => _usePlayer1 ? _player1 : _player2;
+  AudioPlayer get _nextPlayer => _usePlayer1 ? _player2 : _player1;
+
   static const String _activeSoundscapeKey = 'ql_soundscape_id';
   static const String _volumeKey = 'ql_soundscape_volume';
   static const String _muteKey = 'ql_soundscape_muted';
@@ -25,6 +30,7 @@ class SoundscapeService extends ChangeNotifier {
   bool _isPlaying = false;
   
   Timer? _fadeTimer;
+  StreamSubscription? _completionSub;
 
   Soundscape get activeSoundscape => _activeSoundscape;
   double get volume => _volume;
@@ -49,7 +55,11 @@ class SoundscapeService extends ChangeNotifier {
     _sfxVolume = prefs.getDouble(_sfxVolumeKey) ?? 1.0;
     _isSfxMuted = prefs.getBool(_sfxMuteKey) ?? false;
 
-    await _player.setReleaseMode(ReleaseMode.loop);
+    // Set both players to NOT loop automatically, as we'll manage it manually
+    // for seamless double-buffering if needed (or at least alternating).
+    await _player1.setReleaseMode(ReleaseMode.release);
+    await _player2.setReleaseMode(ReleaseMode.release);
+    
     await _updatePlayerVolume();
     notifyListeners();
   }
@@ -97,20 +107,60 @@ class SoundscapeService extends ChangeNotifier {
   }
 
   Future<void> _updatePlayerVolume() async {
-    if (_isMuted) {
-      await _player.setVolume(0);
-    } else {
-      await _player.setVolume(_volume);
-    }
+    final effectiveVolume = _isMuted ? 0.0 : _volume;
+    await _player1.setVolume(effectiveVolume);
+    await _player2.setVolume(effectiveVolume);
+  }
+
+  Future<void> _setupNextLoop() async {
+    _completionSub?.cancel();
+    // Use onPositionChanged to trigger the next player slightly before the end.
+    // This handles cases where onPlayerComplete has a slight delay.
+    _completionSub = _currentPlayer.onPositionChanged.listen((position) async {
+      if (!_isPlaying) return;
+      
+      final duration = await _currentPlayer.getDuration();
+      if (duration == null) return;
+
+      // Trigger the next player 100ms before the current one ends.
+      // This is a common strategy for gapless playback with multiple players.
+      final remaining = duration.inMilliseconds - position.inMilliseconds;
+      if (remaining <= 100 && remaining > 0) {
+        _completionSub?.cancel(); // Prevent multiple triggers
+        
+        _usePlayer1 = !_usePlayer1;
+        final source = AssetSource(_activeSoundscape.assetPath.replaceFirst('assets/', ''));
+        
+        await _nextPlayer.stop(); 
+        await _currentPlayer.play(source);
+        await _nextPlayer.setSource(source);
+        
+        _setupNextLoop();
+      }
+    });
+
+    // Fallback: still listen for completion just in case position events are missed or lag.
+    _currentPlayer.onPlayerComplete.first.then((_) async {
+       if (!_isPlaying || _completionSub == null) return;
+       // If we reach here and it's still playing, it means the position check missed.
+       _usePlayer1 = !_usePlayer1;
+       final source = AssetSource(_activeSoundscape.assetPath.replaceFirst('assets/', ''));
+       await _nextPlayer.stop();
+       await _currentPlayer.play(source);
+       _setupNextLoop();
+    });
   }
 
   Future<void> play({bool fadeIn = true}) async {
     _isPlaying = true;
     _fadeTimer?.cancel();
+    
+    final source = AssetSource(_activeSoundscape.assetPath.replaceFirst('assets/', ''));
 
     if (fadeIn) {
-      await _player.setVolume(0);
-      await _player.play(AssetSource(_activeSoundscape.assetPath.replaceFirst('assets/', '')));
+      await _currentPlayer.setVolume(0);
+      await _currentPlayer.play(source);
+      _setupNextLoop();
       
       const steps = 20;
       const stepDuration = Duration(milliseconds: 1000 ~/ steps);
@@ -120,7 +170,7 @@ class SoundscapeService extends ChangeNotifier {
         currentStep++;
         final targetVolume = _isMuted ? 0.0 : _volume;
         final newVolume = (currentStep / steps) * targetVolume;
-        _player.setVolume(newVolume);
+        _currentPlayer.setVolume(newVolume);
         
         if (currentStep >= steps) {
           timer.cancel();
@@ -129,7 +179,8 @@ class SoundscapeService extends ChangeNotifier {
       });
     } else {
       await _updatePlayerVolume();
-      await _player.play(AssetSource(_activeSoundscape.assetPath.replaceFirst('assets/', '')));
+      await _currentPlayer.play(source);
+      _setupNextLoop();
     }
     notifyListeners();
   }
@@ -137,6 +188,7 @@ class SoundscapeService extends ChangeNotifier {
   Future<void> stop({bool fadeOut = true}) async {
     _isPlaying = false;
     _fadeTimer?.cancel();
+    _completionSub?.cancel();
 
     if (fadeOut) {
       const steps = 20;
@@ -147,15 +199,18 @@ class SoundscapeService extends ChangeNotifier {
       _fadeTimer = Timer.periodic(stepDuration, (timer) {
         currentStep--;
         final newVolume = (currentStep / steps) * startVolume;
-        _player.setVolume(newVolume);
+        _currentPlayer.setVolume(newVolume);
+        _nextPlayer.setVolume(newVolume);
         
         if (currentStep <= 0) {
           timer.cancel();
-          _player.stop();
+          _player1.stop();
+          _player2.stop();
         }
       });
     } else {
-      await _player.stop();
+      await _player1.stop();
+      await _player2.stop();
     }
     notifyListeners();
   }

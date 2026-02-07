@@ -6,6 +6,7 @@ import 'package:quietline_app/data/practices/practice_model.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/screens/results/quiet_why_it_works_screen.dart';
 
 class QuietPracticeLibraryScreen extends StatefulWidget {
   const QuietPracticeLibraryScreen({super.key});
@@ -259,14 +260,42 @@ class _PracticeDetailSheet extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            practice.id.replaceAll('_', ' ').toUpperCase(),
-            style: theme.textTheme.labelSmall,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                practice.id.replaceAll('_', ' ').toUpperCase(),
+                style: theme.textTheme.labelSmall,
+              ),
+              InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => QuietWhyItWorksScreen(
+                        practiceId: practice.id,
+                        onContinue: () => Navigator.of(context).pop(),
+                      ),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Text(
+                    'Why This Works',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Text(practice.description, style: theme.textTheme.bodyLarge),

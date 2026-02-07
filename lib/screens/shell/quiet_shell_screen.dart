@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quietline_app/screens/home/quiet_home_screen.dart';
 import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
 import 'package:quietline_app/screens/brotherhood/quiet_brotherhood_page.dart';
@@ -15,7 +16,6 @@ import 'package:quietline_app/screens/affirmations/quiet_affirmations_library_sc
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/forge/quiet_armor_room_screen.dart';
-import 'package:quietline_app/screens/forge/quiet_forge_screen.dart';
 
 import 'package:quietline_app/core/reminder/reminder_service.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
@@ -31,6 +31,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
 
+enum _CoachingStep {
+  none,
+  quietTimeButton,
+  mentalToughness,
+  sideMenuArrow,
+  sideMenuOpen,
+}
+
 /// Root shell that hosts the bottom navigation and top-level tabs.
 class QuietShellScreen extends StatefulWidget {
   const QuietShellScreen({super.key});
@@ -42,6 +50,7 @@ class QuietShellScreen extends StatefulWidget {
 class _QuietShellScreenState extends State<QuietShellScreen> {
   // Ownership of the Quiet Time button key (non-static)
   final GlobalKey _quietTimeButtonKey = GlobalKey();
+  final GlobalKey _sideMenuButtonKey = GlobalKey(); // Added key for side menu highlight
   int _currentIndex = 0;
   bool _isMenuOpen = false;
   int? _streak; // null = loading / unknown
@@ -53,11 +62,12 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
 
   // Geometry measurement for Quiet Time button
   Rect? _quietTimeButtonRect;
+  Rect? _sideMenuButtonRect; // Added rect for side menu
   bool _didMeasureQuietTimeButton = false;
+  bool _didMeasureSideMenuButton = false;
 
   bool _homeHintLoaded = false;
-  bool _showHomeHint = false;
-
+  _CoachingStep _coachingStep = _CoachingStep.none;
 
   final _web = WebLaunchService();
 
@@ -143,35 +153,52 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   void _toggleMenu() {
     setState(() {
       _isMenuOpen = !_isMenuOpen;
+      if (_isMenuOpen && _coachingStep == _CoachingStep.sideMenuArrow) {
+        _coachingStep = _CoachingStep.sideMenuOpen;
+      }
     });
   }
 
   void _maybeMeasureQuietTimeButton() {
-    if (_didMeasureQuietTimeButton) return;
+    if (_didMeasureQuietTimeButton && _didMeasureSideMenuButton) return;
     if (_currentIndex != 0) return;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      _measureQuietTimeButtonIfNeeded();
+      _measureButtonsIfNeeded();
     });
   }
 
-  void _measureQuietTimeButtonIfNeeded() {
-    if (_didMeasureQuietTimeButton) return;
+  void _measureButtonsIfNeeded() {
+    if (!_didMeasureQuietTimeButton) {
+      final context = _quietTimeButtonKey.currentContext;
+      if (context != null) {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox != null && renderBox.hasSize) {
+          final topLeft = renderBox.localToGlobal(Offset.zero);
+          final size = renderBox.size;
+          setState(() {
+            _quietTimeButtonRect = topLeft & size;
+            _didMeasureQuietTimeButton = true;
+          });
+        }
+      }
+    }
 
-    final context = _quietTimeButtonKey.currentContext;
-    if (context == null) return;
-
-    final renderBox = context.findRenderObject() as RenderBox?;
-    if (renderBox == null || !renderBox.hasSize) return;
-
-    final topLeft = renderBox.localToGlobal(Offset.zero);
-    final size = renderBox.size;
-
-    setState(() {
-      _quietTimeButtonRect = topLeft & size;
-      _didMeasureQuietTimeButton = true;
-    });
+    if (!_didMeasureSideMenuButton) {
+      final context = _sideMenuButtonKey.currentContext;
+      if (context != null) {
+        final renderBox = context.findRenderObject() as RenderBox?;
+        if (renderBox != null && renderBox.hasSize) {
+          final topLeft = renderBox.localToGlobal(Offset.zero);
+          final size = renderBox.size;
+          setState(() {
+            _sideMenuButtonRect = topLeft & size;
+            _didMeasureSideMenuButton = true;
+          });
+        }
+      }
+    }
   }
 
   Future<void> _loadHomeHintState() async {
@@ -184,10 +211,14 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
 
     setState(() {
       _homeHintLoaded = true;
-      _showHomeHint = (_streak ?? 0) >= 1 && !hasSeen;
+      if ((_streak ?? 0) >= 1 && !hasSeen) {
+        _coachingStep = _CoachingStep.quietTimeButton;
+      } else {
+        _coachingStep = _CoachingStep.none;
+      }
     });
 
-    if (!_showHomeHint) {
+    if (_coachingStep == _CoachingStep.none) {
       _maybeScheduleReminderPrompt();
     }
   }
@@ -197,7 +228,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       return;
     }
     // Only schedule if home hint is not showing and prompt isn't already shown.
-    if (_showHomeHint) {
+    if (_coachingStep != _CoachingStep.none) {
       return;
     }
     final prefs = await SharedPreferences.getInstance();
@@ -210,7 +241,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
     Future.delayed(const Duration(milliseconds: 2200), () {
       if (_currentIndex != 0) return;
       if (!mounted) return;
-      if (_showHomeHint) return;
+      if (_coachingStep != _CoachingStep.none) return;
       _showReminderModal();
     });
   }
@@ -256,18 +287,16 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   }
 
   Future<void> _dismissHomeHint() async {
-    await FirstLaunchService.instance.markHomeHintSeen();
-    if (!mounted) return;
-    setState(() {
-      _showHomeHint = false;
-    });
-
-    // Special FTUE bridge: after home hint, fade and show forge.
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const QuietForgeScreen()),
-    );
+    // PROGRESSION: This is called when the user taps the overlay
+    if (_coachingStep == _CoachingStep.quietTimeButton) {
+      HapticFeedback.lightImpact();
+      setState(() => _coachingStep = _CoachingStep.mentalToughness);
+    } else if (_coachingStep == _CoachingStep.mentalToughness) {
+      HapticFeedback.lightImpact();
+      setState(() => _coachingStep = _CoachingStep.sideMenuArrow);
+    } else if (_coachingStep == _CoachingStep.sideMenuArrow) {
+      // Step: pointing to side menu.
+    }
   }
 
   Future<void> _navigateToPractices() async {
@@ -294,6 +323,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           streak: _streak ?? 0,
           onMenu: _toggleMenu,
           onPracticeTap: _navigateToPractices,
+          menuButtonKey: _sideMenuButtonKey,
         );
       case 2:
         // Brotherhood / community
@@ -308,30 +338,115 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
   }
 
   Widget _buildHomeHintOverlay() {
-    if (_quietTimeButtonRect == null || !_showHomeHint) {
+    if (_coachingStep == _CoachingStep.none) {
       return const SizedBox.shrink();
     }
 
-    final rect = _quietTimeButtonRect!;
-    final double ringPadding = 12.0;
-    final double ringSize =
-        (rect.width > rect.height ? rect.width : rect.height) + ringPadding * 2;
+    // Step 1: Quiet Time Button Spotlight
+    if (_coachingStep == _CoachingStep.quietTimeButton) {
+      if (_quietTimeButtonRect == null) return const SizedBox.shrink();
+      return _buildSpotlightOverlay(
+        rect: _quietTimeButtonRect!,
+        title: 'Well done.',
+        body: 'You just did the hardest part; starting.\n\n'
+            'Use Quiet Time anytime you need a reset.\n'
+            'Tap the button at the bottom to begin.',
+      );
+    }
+
+    // Step 2: Mental Toughness Explanation
+    if (_coachingStep == _CoachingStep.mentalToughness) {
+      return _buildMessageOverlay(
+        title: 'Building Resilience',
+        body: 'Whenever you complete a session, you are building towards mental toughness.\n\n'
+            'Keep showing up and you will see your progress become something tangible.',
+      );
+    }
+
+    // Step 3: Side Menu Arrow
+    if (_coachingStep == _CoachingStep.sideMenuArrow) {
+      if (_sideMenuButtonRect == null) return const SizedBox.shrink();
+      return _buildSpotlightOverlay(
+        rect: _sideMenuButtonRect!,
+        title: 'Your Armor',
+        body: 'Open the menu to see what you are building.',
+        showArrow: true,
+        // Interactions are blocked except for the menu button itself.
+        // We'll handle this by NOT having a full screen GestureDetector here,
+        // or by having one that ignores the menu button rect.
+        barrierDismissible: false,
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildSpotlightOverlay({
+    required Rect rect,
+    required String title,
+    required String body,
+    bool showArrow = false,
+    bool barrierDismissible = true,
+  }) {
+    final double holePadding = 12.0;
+    final Rect holeRect = rect.inflate(holePadding);
 
     return Stack(
       children: [
-        // Dimmed scrim; tap anywhere to dismiss (logic wired later)
-        GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _dismissHomeHint,
-          child: Container(color: Colors.black.withValues(alpha: 0.45)),
+        // Top blocker
+        Positioned(
+          left: 0,
+          top: 0,
+          right: 0,
+          height: holeRect.top,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: barrierDismissible ? _dismissHomeHint : null,
+            child: Container(color: Colors.black.withValues(alpha: 0.65)),
+          ),
+        ),
+        // Bottom blocker
+        Positioned(
+          left: 0,
+          top: holeRect.bottom,
+          right: 0,
+          bottom: 0,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: barrierDismissible ? _dismissHomeHint : null,
+            child: Container(color: Colors.black.withValues(alpha: 0.65)),
+          ),
+        ),
+        // Left blocker
+        Positioned(
+          left: 0,
+          top: holeRect.top,
+          width: holeRect.left,
+          height: holeRect.height,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: barrierDismissible ? _dismissHomeHint : null,
+            child: Container(color: Colors.black.withValues(alpha: 0.65)),
+          ),
+        ),
+        // Right blocker
+        Positioned(
+          left: holeRect.right,
+          top: holeRect.top,
+          right: 0,
+          height: holeRect.height,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: barrierDismissible ? _dismissHomeHint : null,
+            child: Container(color: Colors.black.withValues(alpha: 0.65)),
+          ),
         ),
 
-        // Spotlight ring centered on the Quiet Time button
+        // Spotlight ring
         Positioned(
-          left: rect.center.dx - ringSize / 2,
-          top: rect.center.dy - ringSize / 2,
-          width: ringSize,
-          height: ringSize,
+          left: rect.center.dx - (rect.width / 2 + holePadding),
+          top: rect.center.dy - (rect.height / 2 + holePadding),
+          width: rect.width + holePadding * 2,
+          height: rect.height + holePadding * 2,
           child: IgnorePointer(
             child: Container(
               decoration: BoxDecoration(
@@ -349,53 +464,11 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           child: Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 0, 16, 96),
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F141A),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: const Color(0xFF2A3340),
-                    width: 1,
-                  ),
-                ),
-                child: const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'Well done.',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.white,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'You just did the hardest part; starting.\n\n'
-                      'Use Quiet Time anytime you need a reset.\n'
-                      'Tap the button at the bottom to begin.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        height: 1.35,
-                        color: Color(0xFFB9C3CF),
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Text(
-                      'Tap anywhere to continue',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF7F8A99),
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                  ],
-                ),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+              child: _CoachingCard(
+                title: title,
+                body: body,
+                onTap: barrierDismissible ? _dismissHomeHint : null,
               ),
             ),
           ),
@@ -403,6 +476,30 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
       ],
     );
   }
+
+  Widget _buildMessageOverlay({required String title, required String body}) {
+    return Stack(
+      children: [
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _dismissHomeHint,
+          child: Container(color: Colors.black.withValues(alpha: 0.75)),
+        ),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: _CoachingCard(
+              title: title,
+              body: body,
+              onTap: _dismissHomeHint,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
 
 
 
@@ -535,6 +632,7 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
             displayName: _displayName,
             avatarId: _avatarId,
             onClose: _toggleMenu,
+            highlightArmorRoom: _coachingStep == _CoachingStep.sideMenuArrow || _coachingStep == _CoachingStep.sideMenuOpen,
             onOpenAccount: () async {
               _toggleMenu();
               await Navigator.of(context).push(
@@ -608,6 +706,76 @@ class _QuietShellScreenState extends State<QuietShellScreen> {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _CoachingCard extends StatelessWidget {
+  final String title;
+  final String body;
+  final VoidCallback? onTap;
+
+  const _CoachingCard({required this.title, required this.body, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFF0F141A),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: const Color(0xFF2A3340),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.4),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+                decoration: TextDecoration.none,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              body,
+              style: const TextStyle(
+                fontSize: 14,
+                height: 1.4,
+                color: Color(0xFFB9C3CF),
+                decoration: TextDecoration.none,
+              ),
+            ),
+            if (onTap != null) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Tap to continue',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Color(0xFF2FE6D2),
+                  fontWeight: FontWeight.w600,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

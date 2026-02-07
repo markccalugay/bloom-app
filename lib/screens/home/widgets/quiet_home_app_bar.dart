@@ -7,11 +7,13 @@ import 'package:quietline_app/core/practices/practice_access_service.dart';
 class QuietHomeAppBar extends StatelessWidget {
   final VoidCallback? onMenuTap;
   final VoidCallback? onPracticeTap;
+  final GlobalKey? menuKey;
 
   const QuietHomeAppBar({
     super.key,
     this.onMenuTap,
     this.onPracticeTap,
+    this.menuKey,
   });
 
   @override
@@ -27,6 +29,7 @@ class QuietHomeAppBar extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           IconButton(
+            key: menuKey,
             icon: const Icon(Icons.menu),
             color: color,
             onPressed: onMenuTap ?? () {},

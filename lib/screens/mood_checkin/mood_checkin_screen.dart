@@ -14,6 +14,7 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
+import 'package:quietline_app/screens/results/quiet_why_it_works_screen.dart';
 
 import 'package:quietline_app/screens/results/quiet_results_not_ok_screen.dart';
 
@@ -180,20 +181,46 @@ class _MoodCheckinScreenState extends State<MoodCheckinScreen> {
                     final user = await UserService.instance.getOrCreateUser();
                     debugPrint('Using user: ${user.username} (${user.id})');
 
-                    // 3. Mark first session completion (idempotent).
+                    // 3. Check if this is the first session.
+                    final isFirstSession = !await FirstLaunchService.instance.hasCompletedFirstSession();
+                    
+                    // 4. Mark completion (idempotent).
                     await FirstLaunchService.instance.markCompleted();
+                    await FirstLaunchService.instance.markCompletedFirstSession();
 
-                    // 4. Continue into results (replace so back doesn't return to mood screen).
+                    // 5. Continue into results (replace so back doesn't return to mood screen).
                     if (!mounted) return;
-                    navigator.pushReplacement(
-                      MaterialPageRoute(
-                        builder: (_) => QuietResultsOkScreen(
-                          streak: newStreak,
-                          previousStreak: previousStreak,
-                          isNew: true,
+                    
+                    if (isFirstSession) {
+                      navigator.pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => QuietWhyItWorksScreen(
+                            practiceId: 'core_quiet',
+                            onContinue: () {
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (_) => QuietResultsOkScreen(
+                                    streak: newStreak,
+                                    previousStreak: previousStreak,
+                                    isNew: true,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      ),
-                    );
+                      );
+                    } else {
+                      navigator.pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => QuietResultsOkScreen(
+                            streak: newStreak,
+                            previousStreak: previousStreak,
+                            isNew: true,
+                          ),
+                        ),
+                      );
+                    }
                   } else {
                     // Phase 5 (MVP): Distress results are gated. For MVP we always
                     // route to the standard results flow even if the mood score is low.
