@@ -15,6 +15,8 @@ import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
 import 'package:quietline_app/screens/results/quiet_session_complete_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/practices/practice_access_service.dart';
+import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -163,6 +165,11 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       return;
     }
 
+    // Refresh contract from service to ensure we have the latest selection
+    // if the user changed it just before the countdown.
+    final latestContract = PracticeAccessService.instance.getActiveContract();
+    controller.setContract(latestContract);
+
     // Check if today was already completed BEFORE this session.
     final bool hadCompletedTodayBeforeSession =
         await QuietStreakService.hasCompletedToday();
@@ -214,6 +221,8 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
               child: Column(
                 children: [
                   const SizedBox(height: kQBHeaderTopGap),
+                  _buildPracticeSelector(),
+                  const SizedBox(height: 12),
                   AnimatedBuilder(
                     animation: controller.listenable,
                     builder: (_, _) => QuietBreathTimerTitle(controller: controller),
@@ -409,6 +418,72 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildPracticeSelector() {
+    final theme = Theme.of(context);
+    final accessService = PracticeAccessService.instance;
+
+    return ValueListenableBuilder<String>(
+      valueListenable: accessService.activePracticeId,
+      builder: (context, activeId, _) {
+        final practiceName = activeId.replaceAll('_', ' ').toUpperCase();
+        return InkWell(
+          onTap: () async {
+            if (_hasStarted || _countdownValue != null) {
+              // Show warning during session
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: theme.colorScheme.surface,
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  content: Text(
+                    'Practice cannot be changed while in session.',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                ),
+              );
+              return;
+            }
+
+            // Navigate to library to change practice
+            HapticFeedback.lightImpact();
+            await Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const QuietPracticeLibraryScreen()),
+            );
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'ACTIVE PRACTICE',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.2,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  practiceName,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

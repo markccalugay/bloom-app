@@ -71,7 +71,7 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
     return IgnorePointer(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final double width = constraints.maxWidth * 2.0;
+          final double width = constraints.maxWidth * 1.5;
           final double height = width * 0.35;
 
           return ListenableBuilder(
@@ -81,7 +81,7 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                 alignment: const Alignment(0, -0.10),
                 child: SizedBox(
                   width: width,
-                  height: height * 1.5,
+                  height: height * 1.1,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [

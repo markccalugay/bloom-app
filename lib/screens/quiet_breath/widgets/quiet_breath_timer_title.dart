@@ -22,25 +22,46 @@ class QuietBreathTimerTitle extends StatelessWidget {
             ? 'Press Start to begin.'
             : 'Tap Resume to continue.');
 
+    // ANIMATION CALCULATIONS
+    // Reset animations to original values if the session is fully finished.
+    // Otherwise, calculate progress based on the first cycle.
+    final bool isSessionComplete = !controller.isPlaying && controller.sessionProgress >= 1.0;
+    
+    final double cycle1Progress = isSessionComplete
+        ? 0.0
+        : (controller.sessionProgress * controller.targetCycles).clamp(0.0, 1.0);
+
+    // Fade out "Find your quiet." specifically.
+    // If paused or fresh, we keep it at 1.0.
+    final double headerOpacity =
+        (header == 'Find your quiet.') ? (1.0 - cycle1Progress) : 1.0;
+
+    // Increase instruction size from 16.8 to 21.0 during cycle 1.
+    // We keep the larger size for the rest of the session.
+    final double instructionSize = 16.8 + (4.2 * cycle1Progress);
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const SizedBox(height: kQBHeaderTopGap),
-        Text(
-          header,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+        Opacity(
+          opacity: headerOpacity,
+          child: Text(
+            header,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: kQBHeaderToInstructionGap),
         Text(
           instruction,
           style: TextStyle(
             color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            fontSize: 16.8, // 14 * 1.2
+            fontSize: instructionSize,
             fontWeight: FontWeight.w400,
             letterSpacing: 0.2,
           ),

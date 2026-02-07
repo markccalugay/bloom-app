@@ -66,11 +66,14 @@ Widget _buildHomeBody({
 
               QuietHomeStreakRow(streak: streak),
 
-              const SizedBox(height: 24.0), // Tightened from 40.0
+              // Dynamic spacer that shrinks/grows to fit the screen
+              const Expanded(
+                child: Center(
+                  child: QuietHomeIngotBackground(),
+                ),
+              ),
 
-              const QuietHomeIngotBackground(),
-
-              const SizedBox(height: 12.0), // Tightened from 32.0 (Note: Ingot background itself has internal alignment padding)
+              const SizedBox(height: 8.0),
 
               QuietHomeAffirmationsCarousel(
                 streak: streak,
