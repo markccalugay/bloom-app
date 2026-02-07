@@ -43,7 +43,6 @@ class QuietBreathTimerTitle extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: kQBHeaderTopGap),
         Opacity(
           opacity: headerOpacity,
           child: Text(
