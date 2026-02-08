@@ -40,6 +40,27 @@ class QuietBreathTimerTitle extends StatelessWidget {
     // We keep the larger size for the rest of the session.
     final double instructionSize = 16.8 + (4.2 * cycle1Progress);
 
+    // RHYTHMIC FADING CALCULATIONS
+    // We want the text to fade out ~500ms before the phase ends and fade back in 
+    // at the start of the next phase. This ensures zero overlap.
+    double instructionOpacity = 1.0;
+    if (controller.isPlaying) {
+      final double progress = controller.phaseProgress;
+      final double phaseDuration = controller.contract.phases[controller.phaseIndex].seconds.toDouble();
+      
+      // Use a 500ms window, but clamp it so it doesn't exceed 40% of the phase duration
+      // (important for very fast phases like in Cold Resolve).
+      final double fadePercentage = (0.5 / phaseDuration).clamp(0.0, 0.4);
+      
+      if (progress < fadePercentage) {
+        // Fade In
+        instructionOpacity = Curves.easeInOut.transform(progress / fadePercentage);
+      } else if (progress > (1.0 - fadePercentage)) {
+        // Fade Out
+        instructionOpacity = Curves.easeInOut.transform((1.0 - progress) / fadePercentage);
+      }
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -56,26 +77,10 @@ class QuietBreathTimerTitle extends StatelessWidget {
           ),
         ),
         const SizedBox(height: kQBHeaderToInstructionGap),
-        AnimatedSwitcher(
-          duration: const Duration(milliseconds: 600),
-          // Use Interval curves to ensure fade-out completes before fade-in starts.
-          switchInCurve: const Interval(0.5, 1.0, curve: Curves.easeIn),
-          switchOutCurve: const Interval(0.0, 0.5, curve: Curves.easeOut),
-          layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
-            return Stack(
-              alignment: Alignment.center,
-              children: <Widget>[
-                ...previousChildren,
-                if (currentChild != null) currentChild,
-              ],
-            );
-          },
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            return FadeTransition(opacity: animation, child: child);
-          },
+        Opacity(
+          opacity: instructionOpacity,
           child: Text(
             instruction,
-            key: ValueKey<String>(instruction),
             style: TextStyle(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
               fontSize: instructionSize,
