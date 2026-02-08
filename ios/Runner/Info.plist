@@ -43,5 +43,7 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+<string>QuietLine does not record audio. This permission exists only to support audio playback and system sound routing.</string>
 </dict>
 </plist>
