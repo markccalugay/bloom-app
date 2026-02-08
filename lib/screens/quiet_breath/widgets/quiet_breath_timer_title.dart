@@ -56,15 +56,22 @@ class QuietBreathTimerTitle extends StatelessWidget {
           ),
         ),
         const SizedBox(height: kQBHeaderToInstructionGap),
-        Text(
-          instruction,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            fontSize: instructionSize,
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0.2,
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 500),
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+          child: Text(
+            instruction,
+            key: ValueKey<String>(instruction),
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              fontSize: instructionSize,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.2,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );

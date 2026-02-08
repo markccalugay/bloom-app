@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:audioplayers/audioplayers.dart';
+import 'package:audioplayers/audioplayers.dart' as ap;
+import 'package:just_audio/just_audio.dart' as ja;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'soundscape_models.dart';
@@ -8,9 +9,8 @@ class SoundscapeService extends ChangeNotifier {
   static final SoundscapeService instance = SoundscapeService._internal();
   SoundscapeService._internal();
 
-  final AudioPlayer _player1 = AudioPlayer();
-  final AudioPlayer _player2 = AudioPlayer(); // Keep as secondary for potential future use
-  final AudioPlayer _sfxPlayer = AudioPlayer();
+  final ja.AudioPlayer _bgPlayer = ja.AudioPlayer();
+  final ap.AudioPlayer _sfxPlayer = ap.AudioPlayer();
 
   static const String _activeSoundscapeKey = 'ql_soundscape_id';
   static const String _volumeKey = 'ql_soundscape_volume';
@@ -50,9 +50,8 @@ class SoundscapeService extends ChangeNotifier {
     _sfxVolume = prefs.getDouble(_sfxVolumeKey) ?? 1.0;
     _isSfxMuted = prefs.getBool(_sfxMuteKey) ?? false;
 
-    // Use native looping for seamless playback on supported platforms.
-    await _player1.setReleaseMode(ReleaseMode.loop);
-    await _player2.setReleaseMode(ReleaseMode.release);
+    // Use native looping for seamless playback on supported platforms via just_audio.
+    await _bgPlayer.setLoopMode(ja.LoopMode.all);
     
     await _updatePlayerVolume();
     notifyListeners();
@@ -102,21 +101,20 @@ class SoundscapeService extends ChangeNotifier {
 
   Future<void> _updatePlayerVolume() async {
     final effectiveVolume = _isMuted ? 0.0 : _volume;
-    await _player1.setVolume(effectiveVolume);
-    await _player2.setVolume(effectiveVolume);
+    await _bgPlayer.setVolume(effectiveVolume);
   }
-
-  // Manual loop setup removed in favor of ReleaseMode.loop
 
   Future<void> play({bool fadeIn = true}) async {
     _isPlaying = true;
     _fadeTimer?.cancel();
     
-    final source = AssetSource(_activeSoundscape.assetPath.replaceFirst('assets/', ''));
+    // just_audio uses 'asset:///' prefix or setAsset() helper
+    final assetPath = _activeSoundscape.assetPath;
+    await _bgPlayer.setAsset(assetPath);
 
     if (fadeIn) {
-      await _player1.setVolume(0);
-      await _player1.play(source);
+      await _bgPlayer.setVolume(0);
+      await _bgPlayer.play();
       
       const steps = 20;
       const stepDuration = Duration(milliseconds: 1000 ~/ steps);
@@ -126,7 +124,7 @@ class SoundscapeService extends ChangeNotifier {
         currentStep++;
         final targetVolume = _isMuted ? 0.0 : _volume;
         final newVolume = (currentStep / steps) * targetVolume;
-        _player1.setVolume(newVolume);
+        _bgPlayer.setVolume(newVolume);
         
         if (currentStep >= steps) {
           timer.cancel();
@@ -135,7 +133,7 @@ class SoundscapeService extends ChangeNotifier {
       });
     } else {
       await _updatePlayerVolume();
-      await _player1.play(source);
+      await _bgPlayer.play();
     }
     notifyListeners();
   }
@@ -153,25 +151,21 @@ class SoundscapeService extends ChangeNotifier {
       _fadeTimer = Timer.periodic(stepDuration, (timer) {
         currentStep--;
         final newVolume = (currentStep / steps) * startVolume;
-        _player1.setVolume(newVolume);
+        _bgPlayer.setVolume(newVolume);
         
         if (currentStep <= 0) {
           timer.cancel();
-          _player1.stop();
-          _player2.stop();
+          _bgPlayer.stop();
         }
       });
     } else {
-      await _player1.stop();
-      await _player2.stop();
+      await _bgPlayer.stop();
     }
     notifyListeners();
   }
 
   Future<void> pause() async {
-    // Note: Request said soundscapes should CONTINUE to loop during session pause.
-    // So this method might not be used by the controller, but good to have.
-    // We'll keep it playing unless fully stopped.
+    // Background audio continues unless explicitly stopped.
   }
 
   Future<void> resume() async {
@@ -189,6 +183,16 @@ class SoundscapeService extends ChangeNotifier {
 
   Future<void> playSfx(String assetPath) async {
     await _sfxPlayer.setVolume(_isSfxMuted ? 0 : _sfxVolume);
-    await _sfxPlayer.play(AssetSource(assetPath));
+    // audioplayers AssetSource doesn't need 'assets/' prefix usually if configured, 
+    // but the current paths in models include it. 
+    // Wait, the previous code did replaceFirst('assets/', '').
+    await _sfxPlayer.play(ap.AssetSource(assetPath.replaceFirst('assets/', '')));
+  }
+
+  @override
+  void dispose() {
+    _bgPlayer.dispose();
+    _sfxPlayer.dispose();
+    super.dispose();
   }
 }
