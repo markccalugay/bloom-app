@@ -141,4 +141,11 @@ class AffirmationsUnlockService {
   Future<Affirmation?> getUnlockedForDay(int streakDay) {
     return getUnlockedForStreak(streakDay);
   }
+
+  /// NEW: Clears all affirmation unlock data (progress reset).
+  Future<void> debugReset() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_kUnlockedIdsKey);
+    await prefs.remove(_kLastUnlockDateKey);
+  }
 }

@@ -15,6 +15,8 @@ import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
 import 'package:quietline_app/screens/results/quiet_session_complete_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/practices/practice_access_service.dart';
+import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -123,6 +125,9 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     }
     controller.onSessionComplete = _handleSessionComplete;
 
+    // Auto-start soundscape atmosphere on screen entry
+    SoundscapeService.instance.play();
+
     controller.listenable.addListener(() {
       if (controller.isPlaying && !_hasStarted) {
         _hasStarted = true;
@@ -162,6 +167,11 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       );
       return;
     }
+
+    // Refresh contract from service to ensure we have the latest selection
+    // if the user changed it just before the countdown.
+    final latestContract = PracticeAccessService.instance.getActiveContract();
+    controller.setContract(latestContract);
 
     // Check if today was already completed BEFORE this session.
     final bool hadCompletedTodayBeforeSession =
@@ -208,137 +218,76 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  const SizedBox(height: kQBHeaderTopGap),
-                  AnimatedBuilder(
-                    animation: controller.listenable,
-                    builder: (_, _) => QuietBreathTimerTitle(controller: controller),
-                  ),
-                  Expanded(child: QuietBreathCircle(controller: controller)),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: AnimatedOpacity(
-                opacity: _hasStarted ? 0.0 : 1.0,
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOut,
-                child: IgnorePointer(
-                  ignoring: _hasStarted || _countdownValue != null,
-                  child: QuietBreathControls(
-                    controller: controller,
-                    hasStarted: _hasStarted,
-                    isPlaying: controller.isPlaying,
-                    onStart: _startCountdown,
-                  ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final double maxHeight = constraints.maxHeight;
+            const double circleRadius = (kQBCircleSize / 2) + kQBRingOuterPadding + kQBRingThickness;
+            final double centerY = maxHeight / 2;
+            final double circleTopY = centerY - circleRadius;
+            final double circleBottomY = centerY + circleRadius;
+            
+            // Top bar height is 64
+            const double topBarHeight = 64.0;
+            
+            return Stack(
+              children: [
+                // 1. CENTERED BREATHING CIRCLE (Geometric center of device)
+                Center(
+                  child: QuietBreathCircle(controller: controller),
                 ),
-              ),
-            ),
-            // PRE-SESSION BACK BUTTON
-            if (!_hasStarted && _countdownValue == null)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: IconButton(
-                  icon: Icon(
-                    Icons.arrow_back,
-                    size: 22,
-                    color: Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6),
-                  ),
-                  onPressed: () => Navigator.of(context).pop(),
-                  tooltip: 'Go back',
-                  splashRadius: 24,
-                ),
-              ),
 
-            // IN-SESSION PAUSE/PLAY (TOP LEFT)
-            if (_showPauseIcon && _countdownValue == null)
-              Positioned(
-                top: 8,
-                left: 8,
-                child: AnimatedOpacity(
-                  opacity: _showPauseIcon ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeOut,
-                  child: AnimatedBuilder(
-                    animation: controller.listenable,
-                    builder: (_, _) => Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            controller.isPlaying ? Icons.pause : Icons.play_arrow,
-                            size: 22,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.6),
-                          ),
-                          onPressed: () {
-                            HapticFeedback.selectionClick();
-                            controller.toggle();
-                          },
-                        ),
-                        const SizedBox(width: 4),
-                        ListenableBuilder(
-                          listenable: SoundscapeService.instance,
-                          builder: (context, _) {
-                            final isMuted = SoundscapeService.instance.isMuted;
-                            return IconButton(
-                              icon: Icon(
-                                isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
-                                size: 20,
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurface
-                                    .withValues(alpha: 0.6),
-                              ),
-                              onPressed: () {
-                                HapticFeedback.selectionClick();
-                                SoundscapeService.instance.toggleMute();
-                              },
-                            );
-                          },
-                        ),
-                      ],
+                // 2. TIMER TITLE (Positioned relative to the circle)
+                // We center it vertically in the space between the top row and the circle top.
+                Positioned(
+                  top: topBarHeight,
+                  left: 0,
+                  right: 0,
+                  height: circleTopY - topBarHeight,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      child: AnimatedBuilder(
+                        animation: controller.listenable,
+                        builder: (_, _) => QuietBreathTimerTitle(controller: controller),
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-            // IN-SESSION CANCEL (TOP RIGHT)
-            Positioned(
-              top: 8,
-              right: 8,
-              child: AnimatedBuilder(
-                animation: controller.listenable,
-                builder: (context, _) {
-                  if (_hasStarted && !controller.isPlaying && _countdownValue == null) {
-                    return TextButton(
-                      onPressed: _handleCancel,
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                          fontWeight: FontWeight.w500,
+                // 3. CONSOLIDATED TOP ROW
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: _buildTopRow(),
+                ),
+
+                // 4. CONTROLS (Positioned relative to the circle bottom)
+                // We center the start button in the bottom area.
+                Positioned(
+                  top: circleBottomY,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: AnimatedOpacity(
+                      opacity: _hasStarted ? 0.0 : 1.0,
+                      duration: const Duration(milliseconds: 220),
+                      curve: Curves.easeOut,
+                      child: IgnorePointer(
+                        ignoring: _hasStarted || _countdownValue != null,
+                        child: QuietBreathControls(
+                          controller: controller,
+                          hasStarted: _hasStarted,
+                          isPlaying: controller.isPlaying,
+                          onStart: _startCountdown,
                         ),
                       ),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
-            ),
+                    ),
+                  ),
+                ),
+
+
 
             // COUNTDOWN OVERLAY
             if (_countdownValue != null)
@@ -358,57 +307,233 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                 ),
               ),
 
-            // DEBUG LAYER (HIDDEN UNLESS IN DEBUG)
-            if (kDebugMode && _countdownValue == null) ...[
-              // Move debug info and skip session here
-              Positioned(
-                bottom: 80,
-                right: 12,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () {
-                        controller.completeSessionImmediately();
-                      },
-                      child: const Text(
-                        'DEBUG: Skip Session',
-                        style: TextStyle(color: Colors.redAccent, fontSize: 10),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: DefaultTextStyle(
-                        style: const TextStyle(
-                          fontSize: 9,
-                          color: Colors.white70,
-                          height: 1.2,
+                // DEBUG LAYER (HIDDEN UNLESS IN DEBUG)
+                if (kDebugMode && _countdownValue == null) ...[
+                  // Move debug info and skip session here
+                  Positioned(
+                    bottom: 80,
+                    right: 12,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            controller.completeSessionImmediately();
+                          },
+                          child: const Text(
+                            'DEBUG: Skip Session',
+                            style: TextStyle(color: Colors.redAccent, fontSize: 10),
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('DEBUG · ${controller.contract.name}'),
-                            for (final phase in controller.contract.phases)
-                              Text(
-                                '${phase.type.name[0].toUpperCase()}${phase.type.name.substring(1)}: ${phase.seconds}s',
-                              ),
-                            Text('Cycles: ${controller.contract.cycles}'),
-                          ],
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: DefaultTextStyle(
+                            style: const TextStyle(
+                              fontSize: 9,
+                              color: Colors.white70,
+                              height: 1.2,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('DEBUG · ${controller.contract.name}'),
+                                for (final phase in controller.contract.phases)
+                                  Text(
+                                    '${phase.type.name[0].toUpperCase()}${phase.type.name.substring(1)}: ${phase.seconds}s',
+                                  ),
+                                Text('Cycles: ${controller.contract.cycles}'),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ],
+                  ),
+                ],
+              ],
+            );
+          },
         ),
       ),
+    );
+  }
+
+  Widget _buildTopRow() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      height: 64, // Sufficient height for the top row
+      child: Stack(
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: _buildLeftControls(),
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: _buildPracticeSelector(),
+          ),
+          Align(
+            alignment: Alignment.centerRight,
+            child: _buildRightControls(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeftControls() {
+    // PRE-SESSION BACK BUTTON
+    if (!_hasStarted && _countdownValue == null) {
+      return IconButton(
+        icon: Icon(
+          Icons.arrow_back,
+          size: 22,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+        ),
+        onPressed: () => Navigator.of(context).pop(),
+        tooltip: 'Go back',
+        splashRadius: 24,
+      );
+    }
+
+    // IN-SESSION PAUSE/PLAY + MUTE
+    if (_showPauseIcon && _countdownValue == null) {
+      return AnimatedOpacity(
+        opacity: _showPauseIcon ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOut,
+        child: AnimatedBuilder(
+          animation: controller.listenable,
+          builder: (_, _) => Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: Icon(
+                  controller.isPlaying ? Icons.pause : Icons.play_arrow,
+                  size: 22,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                ),
+                onPressed: () {
+                  HapticFeedback.selectionClick();
+                  controller.toggle();
+                },
+              ),
+              const SizedBox(width: 4),
+              ListenableBuilder(
+                listenable: SoundscapeService.instance,
+                builder: (context, _) {
+                  final isMuted = SoundscapeService.instance.isMuted;
+                  return IconButton(
+                    icon: Icon(
+                      isMuted ? Icons.volume_off_rounded : Icons.volume_up_rounded,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                    onPressed: () {
+                      HapticFeedback.selectionClick();
+                      SoundscapeService.instance.toggleMute();
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildRightControls() {
+    // IN-SESSION CANCEL (TOP RIGHT)
+    return AnimatedBuilder(
+      animation: controller.listenable,
+      builder: (context, _) {
+        if (_hasStarted && !controller.isPlaying && _countdownValue == null) {
+          return TextButton(
+            onPressed: _handleCancel,
+            child: Text(
+              'Cancel',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+
+  Widget _buildPracticeSelector() {
+    final theme = Theme.of(context);
+    final accessService = PracticeAccessService.instance;
+
+    return ValueListenableBuilder<String>(
+      valueListenable: accessService.activePracticeId,
+      builder: (context, activeId, _) {
+        final practiceName = activeId.replaceAll('_', ' ').toUpperCase();
+        return InkWell(
+          onTap: () async {
+            if (_hasStarted || _countdownValue != null) {
+              // Show warning during session
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  backgroundColor: theme.colorScheme.surface,
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  content: Text(
+                    'Practice cannot be changed while in session.',
+                    style: TextStyle(color: theme.colorScheme.onSurface),
+                  ),
+                ),
+              );
+              return;
+            }
+
+            // Navigate to library to change practice
+            HapticFeedback.lightImpact();
+            await Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const QuietPracticeLibraryScreen()),
+            );
+          },
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'ACTIVE PRACTICE',
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 8,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.0,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                  ),
+                ),
+                Text(
+                  practiceName,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

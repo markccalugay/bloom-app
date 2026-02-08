@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
+import 'package:quietline_app/data/affirmations/affirmations_model.dart';
+import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/screens/affirmations/widgets/affirmation_grid_tile.dart';
@@ -17,6 +19,7 @@ class _QuietAffirmationsLibraryScreenState
     extends State<QuietAffirmationsLibraryScreen> {
   bool _loading = true;
   int _streak = 0;
+  Set<String> _unlockedIds = {};
 
   late final List<dynamic> allAffirmations = affirmationsByPack.entries
       .expand((entry) => entry.value.map((a) => {'packId': entry.key, 'a': a}))
@@ -25,21 +28,25 @@ class _QuietAffirmationsLibraryScreenState
   @override
   void initState() {
     super.initState();
-    _loadStreak();
+    _loadData();
   }
 
-  Future<void> _loadStreak() async {
+  Future<void> _loadData() async {
     try {
-      final value = await QuietStreakService.getCurrentStreak();
+      final streak = await QuietStreakService.getCurrentStreak();
+      final unlocked = await AffirmationsUnlockService.instance.getUnlockedIds();
+      
       if (!mounted) return;
       setState(() {
-        _streak = value;
+        _streak = streak;
+        _unlockedIds = unlocked;
         _loading = false;
       });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _streak = 0;
+        _unlockedIds = {};
         _loading = false;
       });
     }
@@ -67,16 +74,12 @@ class _QuietAffirmationsLibraryScreenState
     return '$month ${date.day}, ${date.year}';
   }
 
-  int _extractNumberFromId(String id) {
-    // Ex: core_042 -> 42
-    final parts = id.split('_');
-    if (parts.length < 2) return 999999;
-    return int.tryParse(parts.last) ?? 999999;
-  }
-
-  bool _isUnlocked(String id) {
-    final n = _extractNumberFromId(id);
-    return n <= _unlockedDay;
+  bool _isUnlocked(String id, String packId) {
+    if (packId == AffirmationPackIds.core) {
+      return _unlockedIds.contains(id);
+    }
+    // Premium packs are always "unlocked" in the grid, but potentially "Premium-locked"
+    return true; 
   }
 
   String _packHeader(String packId) {
@@ -139,7 +142,7 @@ class _QuietAffirmationsLibraryScreenState
                               ),
                             ),
                             Text(
-                              '${_streak > 0 ? _streak : 0}/${coreAffirmations.length}',
+                              '${allAffirmations.where((x) => (x as Map)['packId'] == AffirmationPackIds.core && _unlockedIds.contains((x['a'] as Affirmation).id)).length}/${coreAffirmations.length}',
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: theme.colorScheme.primary,
                                 fontWeight: FontWeight.w600,
@@ -170,10 +173,10 @@ class _QuietAffirmationsLibraryScreenState
                             .toList(growable: false);
 
                         final item = coreItems[index] as Map;
-                        final a = item['a'];
+                        final a = item['a'] as Affirmation;
 
                         final bool isPremiumLocked = false;
-                        final bool unlocked = _isUnlocked(a.id);
+                        final bool unlocked = _isUnlocked(a.id, AffirmationPackIds.core);
 
                         return AffirmationGridTile(
                           affirmation: a,
