@@ -47,6 +47,11 @@ class _QuietHomeAffirmationsCarouselState
 
   Future<void> _loadData() async {
     final unlocked = await AffirmationsUnlockService.instance.getUnlockedIds();
+    
+    // DEBUG: Trace affirmation state synchronization
+    debugPrint('QUIET: Carousel sync - streak: ${widget.streak}, unlocked: ${unlocked.length} ids');
+    debugPrint('QUIET: Unlocked IDs: $unlocked');
+
     if (!mounted) return;
 
     setState(() {
@@ -93,12 +98,25 @@ class _QuietHomeAffirmationsCarouselState
         PremiumEntitlement.instance.isPremium;
     final rng = Random();
 
-    // 1. First Position: Most recently unlocked Core affirmation
-    final primary =
-        service.getHomeCoreForStreakDay(widget.streak);
+    // 1. First Position: Most recently unlocked Core affirmation (synced with streak)
+    final streakAffirmation = service.getHomeCoreForStreakDay(widget.streak);
+    Affirmation? primary;
+
+    if (streakAffirmation != null && _unlockedIds.contains(streakAffirmation.id)) {
+      primary = streakAffirmation;
+    } else {
+      // FALLBACK: The streak might be ahead of the actual unlocks, or the user is on Day 0.
+      // We find the highest unlocked Core affirmation.
+      final allCore = service.getAffirmationsForPack(AffirmationPackIds.core);
+      for (final a in allCore.reversed) {
+        if (_unlockedIds.contains(a.id)) {
+          primary = a;
+          break;
+        }
+      }
+    }
 
     final List<_AffirmationCardData> cards = [];
-
     final tier = _backgroundTierForStreak(widget.streak);
     final backgrounds = _backgroundsForTier(tier);
 
@@ -111,7 +129,7 @@ class _QuietHomeAffirmationsCarouselState
       );
     }
 
-    // 2. Second Position: Premium random (if premium), otherwise random Core
+    // 2. Second Position: Premium random (if premium), otherwise random Core (if any others exist)
     Affirmation? secondary;
     if (isPremium) {
       // Pick random from Focus, Sleep, or Strength
@@ -124,15 +142,15 @@ class _QuietHomeAffirmationsCarouselState
       secondary = service.getRandomFromPack(randomPack);
     } else {
       // Random unlocked Core (excluding primary)
-      final allUnlockedCore = service
+      final otherUnlockedCore = service
           .getAffirmationsForPack(AffirmationPackIds.core)
           .where((a) =>
               _unlockedIds.contains(a.id) &&
               a.id != primary?.id)
           .toList();
-      if (allUnlockedCore.isNotEmpty) {
+      if (otherUnlockedCore.isNotEmpty) {
         secondary =
-            allUnlockedCore[rng.nextInt(allUnlockedCore.length)];
+            otherUnlockedCore[rng.nextInt(otherUnlockedCore.length)];
       }
     }
 
@@ -145,11 +163,9 @@ class _QuietHomeAffirmationsCarouselState
       );
     }
 
-    // 3. Third Position: Random from WHICHEVER library
-    // (Excluding ones already picked)
+    // 3. Third Position: Random from WHICHEVER library (Strictly filtered)
     final existingIds = cards.map((c) => c.affirmation.id).toSet();
     
-    // Aggregate potential candidates from ALL packs
     final allPacks = [
       AffirmationPackIds.core,
       AffirmationPackIds.focus,
@@ -161,7 +177,7 @@ class _QuietHomeAffirmationsCarouselState
     for (final packId in allPacks) {
       final packAffirmations = service.getAffirmationsForPack(packId);
       for (final a in packAffirmations) {
-        // If it's core, must be unlocked. If premium, user must be premium.
+        // Source of Truth: Core must be in _unlockedIds. Premium requires entitlement.
         bool isEligible = false;
         if (packId == AffirmationPackIds.core) {
           isEligible = _unlockedIds.contains(a.id);

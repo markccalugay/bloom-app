@@ -22,29 +22,73 @@ class QuietBreathTimerTitle extends StatelessWidget {
             ? 'Press Start to begin.'
             : 'Tap Resume to continue.');
 
+    // ANIMATION CALCULATIONS
+    // Reset animations to original values if the session is fully finished.
+    // Otherwise, calculate progress based on the first cycle.
+    final bool isSessionComplete = !controller.isPlaying && controller.sessionProgress >= 1.0;
+    
+    final double cycle1Progress = isSessionComplete
+        ? 0.0
+        : (controller.sessionProgress * controller.targetCycles).clamp(0.0, 1.0);
+
+    // Fade out "Find your quiet." specifically.
+    // If paused or fresh, we keep it at 1.0.
+    final double headerOpacity =
+        (header == 'Find your quiet.') ? (1.0 - cycle1Progress) : 1.0;
+
+    // Increase instruction size from 16.8 to 21.0 during cycle 1.
+    // We keep the larger size for the rest of the session.
+    final double instructionSize = 16.8 + (4.2 * cycle1Progress);
+
+    // RHYTHMIC FADING CALCULATIONS
+    // We want the text to fade out ~500ms before the phase ends and fade back in 
+    // at the start of the next phase. This ensures zero overlap.
+    double instructionOpacity = 1.0;
+    if (controller.isPlaying) {
+      final double progress = controller.phaseProgress;
+      final double phaseDuration = controller.contract.phases[controller.phaseIndex].seconds.toDouble();
+      
+      // Use a 500ms window, but clamp it so it doesn't exceed 40% of the phase duration
+      // (important for very fast phases like in Cold Resolve).
+      final double fadePercentage = (0.5 / phaseDuration).clamp(0.0, 0.4);
+      
+      if (progress < fadePercentage) {
+        // Fade In
+        instructionOpacity = Curves.easeInOut.transform(progress / fadePercentage);
+      } else if (progress > (1.0 - fadePercentage)) {
+        // Fade Out
+        instructionOpacity = Curves.easeInOut.transform((1.0 - progress) / fadePercentage);
+      }
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        const SizedBox(height: kQBHeaderTopGap),
-        Text(
-          header,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface,
-            fontSize: 22,
-            fontWeight: FontWeight.w700,
+        Opacity(
+          opacity: headerOpacity,
+          child: Text(
+            header,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
         const SizedBox(height: kQBHeaderToInstructionGap),
-        Text(
-          instruction,
-          style: TextStyle(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
-            fontSize: 16.8, // 14 * 1.2
-            fontWeight: FontWeight.w400,
-            letterSpacing: 0.2,
+        Opacity(
+          opacity: instructionOpacity,
+          child: Text(
+            instruction,
+            style: TextStyle(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+              fontSize: instructionSize,
+              fontWeight: FontWeight.w400,
+              letterSpacing: 0.2,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
         ),
       ],
     );

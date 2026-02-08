@@ -5,7 +5,6 @@ import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/widgets/forge/quiet_forge_confetti.dart';
 import 'package:quietline_app/widgets/forge/quiet_forge_cloud_effect.dart';
 import 'package:quietline_app/screens/forge/quiet_armor_room_screen.dart';
@@ -170,12 +169,6 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
                                   width: 280,
                                   height: 280,
                                   fit: BoxFit.contain,
-                                  colorFilter: ColorFilter.mode(
-                                    _controller.isAnimating 
-                                        ? QLColors.armorForgeWarm 
-                                        : QLColors.armorIronBase,
-                                    BlendMode.srcIn,
-                                  ),
                                 ),
                               ),
                             );

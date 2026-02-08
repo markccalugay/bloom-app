@@ -6,6 +6,7 @@ class FirstLaunchService {
 
   static const _keyFtueCompleted = 'ql_ftue_completed';
   static const _keyHomeHintSeen = 'ql_home_hint_seen';
+  static const _keyArmorOnboardingSeen = 'ql_armor_onboarding_seen';
   static const _keyHasCompletedFirstSession = 'ql_has_completed_first_session';
 
   /// Alias used by routing code. True when FTUE is complete.
@@ -36,6 +37,18 @@ class FirstLaunchService {
   Future<void> markHomeHintSeen() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyHomeHintSeen, true);
+  }
+
+  /// Returns true if the one-time Armor Room onboarding has been shown.
+  Future<bool> hasSeenArmorOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyArmorOnboardingSeen) ?? false;
+  }
+
+  /// Marks the one-time Armor Room onboarding as shown.
+  Future<void> markArmorOnboardingSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyArmorOnboardingSeen, true);
   }
 
   /// Returns true if the user has completed their first quiet session.
@@ -70,6 +83,7 @@ class FirstLaunchService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyFtueCompleted);
     await prefs.remove(_keyHomeHintSeen);
+    await prefs.remove(_keyArmorOnboardingSeen);
     await prefs.remove(_keyHasCompletedFirstSession);
   }
 
@@ -79,6 +93,7 @@ class FirstLaunchService {
     return {
       'ftueCompleted': prefs.getBool(_keyFtueCompleted) ?? false,
       'hasSeenHomeHint': prefs.getBool(_keyHomeHintSeen) ?? false,
+      'hasSeenArmorOnboarding': prefs.getBool(_keyArmorOnboardingSeen) ?? false,
       'hasCompletedFirstSession':
           prefs.getBool(_keyHasCompletedFirstSession) ?? false,
     };
