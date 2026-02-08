@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/widgets/forge/quiet_ingot_particles.dart';
 import 'package:quietline_app/core/app_assets.dart';
 
@@ -91,17 +90,13 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                       SlideTransition(
                         position: _fallAnimation,
                         child: Opacity(
-                          opacity: 0.55,
+                          opacity: 1.0,
                           child: SizedBox(
                             width: width,
                             height: height,
                             child: SvgPicture.asset(
                               ForgeService.instance.currentAsset,
                               fit: BoxFit.contain,
-                              colorFilter: const ColorFilter.mode(
-                                QLColors.armorIronBase,
-                                BlendMode.srcIn,
-                              ),
                             ),
                           ),
                         ),

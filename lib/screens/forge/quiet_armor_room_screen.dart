@@ -4,7 +4,6 @@ import 'package:quietline_app/services/first_launch_service.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietArmorRoomScreen extends StatefulWidget {
   const QuietArmorRoomScreen({super.key});
@@ -275,10 +274,6 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
             width: widget.size,
             height: widget.size,
             fit: BoxFit.contain,
-            colorFilter: ColorFilter.mode(
-              widget.isLocked ? QLColors.armorLockedFill : QLColors.armorIronSaturated,
-              BlendMode.srcIn,
-            ),
           ),
         ),
       ),
