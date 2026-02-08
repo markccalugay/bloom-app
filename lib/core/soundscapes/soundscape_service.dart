@@ -53,6 +53,9 @@ class SoundscapeService extends ChangeNotifier {
     // Use native looping for seamless playback on supported platforms via just_audio.
     await _bgPlayer.setLoopMode(ja.LoopMode.all);
     
+    // PRE-LOAD the initial asset
+    await _bgPlayer.setAsset(_activeSoundscape.assetPath);
+    
     await _updatePlayerVolume();
     notifyListeners();
   }
@@ -61,6 +64,9 @@ class SoundscapeService extends ChangeNotifier {
     _activeSoundscape = soundscape;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_activeSoundscapeKey, soundscape.id);
+    
+    // Load the new asset immediately
+    await _bgPlayer.setAsset(soundscape.assetPath);
     
     if (_isPlaying) {
       await play(fadeIn: false); // Switch track immediately if already playing
@@ -82,6 +88,12 @@ class SoundscapeService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_muteKey, _isMuted);
     await _updatePlayerVolume();
+    
+    // If we unmuted and it's marked as "playing" but player stopped, kick it.
+    if (!_isMuted && _isPlaying && !_bgPlayer.playing) {
+       _bgPlayer.play();
+    }
+    
     notifyListeners();
   }
 
@@ -105,24 +117,26 @@ class SoundscapeService extends ChangeNotifier {
   }
 
   Future<void> play({bool fadeIn = true}) async {
+    final targetVolume = _isMuted ? 0.0 : _volume;
+    
+    // If already playing and volume is already at target, don't re-trigger fade
+    if (_isPlaying && _bgPlayer.playing && (_bgPlayer.volume - targetVolume).abs() < 0.01) {
+      return;
+    }
+
     _isPlaying = true;
     _fadeTimer?.cancel();
     
-    // just_audio uses 'asset:///' prefix or setAsset() helper
-    final assetPath = _activeSoundscape.assetPath;
-    await _bgPlayer.setAsset(assetPath);
-
     if (fadeIn) {
       await _bgPlayer.setVolume(0);
       await _bgPlayer.play();
       
-      const steps = 20;
-      const stepDuration = Duration(milliseconds: 1000 ~/ steps);
+      const steps = 10;
+      const stepDuration = Duration(milliseconds: 500 ~/ steps);
       double currentStep = 0.0;
       
       _fadeTimer = Timer.periodic(stepDuration, (timer) {
         currentStep++;
-        final targetVolume = _isMuted ? 0.0 : _volume;
         final newVolume = (currentStep / steps) * targetVolume;
         _bgPlayer.setVolume(newVolume);
         
@@ -143,10 +157,10 @@ class SoundscapeService extends ChangeNotifier {
     _fadeTimer?.cancel();
 
     if (fadeOut) {
-      const steps = 20;
-      const stepDuration = Duration(milliseconds: 1000 ~/ steps);
+      const steps = 10;
+      const stepDuration = Duration(milliseconds: 500 ~/ steps);
       double currentStep = steps.toDouble();
-      final startVolume = _isMuted ? 0.0 : _volume;
+      final startVolume = _bgPlayer.volume;
 
       _fadeTimer = Timer.periodic(stepDuration, (timer) {
         currentStep--;
@@ -183,9 +197,6 @@ class SoundscapeService extends ChangeNotifier {
 
   Future<void> playSfx(String assetPath) async {
     await _sfxPlayer.setVolume(_isSfxMuted ? 0 : _sfxVolume);
-    // audioplayers AssetSource doesn't need 'assets/' prefix usually if configured, 
-    // but the current paths in models include it. 
-    // Wait, the previous code did replaceFirst('assets/', '').
     await _sfxPlayer.play(ap.AssetSource(assetPath.replaceFirst('assets/', '')));
   }
 

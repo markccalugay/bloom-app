@@ -57,7 +57,19 @@ class QuietBreathTimerTitle extends StatelessWidget {
         ),
         const SizedBox(height: kQBHeaderToInstructionGap),
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 600),
+          // Use Interval curves to ensure fade-out completes before fade-in starts.
+          switchInCurve: const Interval(0.5, 1.0, curve: Curves.easeIn),
+          switchOutCurve: const Interval(0.0, 0.5, curve: Curves.easeOut),
+          layoutBuilder: (Widget? currentChild, List<Widget> previousChildren) {
+            return Stack(
+              alignment: Alignment.center,
+              children: <Widget>[
+                ...previousChildren,
+                if (currentChild != null) currentChild,
+              ],
+            );
+          },
           transitionBuilder: (Widget child, Animation<double> animation) {
             return FadeTransition(opacity: animation, child: child);
           },

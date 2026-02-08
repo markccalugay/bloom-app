@@ -125,6 +125,9 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     }
     controller.onSessionComplete = _handleSessionComplete;
 
+    // Auto-start soundscape atmosphere on screen entry
+    SoundscapeService.instance.play();
+
     controller.listenable.addListener(() {
       if (controller.isPlaying && !_hasStarted) {
         _hasStarted = true;
