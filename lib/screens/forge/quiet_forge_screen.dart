@@ -88,23 +88,7 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF1A1F26),
-        title: const Text('The Forge', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'Your consistency applies pressure. Pressure refines iron. Refined iron assembles armor.\n\nShowing up advances your material. Nothing is lost if a day is missed. Your progress waits.',
-          style: TextStyle(color: Color(0xFFB9C3CF)),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              ForgeService.instance.markExplanationSeen();
-              Navigator.of(context).pop();
-            },
-            child: const Text('I understand', style: TextStyle(color: Color(0xFF2FE6D2))),
-          ),
-        ],
-      ),
+      builder: (context) => const _ForgeExplanationDialog(),
     );
   }
 
@@ -118,7 +102,7 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     final state = ForgeService.instance.state;
     // We arrived here AFTER advanceProgress was called.
     
-    if (state.totalSessions == 1) return 'assets/tools/iron_raw.svg'; // Technically it was nothing or raw
+    if (state.totalSessions <= 1) return 'assets/tools/iron_raw.svg';
     if (state.totalSessions == 2) return 'assets/tools/iron_raw.svg';
     if (state.totalSessions == 3) return 'assets/tools/iron_ingot.svg';
     
@@ -132,11 +116,8 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     final forgeState = ForgeService.instance.state;
 
     String headline = 'The Forge';
-    String subheadline = 'Your discipline is refining Iron.';
-
-    if (forgeState.ironStage == IronStage.raw) {
-      subheadline = 'Material: Raw Iron';
-    } else if (forgeState.ironStage == IronStage.ingot) {
+    String subheadline = 'Material: Raw Iron';
+    if (forgeState.ironStage == IronStage.ingot) {
       subheadline = 'Material: Iron Ingot';
     } else if (forgeState.ironStage == IronStage.polished) {
       subheadline = 'Material: Polished Iron Ingot';
@@ -144,14 +125,12 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
 
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 32.0, // accounting for vertical padding
-                ),
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -240,10 +219,65 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _ForgeExplanationDialog extends StatefulWidget {
+  const _ForgeExplanationDialog();
+
+  @override
+  State<_ForgeExplanationDialog> createState() => _ForgeExplanationDialogState();
+}
+
+class _ForgeExplanationDialogState extends State<_ForgeExplanationDialog> {
+  bool _showButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) {
+        setState(() => _showButton = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFF1A1F26),
+      title: const Text('The Forge', style: TextStyle(color: Colors.white)),
+      content: const Text(
+        "This is where QuietLine tracks consistency.\n\n"
+        "Each time you return, iron refines a little more.\n"
+        "Raw iron becomes an ingot.\n"
+        "An ingot becomes polished iron.\n\n"
+        "Polished iron is used to assemble armor.\n"
+        "Armor is built slowly, over time.\n\n"
+        "There’s no penalty for missing a day.\n"
+        "When you come back, you continue.",
+        style: TextStyle(color: Color(0xFFB9C3CF)),
+      ),
+      actions: [
+        AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: _showButton ? 1.0 : 0.0,
+          child: TextButton(
+            onPressed: _showButton
+                ? () {
+                    ForgeService.instance.markExplanationSeen();
+                    Navigator.of(context).pop();
+                  }
+                : null,
+            child: const Text('Begin', style: TextStyle(color: Color(0xFF2FE6D2))),
+          ),
+        ),
+      ],
     );
   }
 }

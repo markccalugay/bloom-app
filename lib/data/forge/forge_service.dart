@@ -128,7 +128,15 @@ class ForgeService extends ChangeNotifier {
       ArmorPiece.chestplate: 5,
     };
 
-    for (final piece in ArmorPiece.values) {
+    // We unlock pieces in a specific order: Helmet -> Tool -> Pauldrons -> Chestplate
+    final unlockOrder = [
+      ArmorPiece.helmet,
+      ArmorPiece.tool,
+      ArmorPiece.pauldrons,
+      ArmorPiece.chestplate,
+    ];
+
+    for (final piece in unlockOrder) {
       if (!nextUnlocked.contains(piece)) {
         final req = craftingRequirements[piece]!;
         if (nextIngotCount >= req) {

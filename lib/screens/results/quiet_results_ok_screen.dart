@@ -144,9 +144,9 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
     final textTheme = theme.textTheme;
 
     // Decide if this screen represents a newly earned session.
-    final int totalSessions = ForgeService.instance.state.totalSessions;
-    final int prevTotalSessions = totalSessions - 1;
-    final bool sessionIncreased = widget.completedToday; // Assuming we arrive here after a session
+    final int totalSessions = widget.streak;
+    final int prevTotalSessions = widget.previousStreak ?? (widget.isNew ? (totalSessions - 1) : totalSessions);
+    final bool sessionIncreased = widget.completedToday;
     final bool continuedProgress = sessionIncreased && prevTotalSessions > 0;
     final bool showPracticeUnlock = sessionIncreased && totalSessions >= 3;
     
@@ -159,7 +159,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
       final eased = Curves.easeOutCubic.transform(t);
       displaySessionsNow = (prevTotalSessions +
               ((totalSessions - prevTotalSessions) * eased).round())
-          .clamp(1, totalSessions);
+          .clamp(1, math.max(1, totalSessions));
     }
 
     return Scaffold(

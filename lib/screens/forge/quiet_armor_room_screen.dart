@@ -14,6 +14,7 @@ class QuietArmorRoomScreen extends StatefulWidget {
 
 class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
   bool _showOnboarding = false;
+  bool _showBeginButton = false;
 
   @override
   void initState() {
@@ -25,6 +26,12 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
     final hasSeen = await FirstLaunchService.instance.hasSeenArmorOnboarding();
     if (!hasSeen && mounted) {
       setState(() => _showOnboarding = true);
+      // Delay showing the "Begin" button
+      Future.delayed(const Duration(milliseconds: 2500), () {
+        if (mounted) {
+          setState(() => _showBeginButton = true);
+        }
+      });
     }
   }
 
@@ -75,44 +82,57 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
   }
 
   Widget _buildOnboardingOverlay() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      color: Colors.black.withValues(alpha: 0.85),
+      color: Colors.black.withValues(alpha: 0.85), // Keep dimming modal dark for focus
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Center(
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            color: const Color(0xFF0F141A),
+            color: isDark ? const Color(0xFF0F141A) : theme.cardColor,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: const Color(0xFF2A3340)),
+            border: Border.all(
+              color: isDark ? const Color(0xFF2A3340) : theme.dividerColor,
+            ),
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               const Icon(Icons.shield_rounded, size: 64, color: Color(0xFF2FE6D2)),
               const SizedBox(height: 24),
-              const Text(
+              Text(
                 'The Forge',
-                style: TextStyle(
-                  fontSize: 20,
+                style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
                 ),
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Showing up applies pressure. Pressure refines iron. Refined iron assembles armor.\n\nYour progress is a result of consistency. Nothing is lost if a day is missed. Discipline accumulates here.',
+              Text(
+                "This is where QuietLine tracks consistency.\n\n"
+                "Each time you return, iron refines a little more.\n"
+                "Raw iron becomes an ingot.\n"
+                "An ingot becomes polished iron.\n\n"
+                "Polished iron is used to assemble armor.\n"
+                "Armor is built slowly, over time.\n\n"
+                "There’s no penalty for missing a day.\n"
+                "When you come back, you continue.",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 15,
+                style: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.5,
-                  color: Color(0xFFB9C3CF),
+                  color: isDark ? const Color(0xFFB9C3CF) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
                 ),
               ),
               const SizedBox(height: 32),
-              QLPrimaryButton(
-                label: 'Begin Journey',
-                onPressed: _dismissOnboarding,
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 300),
+                opacity: _showBeginButton ? 1.0 : 0.0,
+                child: QLPrimaryButton(
+                  label: 'Begin',
+                  onPressed: _showBeginButton ? _dismissOnboarding : () {},
+                ),
               ),
             ],
           ),
@@ -127,22 +147,28 @@ class _ArmorSetCard extends StatelessWidget {
 
   const _ArmorSetCard({required this.set});
 
+  String _capitalize(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     
-    // Check which pieces are unlocked for THIS set
-    // Simplified: our ForgeService currently only tracks a single "currentSet".
-    // For MVP, we'll assume the user is working on one set at a time or 
-    // we'll filter unlocked pieces by set name if we store them globally.
     final forgeService = ForgeService.instance;
     final isCurrentSet = forgeService.state.currentSet == set;
     final unlockedPieces = isCurrentSet ? forgeService.state.unlockedPieces : <ArmorPiece>[];
     
-    String progressLabel = '${unlockedPieces.length}/4 pieces assembled';
-    if (unlockedPieces.length < 4) {
-      final nextPiece = ArmorPiece.values[unlockedPieces.length];
+    String progressLabel = 'Armor Assembled';
+    
+    final unlockOrder = [
+      ArmorPiece.helmet,
+      ArmorPiece.tool,
+      ArmorPiece.pauldrons,
+      ArmorPiece.chestplate,
+    ];
+
+    if (unlockedPieces.length < unlockOrder.length) {
+      final nextPiece = unlockOrder[unlockedPieces.length];
       final requirements = {
         ArmorPiece.helmet: 1,
         ArmorPiece.tool: 2,
@@ -150,15 +176,22 @@ class _ArmorSetCard extends StatelessWidget {
         ArmorPiece.chestplate: 5,
       };
       final req = requirements[nextPiece]!;
-      progressLabel = 'Next: ${nextPiece.name} (${forgeService.state.polishedIngotCount} / $req)';
+      final current = forgeService.state.polishedIngotCount;
+      progressLabel = '${_capitalize(nextPiece.name)} Requires $req polished iron $current / $req';
     }
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF1A1F26),
+        color: theme.brightness == Brightness.dark 
+            ? const Color(0xFF1A1F26) 
+            : theme.cardColor,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFF2A3340)),
+        border: Border.all(
+          color: theme.brightness == Brightness.dark 
+              ? const Color(0xFF2A3340) 
+              : theme.dividerColor,
+        ),
       ),
       child: Column(
         children: [
@@ -167,14 +200,13 @@ class _ArmorSetCard extends StatelessWidget {
             style: textTheme.titleMedium?.copyWith(
               letterSpacing: 1.5,
               fontWeight: FontWeight.bold,
-              color: Colors.white70,
             ),
           ),
           const SizedBox(height: 4),
           Text(
             progressLabel,
             style: textTheme.bodySmall?.copyWith(
-              color: Colors.white38,
+              color: textTheme.bodySmall?.color?.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 16),
@@ -286,6 +318,7 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
   }
 
   void _showZoomedView(BuildContext context, String asset, ArmorPiece piece) {
+    final theme = Theme.of(context);
     final inscriptions = {
       ArmorPiece.helmet: "Conquer the mind, and you conquer the world.",
       ArmorPiece.chestplate: "Hardship is the only way to the forge.",
@@ -308,8 +341,8 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
              Text(
                inscriptions[piece] ?? "",
                textAlign: TextAlign.center,
-               style: const TextStyle(
-                 color: Colors.white,
+               style: TextStyle(
+                 color: theme.brightness == Brightness.dark ? Colors.white : theme.textTheme.bodyLarge?.color,
                  fontSize: 18,
                  fontStyle: FontStyle.italic,
                  fontFamily: 'serif',
