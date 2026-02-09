@@ -1,7 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
@@ -54,7 +53,6 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   bool _shouldAnimateStreak = false; // global gate (screen is ready)
   bool _animateRow = false;          // small flames step
   bool _animateBadge = false;        // big flame step
-  bool _debugForceAnimate = false;
 
   // Debug-only: allows simulating streak progression without touching persistence.
   int? _debugStreakOverride;
@@ -68,8 +66,6 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
 
   // Number count-up (0 -> 1, 1 -> 2, etc)
   late final AnimationController _countController;
-  int _countFrom = 0;
-  int _countTo = 0;
 
   // Tunable timings
   static const Duration _screenSettleDelay = Duration(milliseconds: 650);
@@ -114,10 +110,6 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
         // Sequence state
         _animateRow = false;
         _animateBadge = false;
-
-        // Count-up config
-        _countFrom = prevStreak;
-        _countTo = streak;
       });
 
       // Step 1: animate the small flame row first.
@@ -151,33 +143,23 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    // Decide if this screen represents a newly earned streak day.
-    // - Prefer comparing against `previousStreak` when available.
-    // - Fall back to `isNew` for older callers.
-    // - FTUE safety: if someone forgets to pass flags on Day 1, we still animate.
-    final int streak = _debugStreakOverride ?? widget.streak;
-    final int prevStreak =
-        (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
-            .clamp(0, 999999);
-    final bool streakIncreased = widget.previousStreak != null
-        ? (streak > prevStreak)
-        : widget.isNew;
-    final bool continuedStreak = streakIncreased && prevStreak > 0;
-    final bool showPracticeUnlock = streakIncreased && streak >= 3;
-
-    // Compute displayStreakNow for the Day X label.
-    // This must never show Day 0 and must match the big flame number.
-    int displayStreakNow;
-    if (!streakIncreased) {
-      displayStreakNow = math.max(1, streak);
-    } else if (!_shouldAnimateStreak || !_animateBadge) {
-      displayStreakNow = math.max(1, prevStreak);
+    // Decide if this screen represents a newly earned session.
+    final int totalSessions = widget.streak;
+    final int prevTotalSessions = widget.previousStreak ?? (widget.isNew ? (totalSessions - 1) : totalSessions);
+    final bool sessionIncreased = widget.completedToday;
+    final bool continuedProgress = sessionIncreased && prevTotalSessions > 0;
+    final bool showPracticeUnlock = sessionIncreased && totalSessions >= 3;
+    
+    // Compute displaySessionsNow for the Session X label.
+    int displaySessionsNow;
+    if (!_shouldAnimateStreak || !_animateBadge) {
+      displaySessionsNow = math.max(1, prevTotalSessions);
     } else {
       final t = _countController.value;
       final eased = Curves.easeOutCubic.transform(t);
-      displayStreakNow = (_countFrom +
-              ((_countTo - _countFrom) * eased).round())
-          .clamp(1, _countTo);
+      displaySessionsNow = (prevTotalSessions +
+              ((totalSessions - prevTotalSessions) * eased).round())
+          .clamp(1, math.max(1, totalSessions));
     }
 
     return Scaffold(
@@ -190,89 +172,6 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (kDebugMode)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8.0),
-                    child: Wrap(
-                      spacing: 8,
-                      children: [
-                        TextButton(
-                          onPressed: () async {
-                            final int streak = _debugStreakOverride ?? widget.streak;
-                            final int prevStreak = (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
-                                .clamp(0, 999999);
-  
-                            setState(() {
-                              _debugForceAnimate = true;
-                              _shouldAnimateStreak = true;
-                              _animateRow = false;
-                              _animateBadge = false;
-                              _countFrom = prevStreak;
-                              _countTo = streak;
-                              _countController.stop();
-                              _countController.value = 0.0;
-                              _animationSeed++;
-                            });
-  
-                            await Future.delayed(_rowStartDelay);
-                            if (!mounted) return;
-                            setState(() => _animateRow = true);
-  
-                            await Future.delayed(_badgeStartAfterRow);
-                            if (!mounted) return;
-                            setState(() => _animateBadge = true);
-  
-                            _countController.forward(from: 0.0);
-                          },
-                          child: const Text('DEBUG: Replay', style: TextStyle(color: Colors.redAccent, fontSize: 10)),
-                        ),
-                        TextButton(
-                          onPressed: () async {
-                            final int current = _debugStreakOverride ?? widget.streak;
-                            final int next = (current + 1).clamp(0, 999999);
-                            setState(() {
-                              _debugForceAnimate = true;
-                              _shouldAnimateStreak = true;
-                              _debugPrevOverride = current;
-                              _debugStreakOverride = next;
-                              _animateRow = false;
-                              _animateBadge = false;
-                              _countFrom = current;
-                              _countTo = next;
-                              _countController.stop();
-                              _countController.value = 0.0;
-                              _animationSeed++;
-                            });
-                            await Future.delayed(_rowStartDelay);
-                            if (!mounted) return;
-                            setState(() => _animateRow = true);
-                            await Future.delayed(_badgeStartAfterRow);
-                            if (!mounted) return;
-                            setState(() => _animateBadge = true);
-                            _countController.forward(from: 0.0);
-                          },
-                          child: const Text('DEBUG: +1', style: TextStyle(color: Colors.orangeAccent, fontSize: 10)),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _debugPrevOverride = 0;
-                              _debugStreakOverride = 1;
-                              _debugForceAnimate = false;
-                              _shouldAnimateStreak = false;
-                              _animateRow = false;
-                              _animateBadge = false;
-                              _countController.stop();
-                              _countController.value = 0.0;
-                              _animationSeed++;
-                              _didAutoPlay = false;
-                            });
-                          },
-                          child: const Text('DEBUG: Reset', style: TextStyle(color: Colors.white70, fontSize: 10)),
-                        ),
-                      ],
-                    ),
-                  ),
                 const SizedBox(height: 24),
   
                 // Headline (centered)
@@ -305,7 +204,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                     children: [
                       // Day X of your quiet streak (updated to use displayStreakNow)
                       Text(
-                        QuietResultsStrings.dayOfStreak(displayStreakNow),
+                        QuietResultsStrings.dayOfStreak(displaySessionsNow),
                         style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                         ),
@@ -320,40 +219,39 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                       AnimatedBuilder(
                         animation: _countController,
                         builder: (context, _) {
-                          int displayStreak;
-                          if (!streakIncreased) {
-                            displayStreak = streak;
+                          int currentDisplay;
+                          if (!sessionIncreased) {
+                            currentDisplay = totalSessions;
                           } else if (!_shouldAnimateStreak || !_animateBadge) {
-                            displayStreak = prevStreak;
+                            currentDisplay = prevTotalSessions;
                           } else {
                             final t = _countController.value;
                             final eased = Curves.easeOutCubic.transform(t);
-                            displayStreak = (_countFrom + ((_countTo - _countFrom) * eased).round()).clamp(_countFrom, _countTo);
+                            currentDisplay = (prevTotalSessions + ((totalSessions - prevTotalSessions) * eased).round()).clamp(prevTotalSessions, totalSessions);
                           }
   
-                          final bool badgeShouldAnimate =
-                              (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateBadge;
-                          // Prevent teal -> gray -> teal flicker on continued streak days.
-                          // For continued streaks, treat the badge as already active by setting
-                          // its previousStreak equal to the current streak.
-                          final int badgePreviousStreak = continuedStreak ? streak : prevStreak;
+                          final bool badgeShouldAnimate = sessionIncreased && _shouldAnimateStreak && _animateBadge;
+                          final int badgePreviousCount = continuedProgress ? totalSessions : prevTotalSessions;
+                          
                           return QuietResultsStreakBadge(
-                            key: ValueKey('streak_badge_$_animationSeed'),
+                            key: ValueKey('session_badge_$_animationSeed'),
                             // IMPORTANT: drive the badge's visual state from the displayed value so it
                             // starts inactive (gray) on FTUE and only turns teal when the count-up begins.
-                            streak: displayStreak,
-                            previousStreak: badgePreviousStreak,
+                            streak: currentDisplay,
+                            previousStreak: badgePreviousCount,
                             // the badge renders this number (0->1, 1->2, etc)
-                            displayStreak: displayStreak,
+                            displayStreak: currentDisplay,
                             // Badge only animates in step 2
                             animate: badgeShouldAnimate,
                             // badge should start immediately when step 2 flips true
                             startDelay: Duration.zero,
-                            // Prevent gray->teal on continued streaks, only FTUE
-                            startInactive: !continuedStreak,
+                            // Prevent teal -> gray -> teal flicker on continued streak days.
+                            // For continued streaks, treat the badge as already active by setting
+                            // its previousStreak equal to the current streak.
+                            startInactive: !continuedProgress,
                             // Play wiggle only on continued streaks (no color transition)
-                            wiggleOnly: continuedStreak,
-                            completedToday: streakIncreased
+                            wiggleOnly: continuedProgress,
+                            completedToday: sessionIncreased
                                 ? (_shouldAnimateStreak && _animateBadge)
                                 : widget.completedToday,
                           );
@@ -366,13 +264,13 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   
                       // Small flame row
                       QuietResultsStreakRow(
-                        key: ValueKey('streak_row_$_animationSeed'),
-                        streak: (!streakIncreased)
-                            ? streak
-                            : ((_shouldAnimateStreak && _animateRow) ? streak : prevStreak),
-                        previousStreak: continuedStreak ? streak : prevStreak,
+                        key: ValueKey('session_row_$_animationSeed'),
+                        streak: (!sessionIncreased)
+                            ? totalSessions
+                            : ((_shouldAnimateStreak && _animateRow) ? totalSessions : prevTotalSessions),
+                        previousStreak: continuedProgress ? totalSessions : prevTotalSessions,
                         // Row only animates in step 1
-                        animate: (_debugForceAnimate || streakIncreased) && _shouldAnimateStreak && _animateRow,
+                        animate: sessionIncreased && _shouldAnimateStreak && _animateRow,
                         // row starts immediately when step 1 flips true
                         startDelay: Duration.zero,
                       ),
@@ -400,17 +298,16 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                 ],
   
   
-                // Bottom primary button, matching design
                 QLPrimaryButton(
                   label: QuietResultsStrings.continueButton,
                   onPressed: () async {
-                    if (streakIncreased) {
+                    if (sessionIncreased) {
                       final unlockService = AffirmationsUnlockService.instance;
-                      await unlockService.unlockIfEligibleForToday(streak);
+                      await unlockService.unlockIfEligibleForToday(totalSessions);
                       if (!context.mounted) return;
                       Navigator.of(context).pushReplacement(
                         MaterialPageRoute(
-                          builder: (_) => QuietAffirmationUnlockedScreen(streak: streak),
+                          builder: (_) => QuietAffirmationUnlockedScreen(streak: totalSessions),
                         ),
                       );
                       return;
@@ -438,10 +335,10 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   }
 }
 
-/// Post-results interstitial shown only when a new streak day is earned.
+/// Post-results interstitial shown only when a new session is completed.
 /// It reveals the newly unlocked affirmation for that day.
 class QuietAffirmationUnlockedScreen extends StatefulWidget {
-  final int streak;
+  final int streak; // Renamed conceptually to total sessions in usage
 
   const QuietAffirmationUnlockedScreen({
     super.key,
@@ -456,6 +353,7 @@ class QuietAffirmationUnlockedScreen extends StatefulWidget {
 class _QuietAffirmationUnlockedScreenState
     extends State<QuietAffirmationUnlockedScreen>
     with TickerProviderStateMixin {
+  // ... (keeping internal animation controllers same)
   late final AnimationController _controller;
   late final Animation<double> _fade;
   late final Animation<double> _scale;
@@ -483,7 +381,6 @@ class _QuietAffirmationUnlockedScreenState
       curve: const Interval(0.0, 0.35, curve: Curves.easeOut),
     );
 
-    // Slight pop at the end (the "burst")
     _scale = TweenSequence<double>([
       TweenSequenceItem(
         tween: Tween<double>(begin: 0.98, end: 1.02)
@@ -497,7 +394,6 @@ class _QuietAffirmationUnlockedScreenState
       ),
     ]).animate(_controller);
 
-    // Card flip reveal: 3 full flips (0 -> 3π) between 35% and 85%.
     _flip = Tween<double>(begin: 0.0, end: 3.0 * 3.141592653589793).animate(
       CurvedAnimation(
         parent: _controller,
@@ -514,19 +410,16 @@ class _QuietAffirmationUnlockedScreenState
       curve: Curves.easeOut,
     );
 
-    // Pre-generate confetti pieces (stable, deterministic).
     final rng = math.Random(42);
     for (int i = 0; i < 44; i++) {
       _confettiPieces.add(
         _ConfettiPiece(
-          // Emit from roughly the card center.
           x0: (rng.nextDouble() - 0.5) * 220,
           y0: (rng.nextDouble() - 0.5) * 40,
           angle: rng.nextDouble() * math.pi * 2,
           speed: 160 + rng.nextDouble() * 220,
           size: 4 + rng.nextDouble() * 6,
           spin: (rng.nextDouble() - 0.5) * 10,
-          // Keep colors on-brand: mostly white with a hint of teal.
           color: i % 7 == 0
               ? const Color(0xFF3E8F87)
               : Colors.white.withValues(alpha: 0.9),
@@ -539,14 +432,12 @@ class _QuietAffirmationUnlockedScreenState
 
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed && mounted) {
-        // Confetti burst after the card finishes the slam.
         setState(() => _showConfetti = true);
         _confettiController.forward(from: 0.0).whenComplete(() {
           if (!mounted) return;
           setState(() => _showConfetti = false);
         });
 
-        // Give the user a moment to read before showing Continue.
         Future.delayed(const Duration(milliseconds: 1500), () {
           if (!mounted) return;
           setState(() => _showContinue = true);
@@ -554,7 +445,6 @@ class _QuietAffirmationUnlockedScreenState
       }
     });
 
-    // Start animation on first frame, card renders immediately, then dwell before flip/twirl.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
@@ -609,7 +499,7 @@ class _QuietAffirmationUnlockedScreenState
     final textTheme = theme.textTheme;
 
     final unlockedLabel =
-        'Unlocked on Day ${widget.streak} ${_formatMonthDayYear(DateTime.now())}';
+        'Unlocked on Session ${widget.streak} ${_formatMonthDayYear(DateTime.now())}';
 
     return Scaffold(
       body: SafeArea(
@@ -805,19 +695,27 @@ class _AffirmationUnlockCard extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
+    final Color textColor = theme.brightness == Brightness.dark
+        ? Colors.white
+        : theme.colorScheme.onSurface;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: theme.cardColor.withValues(alpha: 0.18),
+        color: theme.brightness == Brightness.dark
+            ? theme.cardColor.withValues(alpha: 0.18)
+            : theme.colorScheme.surface.withValues(alpha: 0.90),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.10),
+          color: theme.brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.10)
+              : theme.colorScheme.onSurface.withValues(alpha: 0.10),
         ),
         boxShadow: [
           BoxShadow(
             blurRadius: 22,
             offset: const Offset(0, 12),
-            color: Colors.black.withValues(alpha: 0.22),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.22 : 0.08),
           ),
         ],
       ),
@@ -831,7 +729,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
               Icon(
                 isFront ? Icons.lock_open_rounded : Icons.auto_awesome_rounded,
                 size: 18,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: textColor.withValues(alpha: 0.9),
               ),
               const SizedBox(width: 8),
               Text(
@@ -839,7 +737,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
                 style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
-                  color: Colors.white.withValues(alpha: 0.92),
+                  color: textColor.withValues(alpha: 0.92),
                 ),
               ),
             ],
@@ -851,7 +749,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: textColor.withValues(alpha: 0.72),
               height: 1.2,
             ),
           ),
@@ -865,7 +763,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
             style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
               height: 1.25,
-              color: Colors.white,
+              color: textColor,
             ),
           ),
         ],
