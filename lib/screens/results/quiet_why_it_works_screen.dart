@@ -286,8 +286,24 @@ class _QuietWhyItWorksScreenState extends State<QuietWhyItWorksScreen> {
       default:
         return const _WhyContent(
           sections: [
-            _WhySection(text: 'Slow, controlled breathing sends a signal to your nervous system that you’re safe.'),
-            _WhySection(text: 'When you breathe in a steady rhythm — like 4 seconds in, 4 seconds hold, 4 seconds out — your body shifts away from stress mode (fight-or-flight) and toward calm, regulated control (rest-and-digest).'),
+            _WhySection(
+              text:
+                  'Slow, controlled breathing sends a clear signal to your nervous system that you are safe. '
+                  'This signal matters because the nervous system is constantly scanning for threat, even when '
+                  'no immediate danger is present.',
+            ),
+            _WhySection(
+              text:
+                  'When you breathe in a steady rhythm, like 4 seconds in, 4 seconds hold, and 4 seconds out, '
+                  'your body shifts away from stress mode (fight or flight) and toward calm, regulated control '
+                  '(rest and digest). Heart rate slows, muscle tension eases, and the brain reduces its sense of urgency.',
+            ),
+            _WhySection(
+              text:
+                  'This shift happens automatically. You are not trying to calm your thoughts directly. '
+                  'Instead, you are changing the physical signals traveling from your lungs and heart to the brain, '
+                  'which then adjusts emotional and mental state in response.',
+            ),
             _WhySection(
               text: 'This happens because slow breathing:',
               bullets: [
@@ -296,21 +312,38 @@ class _QuietWhyItWorksScreenState extends State<QuietWhyItWorksScreen> {
                 'Reduces overactivity in brain regions linked to anxiety and rumination',
               ],
             ),
-            _WhySection(text: 'You don’t need to think positive thoughts or “relax harder.”\nThe rhythm alone does the work.'),
             _WhySection(
-              text: 'That’s why simple breathing patterns are used by:',
+              text:
+                  'You do not need to think positive thoughts or relax harder. '
+                  'The rhythm alone does the work, even on days when your mind feels busy or resistant.',
+            ),
+            _WhySection(
+              text: 'That is why simple breathing patterns are widely used by:',
               bullets: [
                 'Clinicians treating anxiety and PTSD',
                 'Athletes under performance stress',
-                'Military and first responders to regain control fast',
+                'Military and first responders to regain control quickly',
               ],
             ),
-            _WhySection(text: 'You just told your nervous system: we’re okay.', isBold: true),
+            _WhySection(
+              text:
+                  'By finishing this session, you told your nervous system that the moment is manageable '
+                  'and that you are back in control.',
+              isBold: true,
+            ),
           ],
           sources: [
-            'Jerath, R., Edry, J. W., Barnes, V. A., & Jerath, V. (2015). Physiology of long pranayamic breathing: Neural respiratory elements may provide a mechanism that explains how slow deep breathing shifts the autonomic nervous system. Medical Hypotheses, 85(3), 486–496. https://doi.org/10.1016/j.mehy.2015.07.007',
-            'Laborde, S., Mosley, E., & Thayer, J. F. (2017). Heart rate variability and cardiac vagal tone in psychophysiological research. Frontiers in Psychology, 8, 213. https://doi.org/10.3389/fpsyg.2017.00213',
-            'Zaccaro, A., Piarulli, A., Laurino, M., Garbella, E., Menicucci, D., Neri, B., & Gemignani, A. (2018). How breath-control can change your life: A systematic review on psychophysiological correlates of slow breathing. Frontiers in Human Neuroscience, 12, 353. https://doi.org/10.3389/fnhum.2018.00353',
+            'Jerath, R., Edry, J. W., Barnes, V. A., & Jerath, V. (2015). '
+                'Physiology of long pranayamic breathing: Neural respiratory elements may provide a mechanism '
+                'that explains how slow deep breathing shifts the autonomic nervous system. '
+                'Medical Hypotheses, 85(3), 486-496. https://doi.org/10.1016/j.mehy.2015.07.007',
+            'Laborde, S., Mosley, E., & Thayer, J. F. (2017). '
+                'Heart rate variability and cardiac vagal tone in psychophysiological research. '
+                'Frontiers in Psychology, 8, 213. https://doi.org/10.3389/fpsyg.2017.00213',
+            'Zaccaro, A., Piarulli, A., Laurino, M., Garbella, E., Menicucci, D., Neri, B., & Gemignani, A. (2018). '
+                'How breath-control can change your life: A systematic review on psychophysiological correlates '
+                'of slow breathing. Frontiers in Human Neuroscience, 12, 353. '
+                'https://doi.org/10.3389/fnhum.2018.00353',
           ],
         );
     }
