@@ -10,37 +10,49 @@ enum ArmorSet {
 
 enum ArmorPiece {
   helmet,
-  chestplate,
+  tool,
   pauldrons,
+  chestplate,
 }
 
 enum IronStage {
   raw,
-  forged,
+  ingot,
   polished,
-  complete,
 }
 
 class ForgeState {
   final ArmorSet currentSet;
   final List<ArmorPiece> unlockedPieces;
   final IronStage ironStage;
+  final int polishedIngotCount;
+  final int totalSessions;
+  final bool hasSeenExplanation;
 
   ForgeState({
     required this.currentSet,
     required this.unlockedPieces,
     required this.ironStage,
+    required this.polishedIngotCount,
+    required this.totalSessions,
+    required this.hasSeenExplanation,
   });
 
   ForgeState copyWith({
     ArmorSet? currentSet,
     List<ArmorPiece>? unlockedPieces,
     IronStage? ironStage,
+    int? polishedIngotCount,
+    int? totalSessions,
+    bool? hasSeenExplanation,
   }) {
     return ForgeState(
       currentSet: currentSet ?? this.currentSet,
       unlockedPieces: unlockedPieces ?? this.unlockedPieces,
       ironStage: ironStage ?? this.ironStage,
+      polishedIngotCount: polishedIngotCount ?? this.polishedIngotCount,
+      totalSessions: totalSessions ?? this.totalSessions,
+      hasSeenExplanation: hasSeenExplanation ?? this.hasSeenExplanation,
     );
   }
 }
@@ -52,6 +64,9 @@ class ForgeService extends ChangeNotifier {
   static const String _currentSetKey = 'ql_forge_set';
   static const String _ironStageKey = 'ql_forge_iron_stage';
   static const String _unlockedPiecesKey = 'ql_forge_unlocked_pieces';
+  static const String _ingotCountKey = 'ql_forge_ingot_count';
+  static const String _totalSessionsKey = 'ql_forge_total_sessions';
+  static const String _hasSeenExplanationKey = 'ql_forge_has_seen_explanation';
 
   late ForgeState _state;
   ForgeState get state => _state;
@@ -65,13 +80,19 @@ class ForgeService extends ChangeNotifier {
     final setIdx = prefs.getInt(_currentSetKey) ?? 0;
     final stageIdx = prefs.getInt(_ironStageKey) ?? 0;
     final unlockedPieceNames = prefs.getStringList(_unlockedPiecesKey) ?? [];
+    final ingotCount = prefs.getInt(_ingotCountKey) ?? 0;
+    final totalSessions = prefs.getInt(_totalSessionsKey) ?? 0;
+    final hasSeenExplanation = prefs.getBool(_hasSeenExplanationKey) ?? false;
 
     _state = ForgeState(
       currentSet: ArmorSet.values[setIdx],
-      ironStage: IronStage.values[stageIdx],
+      ironStage: IronStage.values[stageIdx.clamp(0, IronStage.values.length - 1)],
       unlockedPieces: unlockedPieceNames
           .map((name) => ArmorPiece.values.firstWhere((e) => e.name == name))
           .toList(),
+      polishedIngotCount: ingotCount,
+      totalSessions: totalSessions,
+      hasSeenExplanation: hasSeenExplanation,
     );
 
     _initialized = true;
@@ -81,30 +102,50 @@ class ForgeService extends ChangeNotifier {
   Future<void> advanceProgress() async {
     final prefs = await SharedPreferences.getInstance();
 
+    final nextTotalSessions = _state.totalSessions + 1;
+    
     IronStage nextStage;
-    List<ArmorPiece> nextUnlocked = List.from(_state.unlockedPieces);
-
-    if (_state.ironStage == IronStage.polished) {
-      // Unlock next piece
-      nextStage = IronStage.raw; // Reset for next piece
-      if (nextUnlocked.length < ArmorPiece.values.length) {
-        nextUnlocked.add(ArmorPiece.values[nextUnlocked.length]);
-      } else {
-        // All pieces of current set unlocked? 
-        // For now just stay at complete if everything is done.
-        nextStage = IronStage.complete;
-      }
-    } else if (_state.ironStage == IronStage.complete) {
-      // Already complete, maybe move to next set?
-      // For now stay complete.
-      nextStage = IronStage.complete;
+    if (nextTotalSessions == 1) {
+      nextStage = IronStage.raw;
+    } else if (nextTotalSessions == 2) {
+      nextStage = IronStage.ingot;
     } else {
-      nextStage = IronStage.values[_state.ironStage.index + 1];
+      nextStage = IronStage.polished;
+    }
+
+    int nextIngotCount = _state.polishedIngotCount;
+    if (nextTotalSessions >= 3) {
+      nextIngotCount += 1;
+    }
+
+    List<ArmorPiece> nextUnlocked = List.from(_state.unlockedPieces);
+    
+    // Check for automatic unlocks
+    final craftingRequirements = {
+      ArmorPiece.helmet: 1,
+      ArmorPiece.tool: 2,
+      ArmorPiece.pauldrons: 3,
+      ArmorPiece.chestplate: 5,
+    };
+
+    for (final piece in ArmorPiece.values) {
+      if (!nextUnlocked.contains(piece)) {
+        final req = craftingRequirements[piece]!;
+        if (nextIngotCount >= req) {
+          nextIngotCount -= req;
+          nextUnlocked.add(piece);
+        } else {
+          // Cannot unlock this or subsequent pieces
+          break;
+        }
+      }
     }
 
     _state = _state.copyWith(
       ironStage: nextStage,
       unlockedPieces: nextUnlocked,
+      polishedIngotCount: nextIngotCount,
+      totalSessions: nextTotalSessions,
     );
 
     await prefs.setInt(_ironStageKey, _state.ironStage.index);
@@ -112,7 +153,16 @@ class ForgeService extends ChangeNotifier {
       _unlockedPiecesKey,
       _state.unlockedPieces.map((e) => e.name).toList(),
     );
+    await prefs.setInt(_ingotCountKey, _state.polishedIngotCount);
+    await prefs.setInt(_totalSessionsKey, _state.totalSessions);
 
+    notifyListeners();
+  }
+
+  Future<void> markExplanationSeen() async {
+    final prefs = await SharedPreferences.getInstance();
+    _state = _state.copyWith(hasSeenExplanation: true);
+    await prefs.setBool(_hasSeenExplanationKey, true);
     notifyListeners();
   }
 
@@ -129,6 +179,9 @@ class ForgeService extends ChangeNotifier {
     await prefs.remove(_currentSetKey);
     await prefs.remove(_ironStageKey);
     await prefs.remove(_unlockedPiecesKey);
+    await prefs.remove(_ingotCountKey);
+    await prefs.remove(_totalSessionsKey);
+    await prefs.remove(_hasSeenExplanationKey);
     _initialized = false;
     await initialize();
   }
@@ -152,22 +205,27 @@ class ForgeService extends ChangeNotifier {
 
   String get currentAsset {
     if (_state.ironStage == IronStage.raw) return 'assets/tools/iron_raw.svg';
-    if (_state.ironStage == IronStage.forged) return 'assets/tools/iron_forged.svg';
+    if (_state.ironStage == IronStage.ingot) return 'assets/tools/iron_ingot.svg';
     if (_state.ironStage == IronStage.polished) return 'assets/tools/iron_polished.svg';
     
-    // If complete or after polished, return the last unlocked piece
-    if (_state.unlockedPieces.isNotEmpty) {
-      final lastPiece = _state.unlockedPieces.last;
-      return getPieceAsset(_state.currentSet, lastPiece);
-    }
-
     return 'assets/tools/iron_raw.svg';
   }
 
   String getPieceAsset(ArmorSet set, ArmorPiece piece) {
+    if (piece == ArmorPiece.tool) {
+      return 'assets/tools/tool_${set.name}_${_getToolName(set)}.svg';
+    }
     final setName = set.name;
     final pieceName = piece.name;
     return 'assets/armor/$setName/${setName}_$pieceName.svg';
+  }
+
+  String _getToolName(ArmorSet set) {
+    switch (set) {
+      case ArmorSet.knight: return 'longsword';
+      case ArmorSet.legionary: return 'gladius';
+      case ArmorSet.samurai: return 'katana';
+    }
   }
 
   String getRandomHammerSfx() {

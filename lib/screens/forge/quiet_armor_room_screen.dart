@@ -92,7 +92,7 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
               const Icon(Icons.shield_rounded, size: 64, color: Color(0xFF2FE6D2)),
               const SizedBox(height: 24),
               const Text(
-                'Forge Your Resilience',
+                'The Forge',
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -101,7 +101,7 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Every day you show up is a strike of the hammer. Daily practice hardens your mind and unlocks pieces of legendary armor.\n\nKeep growing, and your progress will become visible here.',
+                'Showing up applies pressure. Pressure refines iron. Refined iron assembles armor.\n\nYour progress is a result of consistency. Nothing is lost if a day is missed. Discipline accumulates here.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 15,
@@ -139,7 +139,19 @@ class _ArmorSetCard extends StatelessWidget {
     final forgeService = ForgeService.instance;
     final isCurrentSet = forgeService.state.currentSet == set;
     final unlockedPieces = isCurrentSet ? forgeService.state.unlockedPieces : <ArmorPiece>[];
-    final progressLabel = '${unlockedPieces.length}/3 pieces unlocked';
+    
+    String progressLabel = '${unlockedPieces.length}/4 pieces assembled';
+    if (unlockedPieces.length < 4) {
+      final nextPiece = ArmorPiece.values[unlockedPieces.length];
+      final requirements = {
+        ArmorPiece.helmet: 1,
+        ArmorPiece.tool: 2,
+        ArmorPiece.pauldrons: 3,
+        ArmorPiece.chestplate: 5,
+      };
+      final req = requirements[nextPiece]!;
+      progressLabel = 'Next: ${nextPiece.name} (${forgeService.state.polishedIngotCount} / $req)';
+    }
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -178,7 +190,6 @@ class _ArmorSetCard extends StatelessWidget {
                     piece: ArmorPiece.chestplate,
                     size: 200,
                     isLocked: !unlockedPieces.contains(ArmorPiece.chestplate),
-                    isNew: isCurrentSet && forgeService.state.ironStage == IronStage.raw && unlockedPieces.isNotEmpty && unlockedPieces.last == ArmorPiece.chestplate,
                   ),
                 ),
                 Positioned(
@@ -188,7 +199,6 @@ class _ArmorSetCard extends StatelessWidget {
                     piece: ArmorPiece.pauldrons,
                     size: 200,
                     isLocked: !unlockedPieces.contains(ArmorPiece.pauldrons),
-                    isNew: isCurrentSet && forgeService.state.ironStage == IronStage.raw && unlockedPieces.isNotEmpty && unlockedPieces.last == ArmorPiece.pauldrons,
                   ),
                 ),
                 Positioned(
@@ -198,7 +208,16 @@ class _ArmorSetCard extends StatelessWidget {
                     piece: ArmorPiece.helmet,
                     size: 100,
                     isLocked: !unlockedPieces.contains(ArmorPiece.helmet),
-                    isNew: isCurrentSet && forgeService.state.ironStage == IronStage.raw && unlockedPieces.isNotEmpty && unlockedPieces.last == ArmorPiece.helmet,
+                  ),
+                ),
+                Positioned(
+                  bottom: 20,
+                  right: 20,
+                  child: _PieceWidget(
+                    set: set,
+                    piece: ArmorPiece.tool,
+                    size: 80,
+                    isLocked: !unlockedPieces.contains(ArmorPiece.tool),
                   ),
                 ),
               ],
@@ -215,14 +234,12 @@ class _PieceWidget extends StatefulWidget {
   final ArmorPiece piece;
   final double size;
   final bool isLocked;
-  final bool isNew;
 
   const _PieceWidget({
     required this.set,
     required this.piece,
     this.size = 150,
     this.isLocked = false,
-    this.isNew = false,
   });
 
   @override
@@ -231,7 +248,6 @@ class _PieceWidget extends StatefulWidget {
 
 class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<double> _scaleAnimation;
 
   @override
   void initState() {
@@ -239,10 +255,6 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1000),
-    )..repeat(reverse: true);
-
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.1).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
   }
 
@@ -254,27 +266,20 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.isNew) {
-      _controller.stop();
-      _controller.value = 0;
-    } else {
-      if (!_controller.isAnimating) _controller.repeat(reverse: true);
-    }
+    _controller.stop();
+    _controller.value = 0;
 
     final asset = ForgeService.instance.getPieceAsset(widget.set, widget.piece);
     
     return GestureDetector(
       onTap: widget.isLocked ? null : () => _showZoomedView(context, asset, widget.piece),
-      child: ScaleTransition(
-        scale: widget.isNew ? _scaleAnimation : const AlwaysStoppedAnimation(1.0),
-        child: Opacity(
-          opacity: widget.isLocked ? 0.3 : 1.0,
-          child: SvgPicture.asset(
-            asset,
-            width: widget.size,
-            height: widget.size,
-            fit: BoxFit.contain,
-          ),
+      child: Opacity(
+        opacity: widget.isLocked ? 0.3 : 1.0,
+        child: SvgPicture.asset(
+          asset,
+          width: widget.size,
+          height: widget.size,
+          fit: BoxFit.contain,
         ),
       ),
     );
@@ -285,6 +290,7 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
       ArmorPiece.helmet: "Conquer the mind, and you conquer the world.",
       ArmorPiece.chestplate: "Hardship is the only way to the forge.",
       ArmorPiece.pauldrons: "Bear the weight of your own silence.",
+      ArmorPiece.tool: "A tool shaped by discipline.",
     };
 
     showDialog(

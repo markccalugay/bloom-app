@@ -74,6 +74,38 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     await _controller.forward();
     if (!mounted) return;
     await _controller.reverse();
+
+    // Show explanation if not seen before
+    final forgeService = ForgeService.instance;
+    if (!forgeService.state.hasSeenExplanation) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      _showExplanationDialog();
+    }
+  }
+
+  void _showExplanationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF1A1F26),
+        title: const Text('The Forge', style: TextStyle(color: Colors.white)),
+        content: const Text(
+          'Your consistency applies pressure. Pressure refines iron. Refined iron assembles armor.\n\nShowing up advances your material. Nothing is lost if a day is missed. Your progress waits.',
+          style: TextStyle(color: Color(0xFFB9C3CF)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              ForgeService.instance.markExplanationSeen();
+              Navigator.of(context).pop();
+            },
+            child: const Text('I understand', style: TextStyle(color: Color(0xFF2FE6D2))),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -85,20 +117,12 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
   String _getPreviousAsset() {
     final state = ForgeService.instance.state;
     // We arrived here AFTER advanceProgress was called.
-    // So we need to work backwards to see what it was 2 seconds ago.
     
-    if (state.ironStage == IronStage.forged) return 'assets/tools/iron_raw.svg';
-    if (state.ironStage == IronStage.polished) return 'assets/tools/iron_forged.svg';
+    if (state.totalSessions == 1) return 'assets/tools/iron_raw.svg'; // Technically it was nothing or raw
+    if (state.totalSessions == 2) return 'assets/tools/iron_raw.svg';
+    if (state.totalSessions == 3) return 'assets/tools/iron_ingot.svg';
     
-    // If we're at raw, we might have just unlocked a piece or started over
-    if (state.ironStage == IronStage.raw) {
-       // If we have pieces, the previous stage was polished (of that piece)
-       // But wait, the transition TO raw iron (the next piece's ore)
-       // usually happens AFTER the piece is polished.
-       return 'assets/tools/iron_polished.svg';
-    }
-
-    return 'assets/tools/iron_raw.svg';
+    return 'assets/tools/iron_polished.svg';
   }
 
   @override
@@ -108,12 +132,14 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     final forgeState = ForgeService.instance.state;
 
     String headline = 'The Forge';
-    String subheadline = 'Your progress is hardening.';
+    String subheadline = 'Your discipline is refining Iron.';
 
-    if (forgeState.ironStage == IronStage.complete || (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty)) {
-       final pieceName = forgeState.unlockedPieces.last.name;
-       headline = 'New Piece Unlocked';
-       subheadline = 'The $pieceName is ready.';
+    if (forgeState.ironStage == IronStage.raw) {
+      subheadline = 'Material: Raw Iron';
+    } else if (forgeState.ironStage == IronStage.ingot) {
+      subheadline = 'Material: Iron Ingot';
+    } else if (forgeState.ironStage == IronStage.polished) {
+      subheadline = 'Material: Polished Iron Ingot';
     }
 
     return Scaffold(
@@ -193,11 +219,11 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
                       duration: const Duration(milliseconds: 500),
                       opacity: _showPiece ? 1.0 : 0.0,
                       child: QLPrimaryButton(
-                        label: (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty)
+                        label: forgeState.unlockedPieces.isNotEmpty
                             ? 'View Armor Room'
                             : 'Return Home',
                         onPressed: () {
-                          if (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty) {
+                          if (forgeState.unlockedPieces.isNotEmpty) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(builder: (_) => const QuietArmorRoomScreen()),
                             );
