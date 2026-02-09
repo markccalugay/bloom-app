@@ -261,6 +261,7 @@ class _ForgeExplanationDialogState extends State<_ForgeExplanationDialog> {
         "Armor is built slowly, over time.\n\n"
         "There’s no penalty for missing a day.\n"
         "When you come back, you continue.",
+        textAlign: TextAlign.left,
         style: TextStyle(color: Color(0xFFB9C3CF)),
       ),
       actions: [

@@ -119,7 +119,7 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
                 "Armor is built slowly, over time.\n\n"
                 "There’s no penalty for missing a day.\n"
                 "When you come back, you continue.",
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.5,
                   color: isDark ? const Color(0xFFB9C3CF) : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
