@@ -805,19 +805,27 @@ class _AffirmationUnlockCard extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
+    final Color textColor = theme.brightness == Brightness.dark
+        ? Colors.white
+        : theme.colorScheme.onSurface;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(18),
-        color: theme.cardColor.withValues(alpha: 0.18),
+        color: theme.brightness == Brightness.dark
+            ? theme.cardColor.withValues(alpha: 0.18)
+            : theme.colorScheme.surface.withValues(alpha: 0.90),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.10),
+          color: theme.brightness == Brightness.dark
+              ? Colors.white.withValues(alpha: 0.10)
+              : theme.colorScheme.onSurface.withValues(alpha: 0.10),
         ),
         boxShadow: [
           BoxShadow(
             blurRadius: 22,
             offset: const Offset(0, 12),
-            color: Colors.black.withValues(alpha: 0.22),
+            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.22 : 0.08),
           ),
         ],
       ),
@@ -831,7 +839,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
               Icon(
                 isFront ? Icons.lock_open_rounded : Icons.auto_awesome_rounded,
                 size: 18,
-                color: Colors.white.withValues(alpha: 0.9),
+                color: textColor.withValues(alpha: 0.9),
               ),
               const SizedBox(width: 8),
               Text(
@@ -839,7 +847,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
                 style: textTheme.labelLarge?.copyWith(
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.2,
-                  color: Colors.white.withValues(alpha: 0.92),
+                  color: textColor.withValues(alpha: 0.92),
                 ),
               ),
             ],
@@ -851,7 +859,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
             subtitle,
             textAlign: TextAlign.center,
             style: textTheme.bodySmall?.copyWith(
-              color: Colors.white.withValues(alpha: 0.72),
+              color: textColor.withValues(alpha: 0.72),
               height: 1.2,
             ),
           ),
@@ -865,7 +873,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
             style: textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
               height: 1.25,
-              color: Colors.white,
+              color: textColor,
             ),
           ),
         ],
