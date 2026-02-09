@@ -118,99 +118,104 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
 
     return Scaffold(
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height - 100,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    headline,
-                    style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    subheadline,
-                    style: textTheme.bodyMedium?.copyWith(
-                      color: (textTheme.bodyMedium?.color ?? Colors.white).withValues(alpha: 0.8),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - 32.0, // accounting for vertical padding
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      headline,
+                      style: textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w600),
                     ),
-                  ),
-                  const Spacer(),
-                  Center(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      clipBehavior: Clip.none,
-                      children: [
-                        // Particles/Confetti layer
-                        SizedBox(
-                          width: 400,
-                          height: 400,
-                          child: QuietForgeConfetti(
-                            key: _confettiKey,
+                    const SizedBox(height: 8),
+                    Text(
+                      subheadline,
+                      style: textTheme.bodyMedium?.copyWith(
+                        color: (textTheme.bodyMedium?.color ?? Colors.white).withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const Spacer(),
+                    Center(
+                      child: Stack(
+                        alignment: Alignment.center,
+                        clipBehavior: Clip.none,
+                        children: [
+                          // Particles/Confetti layer
+                          SizedBox(
+                            width: 400,
+                            height: 400,
+                            child: QuietForgeConfetti(
+                              key: _confettiKey,
+                            ),
                           ),
-                        ),
-                        // Piece layer
-                        AnimatedBuilder(
-                          animation: _wiggleAnimation,
-                          builder: (context, child) {
-                            final asset = _transitioned 
-                                ? ForgeService.instance.currentAsset 
-                                : _getPreviousAsset();
-                            
-                            return Transform.rotate(
-                              angle: _wiggleAnimation.value,
-                              child: AnimatedOpacity(
-                                duration: const Duration(milliseconds: 300),
-                                opacity: (_transitioned || !_showPiece) ? 1.0 : 0.6,
-                                child: SvgPicture.asset(
-                                  asset,
-                                  width: 280,
-                                  height: 280,
-                                  fit: BoxFit.contain,
+                          // Piece layer
+                          AnimatedBuilder(
+                            animation: _wiggleAnimation,
+                            builder: (context, child) {
+                              final asset = _transitioned 
+                                  ? ForgeService.instance.currentAsset 
+                                  : _getPreviousAsset();
+                              
+                              return Transform.rotate(
+                                angle: _wiggleAnimation.value,
+                                child: AnimatedOpacity(
+                                  duration: const Duration(milliseconds: 300),
+                                  opacity: (_transitioned || !_showPiece) ? 1.0 : 0.6,
+                                  child: SvgPicture.asset(
+                                    asset,
+                                    width: 280,
+                                    height: 280,
+                                    fit: BoxFit.contain,
+                                  ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                        // Cloud Transition layer (Topmost)
-                        SizedBox(
-                          width: 500,
-                          height: 500,
-                          child: QuietForgeCloudEffect(
-                            key: _cloudKey,
+                              );
+                            },
                           ),
-                        ),
-                      ],
+                          // Cloud Transition layer (Topmost)
+                          SizedBox(
+                            width: 500,
+                            height: 500,
+                            child: QuietForgeCloudEffect(
+                              key: _cloudKey,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Spacer(),
-                  AnimatedOpacity(
-                    duration: const Duration(milliseconds: 500),
-                    opacity: _showPiece ? 1.0 : 0.0,
-                    child: QLPrimaryButton(
-                      label: (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty)
-                          ? 'View Armor Room'
-                          : 'Return Home',
-                      onPressed: () {
-                        if (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty) {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(builder: (_) => const QuietArmorRoomScreen()),
-                          );
-                        } else {
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(builder: (_) => const QuietShellScreen()),
-                            (route) => false,
-                          );
-                        }
-                      },
+                    const Spacer(),
+                    AnimatedOpacity(
+                      duration: const Duration(milliseconds: 500),
+                      opacity: _showPiece ? 1.0 : 0.0,
+                      child: QLPrimaryButton(
+                        label: (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty)
+                            ? 'View Armor Room'
+                            : 'Return Home',
+                        onPressed: () {
+                          if (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty) {
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(builder: (_) => const QuietArmorRoomScreen()),
+                            );
+                          } else {
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(builder: (_) => const QuietShellScreen()),
+                              (route) => false,
+                            );
+                          }
+                        },
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 20), // Extra breathing room above the dock
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
