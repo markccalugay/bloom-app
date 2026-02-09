@@ -74,6 +74,22 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     await _controller.forward();
     if (!mounted) return;
     await _controller.reverse();
+
+    // Show explanation if not seen before
+    final forgeService = ForgeService.instance;
+    if (!forgeService.state.hasSeenExplanation) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (!mounted) return;
+      _showExplanationDialog();
+    }
+  }
+
+  void _showExplanationDialog() {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const _ForgeExplanationDialog(),
+    );
   }
 
   @override
@@ -85,20 +101,12 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
   String _getPreviousAsset() {
     final state = ForgeService.instance.state;
     // We arrived here AFTER advanceProgress was called.
-    // So we need to work backwards to see what it was 2 seconds ago.
     
-    if (state.ironStage == IronStage.forged) return 'assets/tools/iron_raw.svg';
-    if (state.ironStage == IronStage.polished) return 'assets/tools/iron_forged.svg';
+    if (state.totalSessions <= 1) return 'assets/tools/iron_raw.svg';
+    if (state.totalSessions == 2) return 'assets/tools/iron_raw.svg';
+    if (state.totalSessions == 3) return 'assets/tools/iron_ingot.svg';
     
-    // If we're at raw, we might have just unlocked a piece or started over
-    if (state.ironStage == IronStage.raw) {
-       // If we have pieces, the previous stage was polished (of that piece)
-       // But wait, the transition TO raw iron (the next piece's ore)
-       // usually happens AFTER the piece is polished.
-       return 'assets/tools/iron_polished.svg';
-    }
-
-    return 'assets/tools/iron_raw.svg';
+    return 'assets/tools/iron_polished.svg';
   }
 
   @override
@@ -108,24 +116,21 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
     final forgeState = ForgeService.instance.state;
 
     String headline = 'The Forge';
-    String subheadline = 'Your progress is hardening.';
-
-    if (forgeState.ironStage == IronStage.complete || (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty)) {
-       final pieceName = forgeState.unlockedPieces.last.name;
-       headline = 'New Piece Unlocked';
-       subheadline = 'The $pieceName is ready.';
+    String subheadline = 'Material: Raw Iron';
+    if (forgeState.ironStage == IronStage.ingot) {
+      subheadline = 'Material: Iron Ingot';
+    } else if (forgeState.ironStage == IronStage.polished) {
+      subheadline = 'Material: Polished Iron Ingot';
     }
 
     return Scaffold(
       body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: constraints.maxHeight - 32.0, // accounting for vertical padding
-                ),
+        child: CustomScrollView(
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -193,11 +198,11 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
                       duration: const Duration(milliseconds: 500),
                       opacity: _showPiece ? 1.0 : 0.0,
                       child: QLPrimaryButton(
-                        label: (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty)
+                        label: forgeState.unlockedPieces.isNotEmpty
                             ? 'View Armor Room'
                             : 'Return Home',
                         onPressed: () {
-                          if (forgeState.ironStage == IronStage.raw && forgeState.unlockedPieces.isNotEmpty) {
+                          if (forgeState.unlockedPieces.isNotEmpty) {
                             Navigator.of(context).pushReplacement(
                               MaterialPageRoute(builder: (_) => const QuietArmorRoomScreen()),
                             );
@@ -214,10 +219,66 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
                   ],
                 ),
               ),
-            );
-          },
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _ForgeExplanationDialog extends StatefulWidget {
+  const _ForgeExplanationDialog();
+
+  @override
+  State<_ForgeExplanationDialog> createState() => _ForgeExplanationDialogState();
+}
+
+class _ForgeExplanationDialogState extends State<_ForgeExplanationDialog> {
+  bool _showButton = false;
+
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 2500), () {
+      if (mounted) {
+        setState(() => _showButton = true);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: const Color(0xFF1A1F26),
+      title: const Text('The Forge', style: TextStyle(color: Colors.white)),
+      content: const Text(
+        "This is where QuietLine tracks consistency.\n\n"
+        "Each time you return, iron refines a little more.\n"
+        "Raw iron becomes an ingot.\n"
+        "An ingot becomes polished iron.\n\n"
+        "Polished iron is used to assemble armor.\n"
+        "Armor is built slowly, over time.\n\n"
+        "There’s no penalty for missing a day.\n"
+        "When you come back, you continue.",
+        textAlign: TextAlign.left,
+        style: TextStyle(color: Color(0xFFB9C3CF)),
+      ),
+      actions: [
+        AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: _showButton ? 1.0 : 0.0,
+          child: TextButton(
+            onPressed: _showButton
+                ? () {
+                    ForgeService.instance.markExplanationSeen();
+                    Navigator.of(context).pop();
+                  }
+                : null,
+            child: const Text('Begin', style: TextStyle(color: Color(0xFF2FE6D2))),
+          ),
+        ),
+      ],
     );
   }
 }

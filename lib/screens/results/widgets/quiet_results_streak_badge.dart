@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../quiet_results_constants.dart';
 import 'package:quietline_app/core/app_assets.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 
 class LinearGradientTween extends Tween<LinearGradient> {
   LinearGradientTween({required super.begin, required super.end});
@@ -144,12 +145,14 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
 
     if (delay == Duration.zero) {
       _animController.forward(from: 0.0);
+      SoundscapeService.instance.playSfx(AppAssets.flameSfx);
       return;
     }
 
     Future.delayed(delay, () {
       if (!mounted) return;
       _animController.forward(from: 0.0);
+      SoundscapeService.instance.playSfx(AppAssets.flameSfx);
     });
   }
 

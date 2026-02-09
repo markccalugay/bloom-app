@@ -1,11 +1,11 @@
 /// Centralized copy for the results screens.
 class QuietResultsStrings {
   // OK / streak screen
-  static const okHeadline = 'You showed up again.';
+  static const okHeadline = 'Session complete.';
   static const okSub =
-      'Stillness compounds. The calm you build today strengthens you tomorrow.';
+      'Stillness compounds. Your discipline is being refined.';
 
-  static String dayOfStreak(int n) => 'Day $n of your quiet streak.';
+  static String dayOfStreak(int n) => 'Session $n';
 
   static const continueButton = 'Continue';
 
