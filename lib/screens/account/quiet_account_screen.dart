@@ -14,6 +14,7 @@ import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/screens/account/widgets/soundscape_selection_modal.dart';
+import 'package:quietline_app/core/auth/auth_service.dart';
 
 /// Simple MVP account screen.
 /// Shows the anonymous user's display name.
@@ -46,6 +47,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
     super.initState();
     _userFuture = UserService.instance.getOrCreateUser();
     _metricsFuture = _loadMetrics();
+    AuthService.instance.silentSignIn();
   }
 
   Future<Map<String, dynamic>> _loadMetrics() async {
@@ -654,6 +656,57 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
                     // --- DATA MANAGEMENT ---
                     const SizedBox(height: 24),
+                    ListenableBuilder(
+                      listenable: AuthService.instance.currentUserNotifier,
+                      builder: (context, _) {
+                        final user = AuthService.instance.currentUser;
+                        return Column(
+                          children: [
+                            if (user != null)
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 12.0),
+                                child: Text(
+                                  'Signed in as ${user.email}',
+                                  style: textTheme.bodySmall?.copyWith(
+                                    color: baseTextColor.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                              ),
+                            ElevatedButton.icon(
+                              onPressed: () async {
+                                if (user == null) {
+                                  final account = await AuthService.instance.signIn();
+                                  if (account != null && mounted) {
+                                    setState(() {});
+                                  }
+                                } else {
+                                  await AuthService.instance.signOut();
+                                  if (mounted) setState(() {});
+                                }
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.white,
+                                foregroundColor: Colors.black87,
+                                minimumSize: const Size(200, 44),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0.5,
+                              ),
+                              icon: Image.network(
+                                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
+                                height: 18,
+                              ),
+                              label: Text(
+                                user == null ? 'Sign in with Google' : 'Sign out from Google',
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
                     TextButton(
                       onPressed: _handleDataWipe,
                       child: Text(
