@@ -83,6 +83,11 @@ class NotificationService {
       body: 'Take a moment to return to stillness.',
       scheduledDate: scheduled,
       notificationDetails: details,
+      id: _dailyReminderId,
+      title: 'Quiet Time',
+      body: 'Take a moment to return to stillness.',
+      scheduledDate: scheduled,
+      notificationDetails: details,
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
@@ -90,6 +95,7 @@ class NotificationService {
 
   /// Cancels the existing daily reminder notification.
   Future<void> cancelDailyReminder() async {
+    await _plugin.cancel(id: _dailyReminderId);
     await _plugin.cancel(id: _dailyReminderId);
   }
 
