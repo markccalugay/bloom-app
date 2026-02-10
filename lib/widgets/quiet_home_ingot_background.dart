@@ -72,26 +72,34 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                       // Anvil Backdrop (Reduced size by 45%, 40% opacity)
                       Positioned(
                         bottom: 0,
-                        child: SvgPicture.asset(
-                          AppAssets.anvil,
-                          width: width * 0.55,
-                          colorFilter: ColorFilter.mode(
-                            theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                            BlendMode.srcIn,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: SvgPicture.asset(
+                            AppAssets.anvil,
+                            width: width * 0.65, // Slightly larger for better base
+                            colorFilter: ColorFilter.mode(
+                              theme.colorScheme.onSurface.withValues(alpha: 0.4),
+                              BlendMode.srcIn,
+                            ),
                           ),
                         ),
                       ),
                       
                       // Iron Piece sitting on the top edge of the anvil
                       Positioned(
-                        bottom: height * 0.38, // Adjusted for smaller anvil
-                        child: FadeTransition(
-                          opacity: _fadeAnimation,
-                          child: SizedBox(
-                            width: width * 0.45, // Slightly smaller iron to match
-                            child: SvgPicture.asset(
-                              ForgeService.instance.currentAsset,
-                              fit: BoxFit.contain,
+                        bottom: height * 0.42, // Adjusted vertically
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: SizedBox(
+                              width: width * 0.45,
+                              child: SvgPicture.asset(
+                                ForgeService.instance.currentAsset,
+                                fit: BoxFit.contain,
+                              ),
                             ),
                           ),
                         ),
