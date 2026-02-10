@@ -8,6 +8,8 @@ import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/forge/widgets/armor_reveal_overlay.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietArmorRoomScreen extends StatefulWidget {
@@ -242,6 +244,7 @@ class _ArmorSetCard extends StatelessWidget {
       ArmorPiece.tool,
       ArmorPiece.pauldrons,
       ArmorPiece.chestplate,
+      ArmorPiece.greaves,
     ];
 
     if (unlockedPieces.length < unlockOrder.length) {
@@ -251,97 +254,148 @@ class _ArmorSetCard extends StatelessWidget {
         ArmorPiece.tool: 2,
         ArmorPiece.pauldrons: 3,
         ArmorPiece.chestplate: 5,
+        ArmorPiece.greaves: 8,
       };
       final req = requirements[nextPiece]!;
       final current = forgeService.state.polishedIngotCount;
       progressLabel = '${_capitalize(nextPiece.name)} Requires $req polished iron $current / $req';
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: theme.brightness == Brightness.dark 
-            ? const Color(0xFF1A1F26) 
-            : theme.cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: theme.brightness == Brightness.dark 
-              ? const Color(0xFF2A3340) 
-              : theme.dividerColor,
-        ),
-      ),
-      child: Column(
-        children: [
-          Text(
-            set.name.toUpperCase(),
-            style: textTheme.titleMedium?.copyWith(
-              letterSpacing: 1.5,
-              fontWeight: FontWeight.bold,
+    return ValueListenableBuilder<bool>(
+      valueListenable: StoreKitService.instance.isPremium,
+      builder: (context, isPremium, _) {
+        final List<ArmorPiece> effectivelyUnlocked = List.from(effectiveUnlocked);
+        
+        final bool isKnight = set == ArmorSet.knight;
+        
+        // Locking logic
+        final bool isChestplateLocked = !effectivelyUnlocked.contains(ArmorPiece.chestplate);
+        final bool isPauldronsLocked = !effectivelyUnlocked.contains(ArmorPiece.pauldrons);
+        final bool isHelmetLocked = !effectivelyUnlocked.contains(ArmorPiece.helmet);
+        final bool isToolLocked = !effectivelyUnlocked.contains(ArmorPiece.tool);
+        final bool isGreavesLocked = !effectivelyUnlocked.contains(ArmorPiece.greaves);
+
+        // Premium restricted pieces for free users
+        final bool isChestplatePremiumLocked = !isPremium && (isChestplateLocked || !isKnight);
+        final bool isPauldronsPremiumLocked = !isPremium && (isPauldronsLocked || !isKnight);
+        final bool isHelmetPremiumLocked = !isPremium && isHelmetLocked && !isKnight;
+        final bool isToolPremiumLocked = !isPremium && isToolLocked && !isKnight;
+        final bool isGreavesPremiumLocked = !isPremium && (isGreavesLocked || !isKnight);
+
+        String displayProgress = progressLabel;
+        if (!isPremium) {
+          if (!isKnight) {
+            displayProgress = 'QuietLine+ Premium';
+          } else if (effectivelyUnlocked.contains(ArmorPiece.helmet) && 
+                    effectivelyUnlocked.contains(ArmorPiece.tool)) {
+            // Free user finished their free pieces
+            displayProgress = 'QuietLine+ Premium';
+          }
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: theme.brightness == Brightness.dark 
+                ? const Color(0xFF1A1F26) 
+                : theme.cardColor,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: theme.brightness == Brightness.dark 
+                  ? const Color(0xFF2A3340) 
+                  : theme.dividerColor,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            progressLabel,
-            style: textTheme.bodySmall?.copyWith(
-              color: textTheme.bodySmall?.color?.withValues(alpha: 0.5),
-            ),
+          child: Column(
+            children: [
+              Text(
+                set.name.toUpperCase(),
+                style: textTheme.titleMedium?.copyWith(
+                  letterSpacing: 1.5,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                displayProgress,
+                style: textTheme.bodySmall?.copyWith(
+                  color: textTheme.bodySmall?.color?.withValues(alpha: 0.5),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    // Display pieces
+                    Positioned(
+                      top: 60,
+                      child: _PieceWidget(
+                        set: set,
+                        piece: ArmorPiece.chestplate,
+                        size: 200,
+                        isLocked: isChestplateLocked,
+                        isPremiumLocked: isChestplatePremiumLocked,
+                        shouldAnimateReveal: revealedPiece == ArmorPiece.chestplate,
+                        onRevealComplete: onFittingComplete,
+                      ),
+                    ),
+                    Positioned(
+                      top: 60,
+                      child: _PieceWidget(
+                        set: set,
+                        piece: ArmorPiece.pauldrons,
+                        size: 200,
+                        isLocked: isPauldronsLocked,
+                        isPremiumLocked: isPauldronsPremiumLocked,
+                        shouldAnimateReveal: revealedPiece == ArmorPiece.pauldrons,
+                        onRevealComplete: onFittingComplete,
+                      ),
+                    ),
+                    Positioned(
+                      top: 0,
+                      child: _PieceWidget(
+                        set: set,
+                        piece: ArmorPiece.helmet,
+                        size: 100,
+                        isLocked: isHelmetLocked,
+                        isPremiumLocked: isHelmetPremiumLocked,
+                        shouldAnimateReveal: revealedPiece == ArmorPiece.helmet,
+                        onRevealComplete: onFittingComplete,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      child: _PieceWidget(
+                        set: set,
+                        piece: ArmorPiece.greaves,
+                        size: 150,
+                        isLocked: isGreavesLocked,
+                        isPremiumLocked: isGreavesPremiumLocked,
+                        shouldAnimateReveal: revealedPiece == ArmorPiece.greaves,
+                        onRevealComplete: onFittingComplete,
+                      ),
+                    ),
+                    Positioned(
+                      bottom: 20,
+                      right: 20,
+                      child: _PieceWidget(
+                        set: set,
+                        piece: ArmorPiece.tool,
+                        size: 80,
+                        isLocked: isToolLocked,
+                        isPremiumLocked: isToolPremiumLocked,
+                        shouldAnimateReveal: revealedPiece == ArmorPiece.tool,
+                        onRevealComplete: onFittingComplete,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Display pieces
-                Positioned(
-                  top: 60,
-                  child: _PieceWidget(
-                    set: set,
-                    piece: ArmorPiece.chestplate,
-                    size: 200,
-                    isLocked: !effectiveUnlocked.contains(ArmorPiece.chestplate),
-                    shouldAnimateReveal: revealedPiece == ArmorPiece.chestplate,
-                    onRevealComplete: onFittingComplete,
-                  ),
-                ),
-                Positioned(
-                  top: 60,
-                  child: _PieceWidget(
-                    set: set,
-                    piece: ArmorPiece.pauldrons,
-                    size: 200,
-                    isLocked: !effectiveUnlocked.contains(ArmorPiece.pauldrons),
-                    shouldAnimateReveal: revealedPiece == ArmorPiece.pauldrons,
-                    onRevealComplete: onFittingComplete,
-                  ),
-                ),
-                Positioned(
-                  top: 0,
-                  child: _PieceWidget(
-                    set: set,
-                    piece: ArmorPiece.helmet,
-                    size: 100,
-                    isLocked: !effectiveUnlocked.contains(ArmorPiece.helmet),
-                    shouldAnimateReveal: revealedPiece == ArmorPiece.helmet,
-                    onRevealComplete: onFittingComplete,
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  right: 20,
-                  child: _PieceWidget(
-                    set: set,
-                    piece: ArmorPiece.tool,
-                    size: 80,
-                    isLocked: !effectiveUnlocked.contains(ArmorPiece.tool),
-                    shouldAnimateReveal: revealedPiece == ArmorPiece.tool,
-                    onRevealComplete: onFittingComplete,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -351,6 +405,7 @@ class _PieceWidget extends StatefulWidget {
   final ArmorPiece piece;
   final double size;
   final bool isLocked;
+  final bool isPremiumLocked;
   final bool shouldAnimateReveal;
   final VoidCallback? onRevealComplete;
 
@@ -359,6 +414,7 @@ class _PieceWidget extends StatefulWidget {
     required this.piece,
     this.size = 150,
     this.isLocked = false,
+    this.isPremiumLocked = false,
     this.shouldAnimateReveal = false,
     this.onRevealComplete,
   });
@@ -461,7 +517,13 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
     final isDark = theme.brightness == Brightness.dark;
     
     return GestureDetector(
-      onTap: widget.isLocked ? null : () => _showZoomedView(context, asset, widget.piece),
+      onTap: () {
+        if (widget.isPremiumLocked) {
+          _showPremiumLockedContext(context);
+        } else if (!widget.isLocked) {
+          _showZoomedView(context, asset, widget.piece);
+        }
+      },
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -511,43 +573,145 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
     );
   }
 
+  void _showPremiumLockedContext(BuildContext context) {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: theme.colorScheme.surface,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) => Padding(
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'You’ve started forging this set.',
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'QuietLine+ Premium lets you complete armor through consistent practice.',
+              style: textTheme.bodyLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Forged through consistency.\nIncluded with QuietLine+ Premium.',
+              style: textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: const Text('Unlock QuietLine+ Premium'),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: Text(
+                  'Stay with free for now',
+                  style: textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showZoomedView(BuildContext context, String asset, ArmorPiece piece) {
     final theme = Theme.of(context);
     final inscriptions = {
       ArmorPiece.helmet: "Conquer the mind, and you conquer the world.",
       ArmorPiece.chestplate: "Hardship is the only way to the forge.",
-      ArmorPiece.pauldrons: "Bear the weight of your own silence.",
-      ArmorPiece.tool: "A tool shaped by discipline.",
+      ArmorPiece.pauldrons: "Strength is carried on still shoulders.",
+      ArmorPiece.greaves: "True discipline is the foundation of every step.",
+      ArmorPiece.tool: "A sharp mind finds the way.",
     };
 
     showDialog(
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-             Hero(
-               tag: asset,
-               child: SvgPicture.asset(asset, width: 300, height: 300),
-             ),
-             const SizedBox(height: 24),
-             Text(
-               inscriptions[piece] ?? "",
-               textAlign: TextAlign.center,
-               style: TextStyle(
-                 color: theme.brightness == Brightness.dark ? Colors.white : theme.textTheme.bodyLarge?.color,
-                 fontSize: 18,
-                 fontStyle: FontStyle.italic,
-                 fontFamily: 'serif',
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+          decoration: BoxDecoration(
+            color: const Color(0xFF151921).withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               Hero(
+                 tag: asset,
+                 child: SvgPicture.asset(
+                   asset, 
+                   width: 240, 
+                   height: 240,
+                   colorFilter: ColorFilter.mode(
+                     theme.colorScheme.primary,
+                     BlendMode.srcIn,
+                   ),
+                 ),
                ),
-             ),
-             const SizedBox(height: 32),
-             QLPrimaryButton(
-               label: 'Close',
-               onPressed: () => Navigator.pop(context),
-             ),
-          ],
+               const SizedBox(height: 32),
+               Text(
+                 inscriptions[piece] ?? "",
+                 textAlign: TextAlign.center,
+                 style: TextStyle(
+                   color: Colors.white,
+                   fontSize: 18,
+                   fontStyle: FontStyle.italic,
+                   fontFamily: 'serif',
+                   height: 1.4,
+                 ),
+               ),
+               const SizedBox(height: 32),
+               QLPrimaryButton(
+                 label: 'Close',
+                 onPressed: () => Navigator.pop(context),
+               ),
+            ],
+          ),
         ),
       ),
     );

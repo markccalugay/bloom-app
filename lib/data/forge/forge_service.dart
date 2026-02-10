@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'dart:math' as math;
 
 enum ArmorSet {
@@ -13,6 +14,7 @@ enum ArmorPiece {
   tool,
   pauldrons,
   chestplate,
+  greaves,
 }
 
 enum IronStage {
@@ -131,19 +133,31 @@ class ForgeService extends ChangeNotifier {
       ArmorPiece.tool: 2,
       ArmorPiece.pauldrons: 3,
       ArmorPiece.chestplate: 5,
+      ArmorPiece.greaves: 8,
     };
 
-    // We unlock pieces in a specific order: Helmet -> Tool -> Pauldrons -> Chestplate
+    // We unlock pieces in a specific order
     final unlockOrder = [
       ArmorPiece.helmet,
       ArmorPiece.tool,
       ArmorPiece.pauldrons,
       ArmorPiece.chestplate,
+      ArmorPiece.greaves,
     ];
 
     List<ArmorPiece> recentlyUnlocked = [];
+    final bool isPremium = StoreKitService.instance.isPremium.value;
+
     for (final piece in unlockOrder) {
       if (!nextUnlocked.contains(piece)) {
+        // Restriction check
+        if (!isPremium) {
+          // Free users can only forge Knight Helmet and Tool
+          final isFreePiece = _state.currentSet == ArmorSet.knight && 
+                             (piece == ArmorPiece.helmet || piece == ArmorPiece.tool);
+          if (!isFreePiece) break;
+        }
+
         final req = craftingRequirements[piece]!;
         if (nextIngotCount >= req) {
           nextIngotCount -= req;

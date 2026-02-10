@@ -19,7 +19,7 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -27,12 +27,7 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
       curve: Curves.easeIn,
     );
 
-    // Fade in the iron piece on load
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
+    _controller.forward();
   }
 
   @override
@@ -46,32 +41,32 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
     return IgnorePointer(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final double width = constraints.maxWidth * 1.5;
-          final double height = width * 0.35;
+          final double totalWidth = constraints.maxWidth;
+          final double areaHeight = totalWidth * 0.8;
 
           return ListenableBuilder(
             listenable: ForgeService.instance,
             builder: (context, _) {
               return Align(
-                alignment: const Alignment(0, -0.10),
+                alignment: const Alignment(0, -0.05),
                 child: SizedBox(
-                  width: width,
-                  height: height * 1.1,
+                  width: totalWidth,
+                  height: areaHeight,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
+                      // Particles layer
                       const Positioned.fill(
                         child: QuietIngotParticles(),
                       ),
+                      
+                      // Iron Piece (Restored to center)
                       FadeTransition(
                         opacity: _fadeAnimation,
-                        child: SizedBox(
-                          width: width,
-                          height: height,
-                          child: SvgPicture.asset(
-                            ForgeService.instance.currentAsset,
-                            fit: BoxFit.contain,
-                          ),
+                        child: SvgPicture.asset(
+                          ForgeService.instance.currentAsset,
+                          width: totalWidth * 0.5,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ],
