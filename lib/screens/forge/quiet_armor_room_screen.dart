@@ -8,6 +8,7 @@ import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/forge/widgets/armor_reveal_overlay.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietArmorRoomScreen extends StatefulWidget {
   final ArmorPiece? revealedPiece;
@@ -455,19 +456,57 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
       );
     }
     
+    final isRecentlyUnlocked = widget.shouldAnimateReveal;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return GestureDetector(
       onTap: widget.isLocked ? null : () => _showZoomedView(context, asset, widget.piece),
-      child: Opacity(
-        opacity: widget.isLocked ? 0.3 : 1.0,
-        child: Hero(
-          tag: asset,
-          child: SvgPicture.asset(
-            asset,
-            width: widget.size,
-            height: widget.size,
-            fit: BoxFit.contain,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Still Glow Halo
+          if (!widget.isLocked)
+            Container(
+              width: widget.size * 0.8,
+              height: widget.size * 0.8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    // Dark mode amplifies glow, so we drop opacity to ~7% (0.07)
+                    // Light mode stays at the theme default of ~12% (0.12)
+                    color: isDark 
+                        ? const Color(0xFF3F8E89).withValues(alpha: 0.07)
+                        : QLColors.armorUnlockedGlow,
+                    blurRadius: 12,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+          
+          Opacity(
+            opacity: widget.isLocked ? (isDark ? 1.0 : 0.2) : 1.0,
+            child: Hero(
+              tag: asset,
+              child: SvgPicture.asset(
+                asset,
+                width: widget.size,
+                height: widget.size,
+                fit: BoxFit.contain,
+                colorFilter: widget.isLocked 
+                    ? ColorFilter.mode(
+                        isDark ? QLColors.armorLockedFillDark : QLColors.armorLockedFill, 
+                        BlendMode.srcIn,
+                      )
+                    : isRecentlyUnlocked 
+                        ? null 
+                        : const ColorFilter.mode(QLColors.armorIronUnlocked, BlendMode.srcATop),
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

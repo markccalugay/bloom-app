@@ -70,11 +70,17 @@ class QLColors {
   static const armorForgeGlow  = Color(0xFFA17E57); // reuses warmBronze
 
   // Locked State (Silhouette)
-  static const armorLockedFill = Color(0xFF141A20); // near background
-  static const armorLockedLine = Color(0xFF232B33); // ironGray
+  static const armorLockedFill     = Color(0xFF141A20); // near background
+  static const armorLockedLine     = Color(0xFF232B33); // ironGray
+  static const armorLockedFillDark = Color(0xFF1E262D); // Raised value for Dark Mode visibility
+  static const armorLockedLineDark = Color(0xFF2F3A44); // Raised value for Dark Mode visibility
 
   // Unlocked / Polished Style
+  static const armorIronUnlocked  = Color(0xFF8FAFB0); // "Earned" - slight teal bias, mid-value
   static const armorIronSaturated = Color(0xFF89D6CE); // polished metallic teal
+
+  // Glow / Presence
+  static final armorUnlockedGlow  = const Color(0xFF3F8E89).withValues(alpha: 0.12);
 
   // ── Component & Legacy Mapping ──
   static const ringTrack = Color(0x1A000000); // 10% black for Light mode default
