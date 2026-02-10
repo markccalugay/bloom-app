@@ -71,7 +71,7 @@ flutter_native_splash:
   image: assets/images/splash-quietline-v1.png
 
   android: true
-  ios: true
+  ios: false
 
   android_12:
     color: "#FFFFFF"
