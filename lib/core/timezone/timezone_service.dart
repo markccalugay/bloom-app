@@ -10,7 +10,7 @@ class TimezoneService {
 
     try {
       // 2. Get the device's local timezone string (e.g., "America/New_York")
-      final String currentTimezone = await FlutterTimezone.getLocalTimezone();
+      final String currentTimezone = (await FlutterTimezone.getLocalTimezone()).identifier;
       
       // 3. Set the local location so tz.local works correctly
       tz.setLocalLocation(tz.getLocation(currentTimezone));

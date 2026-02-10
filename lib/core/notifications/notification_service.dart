@@ -20,7 +20,12 @@ class NotificationService {
       iOS: iosSettings,
     );
 
-    await _plugin.initialize(settings);
+    await _plugin.initialize(
+      settings: settings,
+      onDidReceiveNotificationResponse: (details) {
+        // Handle notification tap
+      },
+    );
   }
 
   /// Request notification permission from the OS.
@@ -73,13 +78,11 @@ class NotificationService {
     debugPrint('  - Timezone: ${tz.local.name}');
 
     await _plugin.zonedSchedule(
-      _dailyReminderId,
-      'Quiet Time',
-      'Take a moment to return to stillness.',
-      scheduled,
-      details,
-      uiLocalNotificationDateInterpretation:
-          UILocalNotificationDateInterpretation.absoluteTime,
+      id: _dailyReminderId,
+      title: 'Quiet Time',
+      body: 'Take a moment to return to stillness.',
+      scheduledDate: scheduled,
+      notificationDetails: details,
       matchDateTimeComponents: DateTimeComponents.time,
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
     );
@@ -87,7 +90,7 @@ class NotificationService {
 
   /// Cancels the existing daily reminder notification.
   Future<void> cancelDailyReminder() async {
-    await _plugin.cancel(_dailyReminderId);
+    await _plugin.cancel(id: _dailyReminderId);
   }
 
   /// Rebuilds the daily reminder by cancelling the existing
