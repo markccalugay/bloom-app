@@ -2,6 +2,7 @@ class AppAssets {
   static const flame = 'assets/images/icon-flame.svg';
   static const quietlineLogo = 'assets/images/logo-quietline.svg';
   static const ingot = 'assets/images/icon-ingot.svg';
+  static const anvil = 'assets/images/forge_anvil.svg';
 
   // Forge - Raw Materials
   static const ironRaw = 'assets/tools/iron_raw.svg';

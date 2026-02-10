@@ -75,6 +75,7 @@ flutter:
     - assets/images/logo-quietline.svg
     - assets/images/icon-flame.svg
     - assets/images/icon-ingot.svg
+    - assets/images/forge_anvil.svg
     - assets/sfx/
     - assets/tools/
     - assets/armor/knight/
