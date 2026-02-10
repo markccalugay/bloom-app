@@ -12,18 +12,21 @@ class AppAssets {
   static const knightHelmet = 'assets/armor/knight/knight_helmet.svg';
   static const knightChestplate = 'assets/armor/knight/knight_chestplate.svg';
   static const knightPauldrons = 'assets/armor/knight/knight_pauldrons.svg';
+  static const knightGreaves = 'assets/armor/knight/knight_greaves.svg';
   static const knightTool = 'assets/tools/tool_knight_longsword.svg';
 
   // Forge - Armor (Legionary)
   static const legionaryHelmet = 'assets/armor/legionary/legionary_helmet.svg';
   static const legionaryChestplate = 'assets/armor/legionary/legionary_chestplate.svg';
   static const legionaryPauldrons = 'assets/armor/legionary/legionary_pauldrons.svg';
+  static const legionaryGreaves = 'assets/armor/legionary/legionary_greaves.svg';
   static const legionaryTool = 'assets/tools/tool_legionary_gladius.svg';
 
   // Forge - Armor (Samurai)
   static const samuraiHelmet = 'assets/armor/samurai/samurai_helmet.svg';
   static const samuraiChestplate = 'assets/armor/samurai/samurai_chestplate.svg';
   static const samuraiPauldrons = 'assets/armor/samurai/samurai_pauldrons.svg';
+  static const samuraiGreaves = 'assets/armor/samurai/samurai_greaves.svg';
   static const samuraiTool = 'assets/tools/tool_samurai_katana.svg';
 
   // SFX

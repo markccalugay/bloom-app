@@ -17,6 +17,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
 
     return ValueListenableBuilder<bool>(
       valueListenable: StoreKitService.instance.isPremium,
@@ -31,133 +32,227 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
         }
 
         return Scaffold(
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: theme.scaffoldBackgroundColor,
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leadingWidth: 100,
+            leading: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Back',
+                style: textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ),
           body: SafeArea(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 48),
+                  const SizedBox(height: 20),
                   Text(
-                    'Go Deeper',
-                    style: theme.textTheme.headlineMedium,
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Unlock additional breathing practices designed to build discipline, calm, and resilience.',
-                    style: theme.textTheme.bodyLarge,
+                    'QuietLine+ Premium',
+                    style: textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'QuietLine Premium',
-                    style: theme.textTheme.titleMedium,
+                    'QuietLine+ Premium supports long-term discipline, calm, and resilience through structured breathwork and progress-based rewards.',
+                    style: textTheme.bodyLarge?.copyWith(
+                      height: 1.5,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.9),
+                    ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 40),
                   Text(
-                    '\$4.99 per month. Subscription automatically renews unless canceled at least 24 hours before the end of the current period.',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlpha(180),
+                    'What’s included',
+                    style: textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const Spacer(),
-                  ElevatedButton(
-                    onPressed: (isPremium || _isProcessing)
-                        ? null
-                        : () async {
-                            HapticFeedback.selectionClick();
-                            setState(() => _isProcessing = true);
-                            await StoreKitService.instance.purchasePremium();
-                            if (mounted) setState(() => _isProcessing = false);
-                          },
-                    child: _isProcessing
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
-                          )
-                        : Text(
-                            isPremium ? 'QuietLine+ Unlocked' : 'Unlock QuietLine+',
-                          ),
-                  ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
+                  _buildBullet(context, 'All guided breathing practices, including discipline, calm, and focus protocols'),
+                  _buildBullet(context, 'Progress-based unlocks tied to streaks and consistency'),
+                  _buildBullet(context, 'Full access to the Armor Room to mark your discipline over time'),
+                  const SizedBox(height: 60),
+                  
                   Center(
-                    child: TextButton(
-                      onPressed: _isProcessing
-                          ? null
-                          : () async {
-                              HapticFeedback.selectionClick();
-                              setState(() => _isProcessing = true);
-                              await StoreKitService.instance.restorePurchases();
-                              if (mounted) setState(() => _isProcessing = false);
-                            },
-                      child: Text(
-                        'Restore Purchases',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text(
-                        'Maybe later',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurface.withAlpha(153),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Wrap(
-                      alignment: WrapAlignment.center,
-                      spacing: 8,
+                    child: Column(
                       children: [
-                        GestureDetector(
-                          onTap: () {
-                            launchUrl(
-                              Uri.parse(
-                                'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/',
-                              ),
-                            );
-                          },
-                          child: Text(
-                            'Terms of Use',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              decoration: TextDecoration.underline,
-                            ),
+                        Text(
+                          'QuietLine+ Premium',
+                          style: textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const Text('•'),
-                        GestureDetector(
-                          onTap: () {
-                            launchUrl(
-                              Uri.parse('https://quietline.app/privacy'),
-                            );
-                          },
+                        const SizedBox(height: 4),
+                        Text(
+                          '\$4.99 per month',
+                          style: textTheme.headlineSmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Text(
-                            'Privacy Policy',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              decoration: TextDecoration.underline,
+                            'Subscription automatically renews unless canceled at least 24 hours before the end of the current period.',
+                            textAlign: TextAlign.center,
+                            style: textTheme.bodySmall?.copyWith(
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                              height: 1.4,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 40),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: (isPremium || _isProcessing)
+                          ? null
+                          : () async {
+                              HapticFeedback.selectionClick();
+                              setState(() => _isProcessing = true);
+                              await StoreKitService.instance.purchasePremium();
+                              if (mounted) setState(() => _isProcessing = false);
+                            },
+                      style: ElevatedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      child: _isProcessing
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                            )
+                          : Text(
+                              'Unlock QuietLine+ Premium',
+                              style: textTheme.titleMedium?.copyWith(
+                                color: theme.colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text(
+                        'Stay with free for now',
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _LegalButton(
+                        label: 'Restore',
+                        onTap: () async {
+                          setState(() => _isProcessing = true);
+                          await StoreKitService.instance.restorePurchases();
+                          if (mounted) setState(() => _isProcessing = false);
+                        },
+                      ),
+                      _LegalSeparator(),
+                      _LegalButton(
+                        label: 'Terms',
+                        onTap: () => launchUrl(Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')),
+                      ),
+                      _LegalSeparator(),
+                      _LegalButton(
+                        label: 'Privacy',
+                        onTap: () => launchUrl(Uri.parse('https://quietline.app/privacy')),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 48),
                 ],
               ),
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildBullet(BuildContext context, String text) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 4),
+            child: Icon(
+              Icons.check_circle_outline,
+              size: 18,
+              color: theme.colorScheme.primary.withValues(alpha: 0.8),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                height: 1.4,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LegalButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+
+  const _LegalButton({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        child: Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+            decoration: TextDecoration.underline,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.4),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LegalSeparator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '•',
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.2)),
     );
   }
 }

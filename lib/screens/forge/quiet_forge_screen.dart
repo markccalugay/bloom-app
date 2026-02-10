@@ -203,8 +203,19 @@ class _QuietForgeScreenState extends State<QuietForgeScreen> with SingleTickerPr
                             : 'Return Home',
                         onPressed: () {
                           if (forgeState.unlockedPieces.isNotEmpty) {
+                            final pieceToReveal = forgeState.recentlyUnlockedPieces.isNotEmpty 
+                                ? forgeState.recentlyUnlockedPieces.first 
+                                : null;
+                            
+                            // Clear recently unlocked after we've taken the one to reveal
+                            ForgeService.instance.clearRecentlyUnlocked();
+
                             Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(builder: (_) => const QuietArmorRoomScreen()),
+                              MaterialPageRoute(
+                                builder: (_) => QuietArmorRoomScreen(
+                                  revealedPiece: pieceToReveal,
+                                ),
+                              ),
                             );
                           } else {
                             Navigator.of(context).pushAndRemoveUntil(
