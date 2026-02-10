@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:quietline_app/data/user/user_service.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 
 /// Slide-in side menu used by the shell.
 /// The shell owns the open/close state and passes callbacks down.
@@ -276,32 +275,16 @@ class QLSideMenu extends StatelessWidget {
                     ValueListenableBuilder<bool>(
                       valueListenable: StoreKitService.instance.isPremium,
                       builder: (context, isPremium, _) {
-                        if (isPremium) return const SizedBox.shrink();
                         return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => const QuietPaywallScreen(),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary,
-                              foregroundColor: theme.colorScheme.onPrimary,
-                              minimumSize: const Size(double.infinity, 44),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              elevation: 0,
-                            ),
-                            child: const Text(
-                              'Unlock QuietLine+ Premium',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 0.2,
-                              ),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Text(
+                            isPremium
+                                ? 'QuietLine+ Premium active'
+                                : 'QuietLine+ Premium available',
+                            style: textTheme.bodySmall?.copyWith(
+                              color: baseTextColor.withValues(alpha: 0.4),
+                              fontSize: 11,
+                              letterSpacing: 0.3,
                             ),
                           ),
                         );
