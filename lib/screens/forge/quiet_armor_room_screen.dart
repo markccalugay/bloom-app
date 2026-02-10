@@ -1,12 +1,18 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter/services.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
+import 'package:quietline_app/screens/forge/widgets/armor_reveal_overlay.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietArmorRoomScreen extends StatefulWidget {
-  const QuietArmorRoomScreen({super.key});
+  final ArmorPiece? revealedPiece;
+  const QuietArmorRoomScreen({super.key, this.revealedPiece});
 
   @override
   State<QuietArmorRoomScreen> createState() => _QuietArmorRoomScreenState();
@@ -15,10 +21,20 @@ class QuietArmorRoomScreen extends StatefulWidget {
 class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
   bool _showOnboarding = false;
   bool _showBeginButton = false;
+  
+  ArmorPiece? _currentRevealPiece;
+  bool _isAnimatingSequence = false;
+  bool _showRevealOverlay = false;
+  final Set<ArmorPiece> _visuallyUnlockedPieces = {};
 
   @override
   void initState() {
     super.initState();
+    _currentRevealPiece = widget.revealedPiece;
+    if (_currentRevealPiece != null) {
+      _isAnimatingSequence = true;
+      _showRevealOverlay = true;
+    }
     _checkOnboarding();
   }
 
@@ -56,26 +72,66 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
         title: const Text('Armor Room'),
         backgroundColor: Colors.transparent,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bug_report_outlined),
+            onPressed: () {
+              setState(() {
+                _currentRevealPiece = ArmorPiece.helmet;
+                _isAnimatingSequence = true;
+                _showRevealOverlay = true;
+              });
+            },
+          ),
+        ],
       ),
       body: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 1,
-                childAspectRatio: 0.8,
-                mainAxisSpacing: 24,
+          IgnorePointer(
+            ignoring: _isAnimatingSequence || _showOnboarding,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: GridView.builder(
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 1,
+                  childAspectRatio: 0.8,
+                  mainAxisSpacing: 24,
+                ),
+                itemCount: ArmorSet.values.length,
+                itemBuilder: (context, index) {
+                  final set = ArmorSet.values[index];
+                  return _ArmorSetCard(
+                    set: set,
+                    revealedPiece: _currentRevealPiece,
+                    visuallyUnlockedPieces: _visuallyUnlockedPieces,
+                    onFittingComplete: () {
+                      setState(() {
+                        if (_currentRevealPiece != null) {
+                          _visuallyUnlockedPieces.add(_currentRevealPiece!);
+                        }
+                        _isAnimatingSequence = false;
+                        _currentRevealPiece = null;
+                      });
+                    },
+                  );
+                },
               ),
-              itemCount: ArmorSet.values.length,
-              itemBuilder: (context, index) {
-                final set = ArmorSet.values[index];
-                return _ArmorSetCard(set: set);
-              },
             ),
           ),
           if (_showOnboarding)
             _buildOnboardingOverlay(),
+            
+          if (_showRevealOverlay && _currentRevealPiece != null)
+            ArmorRevealOverlay(
+              set: ForgeService.instance.state.currentSet,
+              piece: _currentRevealPiece!,
+              onFinish: () {
+                setState(() {
+                  _showRevealOverlay = false;
+                  // The fitting animation continues in the background
+                });
+              },
+            ),
         ],
       ),
     );
@@ -104,21 +160,18 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
               const Icon(Icons.shield_rounded, size: 64, color: Color(0xFF2FE6D2)),
               const SizedBox(height: 24),
               Text(
-                'The Forge',
+                'Armor Room',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                "This is where QuietLine tracks consistency.\n\n"
-                "Each time you return, iron refines a little more.\n"
-                "Raw iron becomes an ingot.\n"
-                "An ingot becomes polished iron.\n\n"
-                "Polished iron is used to assemble armor.\n"
-                "Armor is built slowly, over time.\n\n"
-                "There’s no penalty for missing a day.\n"
-                "When you come back, you continue.",
+                "This is where your progress takes shape.\n\n"
+                "Each piece here is assembled automatically as you return to QuietLine.\n\n"
+                "You don’t need to chase anything.\n"
+                "Just keep showing up.\n\n"
+                "What’s locked now will unlock over time.",
                 textAlign: TextAlign.left,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   height: 1.5,
@@ -130,7 +183,7 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
                 duration: const Duration(milliseconds: 300),
                 opacity: _showBeginButton ? 1.0 : 0.0,
                 child: QLPrimaryButton(
-                  label: 'Begin',
+                  label: 'Got it',
                   onPressed: _showBeginButton ? _dismissOnboarding : () {},
                 ),
               ),
@@ -144,8 +197,16 @@ class _QuietArmorRoomScreenState extends State<QuietArmorRoomScreen> {
 
 class _ArmorSetCard extends StatelessWidget {
   final ArmorSet set;
+  final ArmorPiece? revealedPiece;
+  final Set<ArmorPiece> visuallyUnlockedPieces;
+  final VoidCallback onFittingComplete;
 
-  const _ArmorSetCard({required this.set});
+  const _ArmorSetCard({
+    required this.set,
+    this.revealedPiece,
+    required this.visuallyUnlockedPieces,
+    required this.onFittingComplete,
+  });
 
   String _capitalize(String s) => s.isEmpty ? s : s[0].toUpperCase() + s.substring(1);
 
@@ -156,7 +217,23 @@ class _ArmorSetCard extends StatelessWidget {
     
     final forgeService = ForgeService.instance;
     final isCurrentSet = forgeService.state.currentSet == set;
+    
+    // If a piece was just revealed, we treat it as NOT yet unlocked for the "fitting" reveal logic
     final unlockedPieces = isCurrentSet ? forgeService.state.unlockedPieces : <ArmorPiece>[];
+    
+    // But if we're actively revealing it, we want it to start "locked" (opacity 0) then animate in.
+    final effectiveUnlocked = List<ArmorPiece>.from(unlockedPieces);
+    
+    // Add locally unlocked pieces (e.g. from debug)
+    for (final p in visuallyUnlockedPieces) {
+      if (!effectiveUnlocked.contains(p)) {
+        effectiveUnlocked.add(p);
+      }
+    }
+
+    if (revealedPiece != null && isCurrentSet) {
+      effectiveUnlocked.remove(revealedPiece);
+    }
     
     String progressLabel = 'Armor Assembled';
     
@@ -221,7 +298,9 @@ class _ArmorSetCard extends StatelessWidget {
                     set: set,
                     piece: ArmorPiece.chestplate,
                     size: 200,
-                    isLocked: !unlockedPieces.contains(ArmorPiece.chestplate),
+                    isLocked: !effectiveUnlocked.contains(ArmorPiece.chestplate),
+                    shouldAnimateReveal: revealedPiece == ArmorPiece.chestplate,
+                    onRevealComplete: onFittingComplete,
                   ),
                 ),
                 Positioned(
@@ -230,7 +309,9 @@ class _ArmorSetCard extends StatelessWidget {
                     set: set,
                     piece: ArmorPiece.pauldrons,
                     size: 200,
-                    isLocked: !unlockedPieces.contains(ArmorPiece.pauldrons),
+                    isLocked: !effectiveUnlocked.contains(ArmorPiece.pauldrons),
+                    shouldAnimateReveal: revealedPiece == ArmorPiece.pauldrons,
+                    onRevealComplete: onFittingComplete,
                   ),
                 ),
                 Positioned(
@@ -239,7 +320,9 @@ class _ArmorSetCard extends StatelessWidget {
                     set: set,
                     piece: ArmorPiece.helmet,
                     size: 100,
-                    isLocked: !unlockedPieces.contains(ArmorPiece.helmet),
+                    isLocked: !effectiveUnlocked.contains(ArmorPiece.helmet),
+                    shouldAnimateReveal: revealedPiece == ArmorPiece.helmet,
+                    onRevealComplete: onFittingComplete,
                   ),
                 ),
                 Positioned(
@@ -249,7 +332,9 @@ class _ArmorSetCard extends StatelessWidget {
                     set: set,
                     piece: ArmorPiece.tool,
                     size: 80,
-                    isLocked: !unlockedPieces.contains(ArmorPiece.tool),
+                    isLocked: !effectiveUnlocked.contains(ArmorPiece.tool),
+                    shouldAnimateReveal: revealedPiece == ArmorPiece.tool,
+                    onRevealComplete: onFittingComplete,
                   ),
                 ),
               ],
@@ -266,12 +351,16 @@ class _PieceWidget extends StatefulWidget {
   final ArmorPiece piece;
   final double size;
   final bool isLocked;
+  final bool shouldAnimateReveal;
+  final VoidCallback? onRevealComplete;
 
   const _PieceWidget({
     required this.set,
     required this.piece,
     this.size = 150,
     this.isLocked = false,
+    this.shouldAnimateReveal = false,
+    this.onRevealComplete,
   });
 
   @override
@@ -286,8 +375,41 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1000),
+      duration: const Duration(milliseconds: 1200),
     );
+
+    if (widget.shouldAnimateReveal) {
+      _startRevealSequence();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_PieceWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.shouldAnimateReveal && !oldWidget.shouldAnimateReveal) {
+      _startRevealSequence();
+    }
+  }
+
+  Future<void> _startRevealSequence() async {
+    // Wait for the overlay to finish its thing (it has its own delays)
+    // Actually, the overlay calls onFinish which sets state in parent,
+    // which rebuilds this with shouldAnimateReveal = true?
+    // Wait, I need a better trigger.
+    
+    // Let's just start it when it appears.
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+
+    // Reveal animation
+    await _controller.forward();
+    if (!mounted) return;
+
+    // Wiggle/Finalize
+    HapticFeedback.mediumImpact();
+    SoundscapeService.instance.playSfx(ForgeService.instance.getRandomHammerSfx());
+
+    widget.onRevealComplete?.call();
   }
 
   @override
@@ -298,21 +420,93 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
 
   @override
   Widget build(BuildContext context) {
-    _controller.stop();
-    _controller.value = 0;
-
     final asset = ForgeService.instance.getPieceAsset(widget.set, widget.piece);
+    
+    if (widget.shouldAnimateReveal) {
+      return AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          final fade = CurvedAnimation(
+            parent: _controller,
+            curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+          ).value;
+          
+          final scale = TweenSequence<double>([
+            TweenSequenceItem(tween: Tween<double>(begin: 1.5, end: 1.0).chain(CurveTween(curve: Curves.easeOutBack)), weight: 1.0),
+          ]).animate(CurvedAnimation(parent: _controller, curve: const Interval(0.0, 0.8))).value;
+
+          final wiggle = math.sin(_controller.value * 20) * 0.05 * (1.0 - _controller.value);
+
+          return Opacity(
+            opacity: fade,
+            child: Transform.scale(
+              scale: scale,
+              child: Transform.rotate(
+                angle: wiggle,
+                child: SvgPicture.asset(
+                  asset,
+                  width: widget.size,
+                  height: widget.size,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          );
+        },
+      );
+    }
+    
+    final isRecentlyUnlocked = widget.shouldAnimateReveal;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     
     return GestureDetector(
       onTap: widget.isLocked ? null : () => _showZoomedView(context, asset, widget.piece),
-      child: Opacity(
-        opacity: widget.isLocked ? 0.3 : 1.0,
-        child: SvgPicture.asset(
-          asset,
-          width: widget.size,
-          height: widget.size,
-          fit: BoxFit.contain,
-        ),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Still Glow Halo
+          if (!widget.isLocked)
+            Container(
+              width: widget.size * 0.8,
+              height: widget.size * 0.8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    // Dark mode amplifies glow, so we drop opacity to ~7% (0.07)
+                    // Light mode stays at the theme default of ~12% (0.12)
+                    color: isDark 
+                        ? const Color(0xFF3F8E89).withValues(alpha: 0.07)
+                        : QLColors.armorUnlockedGlow,
+                    blurRadius: 12,
+                    spreadRadius: 4,
+                  ),
+                ],
+              ),
+            ),
+          
+          Opacity(
+            opacity: widget.isLocked ? (isDark ? 1.0 : 0.2) : 1.0,
+            child: Hero(
+              tag: asset,
+              child: SvgPicture.asset(
+                asset,
+                width: widget.size,
+                height: widget.size,
+                fit: BoxFit.contain,
+                colorFilter: widget.isLocked 
+                    ? ColorFilter.mode(
+                        isDark ? QLColors.armorLockedFillDark : QLColors.armorLockedFill, 
+                        BlendMode.srcIn,
+                      )
+                    : isRecentlyUnlocked 
+                        ? null 
+                        : const ColorFilter.mode(QLColors.armorIronUnlocked, BlendMode.srcATop),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
