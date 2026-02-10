@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/forge/quiet_ingot_particles.dart';
-import 'package:quietline_app/core/app_assets.dart';
-
-import 'package:flutter/services.dart';
-import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 
 class QuietHomeIngotBackground extends StatefulWidget {
   const QuietHomeIngotBackground({super.key});
@@ -16,47 +12,27 @@ class QuietHomeIngotBackground extends StatefulWidget {
 
 class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late Animation<Offset> _fallAnimation;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1500),
     );
 
-    _fallAnimation = Tween<Offset>(
-      begin: const Offset(0, -4.0), // Start way up high
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
+    _fadeAnimation = CurvedAnimation(
       parent: _controller,
-      curve: Curves.bounceOut, // Gives it that "thud" feel
-    ));
+      curve: Curves.easeIn,
+    );
 
-    // If it's raw, show the falling animation
+    // Fade in the iron piece on load
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (ForgeService.instance.state.ironStage == IronStage.raw) {
-        _startFall();
-      } else {
-        _controller.value = 1.0;
+      if (mounted) {
+        _controller.forward();
       }
     });
-  }
-
-  Future<void> _startFall() async {
-    // Slight delay before drop starts
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (!mounted) return;
-    
-    _controller.forward(from: 0.0);
-    
-    // Play sound mid-fall/at impact
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
-    
-    await SoundscapeService.instance.playSfx(AppAssets.oreDropSfx);
-    HapticFeedback.mediumImpact();
   }
 
   @override
@@ -87,17 +63,14 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                       const Positioned.fill(
                         child: QuietIngotParticles(),
                       ),
-                      SlideTransition(
-                        position: _fallAnimation,
-                        child: Opacity(
-                          opacity: 1.0,
-                          child: SizedBox(
-                            width: width,
-                            height: height,
-                            child: SvgPicture.asset(
-                              ForgeService.instance.currentAsset,
-                              fit: BoxFit.contain,
-                            ),
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SizedBox(
+                          width: width,
+                          height: height,
+                          child: SvgPicture.asset(
+                            ForgeService.instance.currentAsset,
+                            fit: BoxFit.contain,
                           ),
                         ),
                       ),

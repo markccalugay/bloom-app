@@ -17,6 +17,7 @@ import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
+import 'package:quietline_app/services/first_launch_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -46,6 +47,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   bool _showPauseIcon = false;
   int? _countdownValue;
   Timer? _countdownTimer;
+  bool _isFirstSession = false;
 
   void _startCountdown() {
     setState(() {
@@ -128,6 +130,8 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     // Auto-start soundscape atmosphere on screen entry
     SoundscapeService.instance.play();
 
+    _checkFirstSession();
+
     controller.listenable.addListener(() {
       if (controller.isPlaying && !_hasStarted) {
         _hasStarted = true;
@@ -141,6 +145,13 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
         });
       }
     });
+  }
+
+  Future<void> _checkFirstSession() async {
+    final completed = await FirstLaunchService.instance.hasCompletedFirstSession();
+    if (mounted) {
+      setState(() => _isFirstSession = !completed);
+    }
   }
 
   @override
@@ -455,7 +466,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     return AnimatedBuilder(
       animation: controller.listenable,
       builder: (context, _) {
-        if (_hasStarted && !controller.isPlaying && _countdownValue == null) {
+        if (_hasStarted && !controller.isPlaying && _countdownValue == null && !_isFirstSession) {
           return TextButton(
             onPressed: _handleCancel,
             child: Text(
