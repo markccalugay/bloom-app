@@ -135,8 +135,8 @@ class _ReminderTimezoneObserver extends WidgetsBindingObserver {
     );
 
     await TimezoneService.initialize();
-    final currentTimezone =
-        await FlutterTimezone.getLocalTimezone();
+    final String currentTimezone =
+        (await FlutterTimezone.getLocalTimezone()).identifier;
     await reminderService.updateStoredTimezone(currentTimezone);
   }
 }
