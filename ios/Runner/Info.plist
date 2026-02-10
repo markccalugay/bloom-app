@@ -45,6 +45,15 @@
 		</array>
 		<key>NSMicrophoneUsageDescription</key>
 		<string>QuietLine does not record audio. This permission exists only to support audio playback and system sound routing.</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.1054446804161-o24asbiksgbqas4th02cl0hhqul8epce</string>
+				</array>
+			</dict>
+		</array>
 		<key>UIStatusBarHidden</key>
 		<false/>
 	</dict>

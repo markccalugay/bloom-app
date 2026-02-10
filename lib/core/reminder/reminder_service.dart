@@ -136,7 +136,7 @@ class ReminderService {
     await notificationService.scheduleDaily(time: time);
 
     final String currentTimezone =
-        await FlutterTimezone.getLocalTimezone();
+        (await FlutterTimezone.getLocalTimezone()).identifier;
     await _prefs.setString(_kLastKnownTimezone, currentTimezone);
 
     // Mark reminder as enabled only after successful scheduling
@@ -170,7 +170,7 @@ class ReminderService {
     }
 
     final String currentTimezone =
-        await FlutterTimezone.getLocalTimezone();
+        (await FlutterTimezone.getLocalTimezone()).identifier;
 
     return storedTimezone != currentTimezone;
   }
