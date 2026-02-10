@@ -179,6 +179,7 @@ class _ArmorRevealOverlayState extends State<ArmorRevealOverlay> with TickerProv
       case ArmorPiece.tool: return 'Tool';
       case ArmorPiece.pauldrons: return 'Pauldrons';
       case ArmorPiece.chestplate: return 'Chestplate';
+      case ArmorPiece.greaves: return 'Greaves';
     }
   }
 }

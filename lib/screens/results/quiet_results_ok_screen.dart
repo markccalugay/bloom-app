@@ -282,9 +282,9 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   
                 if (showPracticeUnlock) ...[
                   QuietInlineUnlockCard(
-                    title: 'Explore deeper practices',
+                    title: 'You’re building momentum.',
                     subtitle:
-                        'Go beyond the core reset with guided discipline, calm, and resilience practices.',
+                        'QuietLine+ Premium includes deeper practices, progress-based unlocks, and full access to the Armor Room.',
                     ctaLabel: 'View practices',
                     onTap: () {
                       Navigator.of(context).push(

@@ -297,7 +297,7 @@ class QLSideMenu extends StatelessWidget {
                               elevation: 0,
                             ),
                             child: const Text(
-                              'Unlock QuietLine+',
+                              'Unlock QuietLine+ Premium',
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 letterSpacing: 0.2,
