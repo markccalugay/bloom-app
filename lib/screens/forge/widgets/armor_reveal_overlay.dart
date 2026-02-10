@@ -133,36 +133,58 @@ class _ArmorRevealOverlayState extends State<ArmorRevealOverlay> with TickerProv
               opacity: _fade,
               child: ScaleTransition(
                 scale: _scale,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      asset,
-                      width: 280,
-                      height: 280,
-                      fit: BoxFit.contain,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 48),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF151921).withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(28),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                      width: 1.5,
                     ),
-                    const SizedBox(height: 48),
-                    Text(
-                      'NEW ARMOR UNLOCKED',
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 4.0,
-                        height: 1.5,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 40,
+                        offset: const Offset(0, 20),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _getPieceName(widget.piece).toUpperCase(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white.withValues(alpha: 0.6),
-                        letterSpacing: 2.0,
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      SvgPicture.asset(
+                        asset,
+                        width: 280,
+                        height: 280,
+                        fit: BoxFit.contain,
+                        colorFilter: ColorFilter.mode(
+                          theme.colorScheme.primary,
+                          BlendMode.srcIn,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 48),
+                      Text(
+                        'NEW ARMOR UNLOCKED',
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 4.0,
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _getPieceName(widget.piece).toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.6),
+                          letterSpacing: 2.0,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

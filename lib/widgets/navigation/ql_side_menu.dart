@@ -301,8 +301,9 @@ class QLSideMenu extends StatelessWidget {
                           return Text(
                             label,
                             style: textTheme.bodySmall?.copyWith(
-                              color: baseTextColor.withValues(alpha: 0.5),
+                              color: baseTextColor.withValues(alpha: 0.4),
                               fontSize: 11,
+                              letterSpacing: 0.3,
                             ),
                           );
                         },

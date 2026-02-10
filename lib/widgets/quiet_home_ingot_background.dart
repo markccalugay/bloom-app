@@ -69,12 +69,12 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                         child: QuietIngotParticles(),
                       ),
                       
-                      // Anvil Backdrop
+                      // Anvil Backdrop (Reduced size by 45%, 40% opacity)
                       Positioned(
                         bottom: 0,
                         child: SvgPicture.asset(
                           AppAssets.anvil,
-                          width: width,
+                          width: width * 0.55,
                           colorFilter: ColorFilter.mode(
                             theme.colorScheme.onSurface.withValues(alpha: 0.4),
                             BlendMode.srcIn,
@@ -84,11 +84,11 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                       
                       // Iron Piece sitting on the top edge of the anvil
                       Positioned(
-                        bottom: height * 0.45, // Elevated to sit on anvil top edge
+                        bottom: height * 0.38, // Adjusted for smaller anvil
                         child: FadeTransition(
                           opacity: _fadeAnimation,
                           child: SizedBox(
-                            width: width * 0.65,
+                            width: width * 0.45, // Slightly smaller iron to match
                             child: SvgPicture.asset(
                               ForgeService.instance.currentAsset,
                               fit: BoxFit.contain,
