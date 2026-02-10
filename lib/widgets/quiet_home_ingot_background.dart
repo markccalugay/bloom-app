@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/widgets/forge/quiet_ingot_particles.dart';
 
@@ -20,7 +19,7 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _fadeAnimation = CurvedAnimation(
@@ -28,12 +27,7 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
       curve: Curves.easeIn,
     );
 
-    // Fade in the iron piece on load
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _controller.forward();
-      }
-    });
+    _controller.forward();
   }
 
   @override
@@ -44,14 +38,11 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    
     return IgnorePointer(
       child: LayoutBuilder(
         builder: (context, constraints) {
-          // Responsive sizing based on width
-          final double width = constraints.maxWidth * 0.8;
-          final double height = width * 0.6;
+          final double totalWidth = constraints.maxWidth;
+          final double areaHeight = totalWidth * 0.8;
 
           return ListenableBuilder(
             listenable: ForgeService.instance,
@@ -59,8 +50,8 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
               return Align(
                 alignment: const Alignment(0, -0.05),
                 child: SizedBox(
-                  width: width,
-                  height: height * 1.5,
+                  width: totalWidth,
+                  height: areaHeight,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -69,39 +60,13 @@ class _QuietHomeIngotBackgroundState extends State<QuietHomeIngotBackground> wit
                         child: QuietIngotParticles(),
                       ),
                       
-                      // Anvil Backdrop (Reduced size by 45%, 40% opacity)
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: SvgPicture.asset(
-                            AppAssets.anvil,
-                            width: width * 0.65, // Slightly larger for better base
-                            colorFilter: ColorFilter.mode(
-                              theme.colorScheme.onSurface.withValues(alpha: 0.4),
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                        ),
-                      ),
-                      
-                      // Iron Piece sitting on the top edge of the anvil
-                      Positioned(
-                        bottom: height * 0.42, // Adjusted vertically
-                        left: 0,
-                        right: 0,
-                        child: Center(
-                          child: FadeTransition(
-                            opacity: _fadeAnimation,
-                            child: SizedBox(
-                              width: width * 0.45,
-                              child: SvgPicture.asset(
-                                ForgeService.instance.currentAsset,
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
+                      // Iron Piece (Restored to center)
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SvgPicture.asset(
+                          ForgeService.instance.currentAsset,
+                          width: totalWidth * 0.5,
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ],
