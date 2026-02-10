@@ -661,30 +661,57 @@ class _PieceWidgetState extends State<_PieceWidget> with SingleTickerProviderSta
       context: context,
       builder: (_) => Dialog(
         backgroundColor: Colors.transparent,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-             Hero(
-               tag: asset,
-               child: SvgPicture.asset(asset, width: 300, height: 300),
-             ),
-             const SizedBox(height: 24),
-             Text(
-               inscriptions[piece] ?? "",
-               textAlign: TextAlign.center,
-               style: TextStyle(
-                 color: theme.brightness == Brightness.dark ? Colors.white : theme.textTheme.bodyLarge?.color,
-                 fontSize: 18,
-                 fontStyle: FontStyle.italic,
-                 fontFamily: 'serif',
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 40),
+          decoration: BoxDecoration(
+            color: const Color(0xFF151921).withValues(alpha: 0.92),
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.5),
+                blurRadius: 40,
+                offset: const Offset(0, 20),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+               Hero(
+                 tag: asset,
+                 child: SvgPicture.asset(
+                   asset, 
+                   width: 240, 
+                   height: 240,
+                   colorFilter: ColorFilter.mode(
+                     theme.colorScheme.primary,
+                     BlendMode.srcIn,
+                   ),
+                 ),
                ),
-             ),
-             const SizedBox(height: 32),
-             QLPrimaryButton(
-               label: 'Close',
-               onPressed: () => Navigator.pop(context),
-             ),
-          ],
+               const SizedBox(height: 32),
+               Text(
+                 inscriptions[piece] ?? "",
+                 textAlign: TextAlign.center,
+                 style: TextStyle(
+                   color: Colors.white,
+                   fontSize: 18,
+                   fontStyle: FontStyle.italic,
+                   fontFamily: 'serif',
+                   height: 1.4,
+                 ),
+               ),
+               const SizedBox(height: 32),
+               QLPrimaryButton(
+                 label: 'Close',
+                 onPressed: () => Navigator.pop(context),
+               ),
+            ],
+          ),
         ),
       ),
     );
