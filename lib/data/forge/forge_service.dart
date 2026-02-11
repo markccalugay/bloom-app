@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
 import 'dart:math' as math;
+import '../../core/backup/backup_coordinator.dart';
+import '../../core/entitlements/premium_entitlement.dart';
 
 enum ArmorSet {
   knight,
@@ -186,6 +188,11 @@ class ForgeService extends ChangeNotifier {
     await prefs.setInt(_ingotCountKey, _state.polishedIngotCount);
     await prefs.setInt(_totalSessionsKey, _state.totalSessions);
 
+    // Trigger backup if Premium
+    if (PremiumEntitlement.instance.isPremium) {
+      BackupCoordinator.instance.runBackup();
+    }
+
     notifyListeners();
   }
 
@@ -205,6 +212,12 @@ class ForgeService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _state = _state.copyWith(currentSet: set);
     await prefs.setInt(_currentSetKey, set.index);
+
+    // Trigger backup if Premium
+    if (PremiumEntitlement.instance.isPremium) {
+      BackupCoordinator.instance.runBackup();
+    }
+
     notifyListeners();
   }
 

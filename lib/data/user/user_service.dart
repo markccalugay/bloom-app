@@ -9,17 +9,20 @@ class UserProfile {
   final String id;        // stable internal ID (local for now)
   final String username;  // e.g. "QuietEmber472"
   final String avatarId;  // e.g. "avatar_3"
+  final DateTime createdAt;
 
   const UserProfile({
     required this.id,
     required this.username,
     required this.avatarId,
+    required this.createdAt,
   });
 
-  Map<String, String> toJson() => {
+  Map<String, dynamic> toJson() => {
         'id': id,
         'username': username,
         'avatarId': avatarId,
+        'createdAt': createdAt.toIso8601String(),
       };
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
@@ -27,6 +30,9 @@ class UserProfile {
       id: json['id'] as String,
       username: json['username'] as String,
       avatarId: json['avatarId'] as String,
+      createdAt: json['createdAt'] != null 
+          ? DateTime.parse(json['createdAt'] as String)
+          : DateTime.now(), // Fallback for old data
     );
   }
 }
@@ -40,6 +46,7 @@ class UserService {
   static const _keyId = 'ql_user_id';
   static const _keyUsername = 'ql_user_username';
   static const _keyAvatarId = 'ql_user_avatar_id';
+  static const _keyCreatedAt = 'ql_user_created_at';
 
   UserProfile? _cachedProfile;
 
@@ -51,24 +58,35 @@ class UserService {
     final id = prefs.getString(_keyId);
     final username = prefs.getString(_keyUsername);
     final avatarId = prefs.getString(_keyAvatarId);
+    final createdAtString = prefs.getString(_keyCreatedAt);
 
     if (id != null && username != null && avatarId != null) {
       final normalizedUsername = _normalizeUsername(username);
+      final createdAt = createdAtString != null 
+          ? DateTime.parse(createdAtString) 
+          : DateTime.now(); // Fallback for existing users
 
       // If we previously stored a spaced username (e.g. "Soft Pine 225"),
       // migrate it once to the no-space format (e.g. "SoftPine225").
-      if (normalizedUsername != username) {
+      // Also migrate if createdAt was missing.
+      if (normalizedUsername != username || createdAtString == null) {
         final migrated = UserProfile(
           id: id,
           username: normalizedUsername,
           avatarId: avatarId,
+          createdAt: createdAt,
         );
         await _saveProfile(prefs, migrated);
         _cachedProfile = migrated;
         return _cachedProfile!;
       }
 
-      _cachedProfile = UserProfile(id: id, username: username, avatarId: avatarId);
+      _cachedProfile = UserProfile(
+        id: id, 
+        username: username, 
+        avatarId: avatarId,
+        createdAt: createdAt,
+      );
       return _cachedProfile!;
     }
 
@@ -96,9 +114,10 @@ class UserService {
   // --- Internal helpers ------------------------------------------------------
 
   UserProfile _generateAnonymousProfile() {
-    final now = DateTime.now().millisecondsSinceEpoch;
+    final now = DateTime.now();
+    final nowMs = now.millisecondsSinceEpoch;
     // Internal ID – local for now, later this can be a server/user ID.
-    final id = 'user_$now';
+    final id = 'user_$nowMs';
 
     final username = generateRandomUsername();
 
@@ -109,6 +128,7 @@ class UserService {
       id: id,
       username: username,
       avatarId: avatarId,
+      createdAt: now,
     );
   }
 
@@ -149,6 +169,7 @@ class UserService {
     await prefs.setString(_keyId, profile.id);
     await prefs.setString(_keyUsername, profile.username);
     await prefs.setString(_keyAvatarId, profile.avatarId);
+    await prefs.setString(_keyCreatedAt, profile.createdAt.toIso8601String());
   }
 
   String _normalizeUsername(String value) {

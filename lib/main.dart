@@ -4,20 +4,17 @@ import 'core/reminder/reminder_service.dart';
 import 'core/practices/practice_access_service.dart';
 import 'core/notifications/notification_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-// import 'screens/quiet_breath/quiet_breath_screen.dart';
-// import 'screens/mood_checkin/mood_checkin_screen.dart';
-// import 'screens/mood_checkin/mood_checkin_strings.dart';
 import 'screens/entry/quiet_entry_screen.dart';
-
-import 'screens/results/quiet_results_ok_screen.dart';
+import 'core/backup/backup_coordinator.dart';
+import 'core/auth/auth_service.dart';
+import 'core/api/backend_service.dart';
+import 'data/affirmations/affirmations_unlock_service.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'data/streak/quiet_streak_local_store.dart';
 import 'data/streak/quiet_streak_repository.dart';
 import 'data/streak/quiet_streak_service.dart';
 
-// import 'services/first_launch_service.dart';
-// import 'screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/core/app_restart.dart';
 import 'package:quietline_app/core/storekit/storekit_service.dart';
@@ -46,6 +43,21 @@ void main() async {
   QuietStreakService.repo = quietStreakRepo;
   await PracticeAccessService.instance.initialize();
   await ForgeService.instance.initialize();
+  final reminderService = ReminderService(prefs);
+
+  // Initialize Backup/Restore
+  final backendService = BackendService(
+    baseUrl: 'https://quietline-backend-zwzwtdwllfiumgiopjwd.a.run.app', // Placeholder URL
+  );
+  BackupCoordinator.instance = BackupCoordinator(
+    backendService: backendService,
+    authService: AuthService.instance,
+    streakRepo: quietStreakRepo,
+    forgeService: ForgeService.instance,
+    affirmationsService: AffirmationsUnlockService.instance,
+    themeService: ThemeService.instance,
+    reminderService: reminderService,
+  );
 
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -54,7 +66,7 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   runApp(const AppRestart(child: QuietLineApp()));
   WidgetsBinding.instance.addObserver(
-    _ReminderTimezoneObserver(),
+    _ReminderAndBackupObserver(reminderService),
   );
 }
 
@@ -69,7 +81,6 @@ class QuietLineApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeService.instance.themeData,
-          // Entry router: Splash → Welcome → (FTUE Quiet Time once) → Home
           home: const QuietEntryScreen(),
         );
       },
@@ -77,49 +88,25 @@ class QuietLineApp extends StatelessWidget {
   }
 }
 
-class DebugResultsEntryScreen extends StatelessWidget {
-  const DebugResultsEntryScreen({super.key});
+class _ReminderAndBackupObserver extends WidgetsBindingObserver {
+  _ReminderAndBackupObserver(this._reminderService);
+  final ReminderService _reminderService;
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Test OK / streak screen
-            ElevatedButton(
-              onPressed: () async {
-                final newStreak = await quietStreakRepo
-                    .registerSessionCompletedToday();
-                if (!context.mounted) return;
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        QuietResultsOkScreen(streak: newStreak, isNew: true),
-                  ),
-                );
-              },
-              child: const Text('Test OK (streak) screen'),
-            ),
-            const SizedBox(height: 16),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReminderTimezoneObserver extends WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) async {
+    // Trigger background backup for Premium users
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      if (PremiumEntitlement.instance.isPremium) {
+        debugPrint('[BACKUP] App moving to background (Premium). Triggering backup.');
+        await BackupCoordinator.instance.runBackup();
+      }
+    }
+
     if (state != AppLifecycleState.resumed) return;
 
     final prefs = await SharedPreferences.getInstance();
-    final reminderService = ReminderService(prefs);
-
-    final needsResync = await reminderService.needsTimezoneResync();
+    
+    final needsResync = await _reminderService.needsTimezoneResync();
     if (!needsResync) return;
 
     final hour = prefs.getInt('reminderHour');
@@ -137,6 +124,6 @@ class _ReminderTimezoneObserver extends WidgetsBindingObserver {
     await TimezoneService.initialize();
     final currentTimezone =
         (await FlutterTimezone.getLocalTimezone()).identifier;
-    await reminderService.updateStoredTimezone(currentTimezone);
+    await _reminderService.updateStoredTimezone(currentTimezone);
   }
 }

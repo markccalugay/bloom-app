@@ -53,6 +53,7 @@ class _QuietEditProfileScreenState extends State<QuietEditProfileScreen> {
       id: _user!.id,
       username: _usernameController.text.trim(),
       avatarId: _selectedAvatarId,
+      createdAt: _user!.createdAt,
     );
 
     await UserService.instance.updateProfile(updated);

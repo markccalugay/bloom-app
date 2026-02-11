@@ -16,6 +16,7 @@ import 'package:quietline_app/data/forge/forge_service.dart';
 import 'package:quietline_app/screens/forge/quiet_forge_screen.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/core/app_assets.dart';
+import 'package:quietline_app/core/backup/backup_coordinator.dart';
 
 /// “You showed up again” results screen shown when mood >= 3.
 ///
@@ -129,6 +130,9 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
 
       // Start number count-up alongside the badge slam.
       _countController.forward(from: 0.0);
+
+      // Trigger background backup
+      BackupCoordinator.instance.runBackup();
     });
   }
 

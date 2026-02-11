@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
-import 'package:quietline_app/data/user/user_service.dart';
-import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:intl/intl.dart';
 import 'package:quietline_app/core/app_restart.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:quietline_app/screens/account/quiet_edit_profile_screen.dart';
-import 'package:quietline_app/screens/account/widgets/mindful_days_heatmap.dart';
-import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
-import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
-import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
-import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
-import 'package:quietline_app/screens/account/widgets/soundscape_selection_modal.dart';
 import 'package:quietline_app/core/auth/auth_service.dart';
+import 'package:quietline_app/core/auth/user_model.dart';
+import 'package:quietline_app/core/backup/backup_coordinator.dart';
+import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
+import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
+import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:quietline_app/data/user/user_service.dart';
+import 'package:quietline_app/screens/account/quiet_edit_profile_screen.dart';
+import 'package:quietline_app/screens/account/remote_data_found_screen.dart';
+import 'package:quietline_app/screens/account/widgets/mindful_days_heatmap.dart';
+import 'package:quietline_app/screens/account/widgets/soundscape_selection_modal.dart';
+import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
+import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 /// Simple MVP account screen.
 /// Shows the anonymous user's display name.
@@ -61,7 +66,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
       'sessions': sessions,
       'seconds': seconds,
       'dates': dates,
-      'usage': usage,
+      'usage': usage, // usage is Map<String, int>
     };
   }
 
@@ -69,6 +74,50 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
     final mins = totalSeconds ~/ 60;
     final secs = totalSeconds % 60;
     return '$mins minutes, $secs seconds';
+  }
+
+  String _formatMemberSince(DateTime date) {
+    return DateFormat.yMMMd().format(date);
+  }
+
+  Future<void> _handleSignIn(Future<AuthenticatedUser?> Function() signInMethod) async {
+    final user = await signInMethod();
+    if (user != null && mounted) {
+      // Check for remote data
+      final remoteSnapshot = await BackupCoordinator.instance.checkForRemoteSnapshot(user);
+      
+      if (remoteSnapshot != null && mounted) {
+         // Conflict found - navigate to resolution screen
+         await Navigator.of(context).push(
+           MaterialPageRoute(
+             builder: (context) => RemoteDataFoundScreen(
+               user: user,
+               remoteSnapshot: remoteSnapshot,
+               onRestoreCompleted: () {
+                 Navigator.of(context).pop();
+                 if (mounted) {
+                   setState(() { _metricsFuture = _loadMetrics(); });
+                   AppRestart.restart(context);
+                 }
+               },
+               onKeepLocalCompleted: () {
+                 Navigator.of(context).pop();
+                 if (mounted) {
+                   setState(() { _metricsFuture = _loadMetrics(); });
+                 }
+               },
+             ),
+           ),
+         );
+      } else {
+        // No remote data or check failed - just refresh
+        if (mounted) {
+          setState(() {
+            _metricsFuture = _loadMetrics();
+          });
+        }
+      }
+    }
   }
 
   Future<void> _handleDataWipe() async {
@@ -153,6 +202,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
               final user = snapshot.data!;
               final displayName = user.username;
               final avatarId = user.avatarId;
+              final memberSince = _formatMemberSince(user.createdAt);
 
               // Map avatarId to emoji (shared logic from UserService)
               final emoji = avatarPresets[avatarId] ?? '👤';
@@ -193,6 +243,17 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                       textAlign: TextAlign.center,
                       style: textTheme.bodySmall?.copyWith(
                         color: baseTextColor.withValues(alpha: 0.8),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Member Since
+                    Text(
+                      'Member since $memberSince',
+                      style: textTheme.labelSmall?.copyWith(
+                        color: baseTextColor.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
                       ),
                     ),
 
@@ -657,66 +718,118 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                     // --- DATA MANAGEMENT ---
                     const SizedBox(height: 24),
                     ListenableBuilder(
-                      listenable: AuthService.instance.currentUserNotifier,
+                      listenable: AuthService.instance.connectedUsersNotifier,
                       builder: (context, _) {
-                        final user = AuthService.instance.currentUser;
+                        final googleUser = AuthService.instance.googleUser;
+                        final appleUser = AuthService.instance.appleUser;
+                        final isDark = Theme.of(context).brightness == Brightness.dark;
+
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            if (user != null)
+                            Text(
+                              'SYNC & BACKUP',
+                              style: textTheme.labelSmall?.copyWith(
+                                letterSpacing: 0.8,
+                                fontWeight: FontWeight.w600,
+                                color: baseTextColor.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            
+                            // 1. Apple Section
+                            if (appleUser != null)
+                              _ConnectedProviderCard(
+                                providerName: 'Apple',
+                                email: appleUser.email ?? 'Connected',
+                                icon: Icons.apple,
+                                onDisconnect: () async {
+                                  await AuthService.instance.signOutApple();
+                                  if (context.mounted) {
+                                     setState(() { _metricsFuture = _loadMetrics(); });
+                                  }
+                                },
+                              )
+                            else
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 12.0),
-                                child: Text(
-                                  'Signed in as ${user.email}',
-                                  style: textTheme.bodySmall?.copyWith(
-                                    color: baseTextColor.withValues(alpha: 0.6),
+                                child: SignInWithAppleButton(
+                                  onPressed: () => _handleSignIn(() => AuthService.instance.signInWithApple()),
+                                  style: isDark 
+                                      ? SignInWithAppleButtonStyle.white 
+                                      : SignInWithAppleButtonStyle.black,
+                                  height: 50,
+                                  borderRadius: const BorderRadius.all(Radius.circular(12)),
+                                ),
+                              ),
+
+                            // 2. Google Section
+                            if (googleUser != null)
+                              Padding(
+                                padding: EdgeInsets.only(top: appleUser != null ? 8.0 : 0),
+                                child: _ConnectedProviderCard(
+                                  providerName: 'Google',
+                                  email: googleUser.email ?? 'Connected',
+                                  icon: Icons.cloud_circle, 
+                                  onDisconnect: () async {
+                                    await AuthService.instance.signOutGoogle();
+                                    if (context.mounted) {
+                                       setState(() { _metricsFuture = _loadMetrics(); });
+                                    }
+                                  },
+                                ),
+                              )
+                            else
+                              Padding(
+                                padding: const EdgeInsets.only(top: 12.0),
+                                child: ElevatedButton.icon(
+                                  onPressed: () => _handleSignIn(() => AuthService.instance.signInWithGoogle()),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: Colors.black87,
+                                    minimumSize: const Size(double.infinity, 50),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: const BorderSide(color: Colors.black12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  icon: Image.network(
+                                    'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
+                                    height: 20,
+                                  ),
+                                  label: const Text(
+                                    'Sign in with Google',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 19,
+                                      fontFamily: 'SF Pro Text',
+                                    ),
                                   ),
                                 ),
                               ),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                if (user == null) {
-                                  final account = await AuthService.instance.signIn();
-                                  if (account != null && mounted) {
-                                    setState(() {});
-                                  }
-                                } else {
-                                  await AuthService.instance.signOut();
-                                  if (mounted) setState(() {});
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.white,
-                                foregroundColor: Colors.black87,
-                                minimumSize: const Size(200, 44),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+
+                            const SizedBox(height: 24),
+                            const Divider(),
+                            const SizedBox(height: 12),
+
+                            // 3. Data Wipe - Always visible
+                            Center(
+                              child: TextButton(
+                                onPressed: _handleDataWipe,
+                                child: Text(
+                                  'Data Wipe',
+                                  style: TextStyle(
+                                    color: Colors.redAccent.withValues(alpha: 0.7),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                                elevation: 0.5,
-                              ),
-                              icon: Image.network(
-                                'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Google_%22G%22_logo.svg/1200px-Google_%22G%22_logo.svg.png',
-                                height: 18,
-                              ),
-                              label: Text(
-                                user == null ? 'Sign in with Google' : 'Sign out from Google',
-                                style: const TextStyle(fontWeight: FontWeight.w600),
                               ),
                             ),
                           ],
                         );
                       },
-                    ),
-                    const SizedBox(height: 12),
-                    TextButton(
-                      onPressed: _handleDataWipe,
-                      child: Text(
-                        'Data Wipe',
-                        style: TextStyle(
-                          color: Colors.redAccent.withValues(alpha: 0.7),
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
                     ),
                     const SizedBox(height: 48),
                   ],
@@ -882,6 +995,72 @@ class _PreferenceTile extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ConnectedProviderCard extends StatelessWidget {
+  final String providerName;
+  final String email;
+  final IconData icon;
+  final VoidCallback onDisconnect;
+
+  const _ConnectedProviderCard({
+    required this.providerName,
+    required this.email,
+    required this.icon,
+    required this.onDisconnect,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final baseTextColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: baseTextColor.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 24, color: baseTextColor),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  providerName,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  email,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: baseTextColor.withValues(alpha: 0.6),
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: onDisconnect,
+            style: TextButton.styleFrom(
+              foregroundColor: colorScheme.error,
+            ),
+            child: const Text('Disconnect'),
+          ),
+        ],
       ),
     );
   }

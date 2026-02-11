@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/ql_theme.dart';
+import '../backup/backup_coordinator.dart';
+import '../entitlements/premium_entitlement.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeService._();
@@ -56,6 +58,11 @@ class ThemeService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_themeKey, _variant.index);
     
+    // Trigger backup if Premium
+    if (PremiumEntitlement.instance.isPremium) {
+      BackupCoordinator.instance.runBackup();
+    }
+
     notifyListeners();
   }
 

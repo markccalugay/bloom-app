@@ -1,13 +1,13 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
+import 'package:quietline_app/data/forge/forge_service.dart';
+import 'package:quietline_app/widgets/affirmations/quiet_home_affirmations_carousel.dart';
+import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
 
 import '../home/widgets/quiet_home_app_bar.dart';
 import '../home/widgets/quiet_home_streak_row.dart';
 import '../results/quiet_results_ok_screen.dart';
-import 'package:flutter/foundation.dart';
-import 'package:quietline_app/widgets/quiet_home_ingot_background.dart';
-import 'package:quietline_app/widgets/affirmations/quiet_home_affirmations_carousel.dart';
-import 'package:quietline_app/data/forge/forge_service.dart';
-import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
 
 const double kHomeHorizontalPadding = 16.0;
 const double kHomeTopSpacing = 12.0;          // Tightened from 20.0

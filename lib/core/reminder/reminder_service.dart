@@ -4,6 +4,8 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 
 import 'reminder_state.dart';
 import '../notifications/notification_service.dart';
+import '../backup/backup_coordinator.dart';
+import '../entitlements/premium_entitlement.dart';
 
 enum ReminderEnableResult {
   enabled,
@@ -141,6 +143,11 @@ class ReminderService {
 
     // Mark reminder as enabled only after successful scheduling
     await markReminderEnabled();
+
+    // Trigger backup if Premium
+    if (PremiumEntitlement.instance.isPremium) {
+      BackupCoordinator.instance.runBackup();
+    }
 
     return ReminderEnableResult.enabled;
   }
