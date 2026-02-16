@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/practices/practice_model.dart';
-import '../entitlements/premium_entitlement.dart';
+import '../../data/practices/practice_catalog.dart';
+import'../entitlements/premium_entitlement.dart';
 import '../../screens/quiet_breath/models/breath_phase_contracts.dart';
 
 class PracticeAccessService {
@@ -30,10 +31,10 @@ class PracticeAccessService {
   }
 
   BreathingPracticeContract getActiveContract() {
-    return allBreathingPractices.firstWhere(
+    return PracticeCatalog.all.firstWhere(
       (p) => p.id == activePracticeId.value,
-      orElse: () => coreQuietContract,
-    );
+      orElse: () => PracticeCatalog.coreQuiet,
+    ).contract;
   }
 
   Future<void> setActivePractice(String practiceId) async {

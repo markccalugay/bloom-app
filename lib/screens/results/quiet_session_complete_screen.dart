@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'quiet_results_constants.dart';
 
 class QuietSessionCompleteScreen extends StatelessWidget {
@@ -123,7 +124,11 @@ class QuietSessionCompleteScreen extends StatelessWidget {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) => const QuietShellScreen(),
+                          ),
+                          (route) => false);
                     },
                     child: const Text('Continue'),
                   ),

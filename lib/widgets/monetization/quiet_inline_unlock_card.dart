@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
+
 
 class QuietInlineUnlockCard extends StatelessWidget {
   final String title;
@@ -53,7 +53,7 @@ class QuietInlineUnlockCard extends StatelessWidget {
             child: TextButton(
               onPressed: onTap,
               style: TextButton.styleFrom(
-                foregroundColor: QLColors.primaryTeal,
+                foregroundColor: theme.colorScheme.primary,
               ),
               child: Text(
                 ctaLabel,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import '../controllers/quiet_breath_controller.dart';
 import '../painters/quiet_breath_wave_painter.dart';
 import '../painters/quiet_breath_ring_painter.dart';
@@ -21,20 +20,30 @@ class QuietBreathCircle extends StatelessWidget {
         
         final ringTrackColor = theme.brightness == Brightness.light
             ? Colors.black.withValues(alpha: 0.08)
-            : QLColors.ringTrack;
+            : theme.dividerColor.withValues(alpha: 0.2);
         
         final ellipseBgColor = theme.brightness == Brightness.dark
-            ? QLColors.ironGray
-            : QLColors.paleStone;
+            ? theme.colorScheme.surfaceContainerHighest
+            : theme.colorScheme.surfaceContainerLow;
 
         final waveDim = theme.colorScheme.primary.withValues(
-          alpha: theme.brightness == Brightness.dark ? 0.6 : 0.3,
+          alpha: theme.brightness == Brightness.dark ? 0.5 : 0.25,
         );
 
         return Center(
           child: Stack(
             alignment: Alignment.center,
             children: [
+              // "overwhelmed" / "calm" labels
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Placeholder for "overwhelmed" label
+                  // Text('Overwhelmed', style: theme.textTheme.labelSmall),
+                  // Placeholder for "calm" label
+                  // Text('Calm', style: theme.textTheme.labelSmall),
+                ],
+              ),
               // Radial ring (neutral track + active sweep by phase)
               SizedBox(
                 width: ringSize,

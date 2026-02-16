@@ -1,7 +1,5 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'dart:math' as math;
 import '../../core/backup/backup_coordinator.dart';
 import '../../core/entitlements/premium_entitlement.dart';
 
@@ -113,79 +111,16 @@ class ForgeService extends ChangeNotifier {
 
     final nextTotalSessions = _state.totalSessions + 1;
     
-    IronStage nextStage;
-    if (nextTotalSessions == 1) {
-      nextStage = IronStage.raw;
-    } else if (nextTotalSessions == 2) {
-      nextStage = IronStage.ingot;
-    } else {
-      nextStage = IronStage.polished;
-    }
-
-    int nextIngotCount = _state.polishedIngotCount;
-    if (nextTotalSessions >= 3) {
-      nextIngotCount += 1;
-    }
-
-    List<ArmorPiece> nextUnlocked = List.from(_state.unlockedPieces);
-    
-    // Check for automatic unlocks
-    final craftingRequirements = {
-      ArmorPiece.helmet: 1,
-      ArmorPiece.tool: 2,
-      ArmorPiece.pauldrons: 3,
-      ArmorPiece.chestplate: 5,
-      ArmorPiece.greaves: 8,
-    };
-
-    // We unlock pieces in a specific order
-    final unlockOrder = [
-      ArmorPiece.helmet,
-      ArmorPiece.tool,
-      ArmorPiece.pauldrons,
-      ArmorPiece.chestplate,
-      ArmorPiece.greaves,
-    ];
-
-    List<ArmorPiece> recentlyUnlocked = [];
-    final bool isPremium = StoreKitService.instance.isPremium.value;
-
-    for (final piece in unlockOrder) {
-      if (!nextUnlocked.contains(piece)) {
-        // Restriction check
-        if (!isPremium) {
-          // Free users can only forge Knight Helmet and Tool
-          final isFreePiece = _state.currentSet == ArmorSet.knight && 
-                             (piece == ArmorPiece.helmet || piece == ArmorPiece.tool);
-          if (!isFreePiece) break;
-        }
-
-        final req = craftingRequirements[piece]!;
-        if (nextIngotCount >= req) {
-          nextIngotCount -= req;
-          nextUnlocked.add(piece);
-          recentlyUnlocked.add(piece);
-        } else {
-          // Cannot unlock this or subsequent pieces
-          break;
-        }
-      }
-    }
+    // FORGE DISABLED: We only track session counts now.
+    // All other state (ingots, armor, stage) remains static.
 
     _state = _state.copyWith(
-      ironStage: nextStage,
-      unlockedPieces: nextUnlocked,
-      polishedIngotCount: nextIngotCount,
       totalSessions: nextTotalSessions,
-      recentlyUnlockedPieces: recentlyUnlocked,
+      // Ensure we don't accidentally trigger old unlock UI
+      recentlyUnlockedPieces: [], 
     );
 
-    await prefs.setInt(_ironStageKey, _state.ironStage.index);
-    await prefs.setStringList(
-      _unlockedPiecesKey,
-      _state.unlockedPieces.map((e) => e.name).toList(),
-    );
-    await prefs.setInt(_ingotCountKey, _state.polishedIngotCount);
+    // Only persist the session count
     await prefs.setInt(_totalSessionsKey, _state.totalSessions);
 
     // Trigger backup if Premium
@@ -251,34 +186,4 @@ class ForgeService extends ChangeNotifier {
      }
   }
 
-  String get currentAsset {
-    if (_state.ironStage == IronStage.raw) return 'assets/tools/iron_raw.svg';
-    if (_state.ironStage == IronStage.ingot) return 'assets/tools/iron_ingot.svg';
-    if (_state.ironStage == IronStage.polished) return 'assets/tools/iron_polished.svg';
-    
-    return 'assets/tools/iron_raw.svg';
-  }
-
-  String getPieceAsset(ArmorSet set, ArmorPiece piece) {
-    if (piece == ArmorPiece.tool) {
-      return 'assets/tools/tool_${set.name}_${_getToolName(set)}.svg';
-    }
-    final setName = set.name;
-    final pieceName = piece.name;
-    return 'assets/armor/$setName/${setName}_$pieceName.svg';
-  }
-
-  String _getToolName(ArmorSet set) {
-    switch (set) {
-      case ArmorSet.knight: return 'longsword';
-      case ArmorSet.legionary: return 'gladius';
-      case ArmorSet.samurai: return 'katana';
-    }
-  }
-
-  String getRandomHammerSfx() {
-    final rng = math.Random();
-    final n = rng.nextInt(3) + 1;
-    return 'sfx/ql_sfx_hammer_anvil_$n.wav';
-  }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_models.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
@@ -95,14 +95,14 @@ class SoundscapeSelectionModal extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              HapticFeedback.selectionClick();
+              HapticService.selection();
               Navigator.pop(context, false);
             },
             child: Text('Cancel', style: TextStyle(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5))),
           ),
           TextButton(
             onPressed: () {
-              HapticFeedback.selectionClick();
+              HapticService.selection();
               Navigator.pop(context, true);
             },
             child: Text('Confirm', style: TextStyle(fontWeight: FontWeight.w700)),

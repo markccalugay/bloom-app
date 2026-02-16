@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quietline_app/theme/ql_theme.dart';
 
 /// Layout and styling constants specific to the results screens.
 class QuietResultsConstants {
@@ -13,29 +14,15 @@ class QuietResultsConstants {
   static const double streakBadgeSize = 220.0;
   static const double smallFlameSize = 48.0;
 
-  // Colors (tweak values to better match your palette)
-  static const Color activeFlameTop = Color(0xFF3BA89C);   // teal-ish
-  static const Color activeFlameBottom = Color(0xFF2F716C);
-  static const Color inactiveFlame = Color(0xFF4A4F54);    // muted gray
-  static const Color softWaveColor = Color(0x26FFFFFF);    // very subtle white (15% alpha)
+
+  // Colors (Theme-aware mappings)
+  static Color get activeFlameTop => QLColors.calmTeal;
+  static Color get activeFlameBottom => const Color(0xFF2C6C68);
+  static Color get inactiveFlame => QLColors.steelGray;
 
   // Gradient for inactive streak flames (big + small)
-  static const LinearGradient inactiveGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      Color(0xFF5E6874), // top
-      Color(0xFF313841), // bottom
-    ],
-  );
+  static Gradient get inactiveGradient => QLGradients.steelFlame;
 
   // Gradient for active streak flames (big + small)
-  static const Gradient streakGradient = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [
-      activeFlameTop,
-      activeFlameBottom,
-    ],
-  );
+  static Gradient get streakGradient => QLGradients.tealFlame;
 }

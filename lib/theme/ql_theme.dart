@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
 
 enum ThemeVariant {
-  quietLine,
-  quietLineLight,
+  midnight,
+  morning,
+  charcoal,
 }
 
 class QLColors {
@@ -125,14 +126,53 @@ class QLGradients {
   // Mapping to current theme
   static Gradient getPrimaryGradient(ThemeVariant variant) {
     switch (variant) {
-      case ThemeVariant.quietLine:
+      case ThemeVariant.midnight:
         return tealFlame;
-      case ThemeVariant.quietLineLight:
+      case ThemeVariant.morning:
         return LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [QLColors.quietAqua, QLColors.slateBlue.withValues(alpha: 0.8)],
         );
+      case ThemeVariant.charcoal:
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [QLColors.steelGray, QLColors.deepStone],
+        );
+    }
+  }
+
+  static Gradient getHomeGradient(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0F1C24), Color(0xFF132B34)],
+        );
+      case ThemeVariant.morning:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF5F7FA), Color(0xFFE2E6EA)],
+        );
+      case ThemeVariant.charcoal:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF141A20), Color(0xFF1A2229)],
+        );
+    }
+  }
+
+  static Color getResultsWaveColor(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
+      case ThemeVariant.charcoal:
+        return const Color(0x26FFFFFF); // 15% white
+      case ThemeVariant.morning:
+        return const Color(0x1A000000); // 10% black
     }
   }
 
@@ -144,7 +184,7 @@ class QLGradients {
 class QLTheme {
   static ThemeData dark = ThemeData(
     brightness: Brightness.dark,
-    scaffoldBackgroundColor: QLColors.midnightBlue, // Per dark mode Primary
+    scaffoldBackgroundColor: QLColors.deepCharcoal, // Ultra-dark premium base
     colorScheme: const ColorScheme.dark(
       surface: QLColors.ironGray,
       primary: QLColors.calmTeal,
@@ -186,6 +226,31 @@ class QLTheme {
     dividerTheme: const DividerThemeData(
       color: QLColors.steelGray,
       thickness: 1,
+    ),
+  );
+
+  static ThemeData morning = quietLight; // Alias for Morning variant
+
+  static ThemeData charcoal = ThemeData(
+    brightness: Brightness.dark,
+    scaffoldBackgroundColor: const Color(0xFF1A1F24),
+    colorScheme: const ColorScheme.dark(
+      surface: Color(0xFF242B31),
+      primary: QLColors.steelGray,
+      secondary: QLColors.deepStone,
+      onSurface: QLColors.armorIronLight,
+      onPrimary: Colors.white,
+    ),
+    textTheme: const TextTheme(
+      bodyMedium: TextStyle(fontSize: 14, color: QLColors.armorIronLight),
+      bodySmall: TextStyle(fontSize: 12, color: QLColors.armorIronDark),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: QLColors.deepStone,
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
     ),
   );
 
@@ -273,28 +338,34 @@ class QLTheme {
 
   static ThemeData getTheme(ThemeVariant variant) {
     switch (variant) {
-      case ThemeVariant.quietLine:
+      case ThemeVariant.midnight:
         return dark;
-      case ThemeVariant.quietLineLight:
+      case ThemeVariant.morning:
         return quietLight;
+      case ThemeVariant.charcoal:
+        return charcoal;
     }
   }
 
   static Color getPrimaryColor(ThemeVariant variant) {
     switch (variant) {
-      case ThemeVariant.quietLine:
+      case ThemeVariant.midnight:
         return QLColors.calmTeal;
-      case ThemeVariant.quietLineLight:
+      case ThemeVariant.morning:
         return QLColors.slateBlue;
+      case ThemeVariant.charcoal:
+        return QLColors.deepStone;
     }
   }
 
   static Color getBackgroundColor(ThemeVariant variant) {
     switch (variant) {
-      case ThemeVariant.quietLine:
-        return QLColors.midnightBlue; // Anchors dark mode in primary
-      case ThemeVariant.quietLineLight:
+      case ThemeVariant.midnight:
+        return QLColors.deepCharcoal;
+      case ThemeVariant.morning:
         return QLColors.offWhiteFog;
+      case ThemeVariant.charcoal:
+        return const Color(0xFF1A1F24);
     }
   }
 

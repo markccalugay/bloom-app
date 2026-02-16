@@ -1,5 +1,7 @@
 // lib/data/affirmations/affirmations_service.dart
 
+import 'dart:math' as math;
+
 import 'affirmations_model.dart';
 import 'affirmations_packs.dart';
 
@@ -102,7 +104,7 @@ class AffirmationsService {
   Affirmation? getRandomFromPack(String packId) {
     final list = getAffirmationsForPack(packId);
     if (list.isEmpty) return null;
-    list.shuffle();
-    return list.first;
+    final random = math.Random();
+    return list[random.nextInt(list.length)];
   }
 }

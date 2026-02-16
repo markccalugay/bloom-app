@@ -43,29 +43,72 @@ class QuietResultsStreakRow extends StatelessWidget {
     // Clamp to 0 so Day 1 can animate from Day 0.
     final int prevRaw =
         (previousStreak == null) ? (streak - 1) : previousStreak!;
-    final int prev = (prevRaw >= streak) ? (streak - 1) : prevRaw;
-    final int prevClamped = prev < 0 ? 0 : prev;
+    // Tiered Progression Logic
 
-    // FTUE: show 3 flames initially. After Day 3 is reached, expand to 5.
-    // Keep this widget future-proof by still allowing a caller-provided maxFlames
-    // to cap the display.
-    final int targetFlames = streak >= 3 ? 5 : 3;
-    final int effectiveMaxFlames = maxFlames < targetFlames ? maxFlames : targetFlames;
+    // Tier 1: Days 1-3 (3 flames)
+    // Tier 2: Days 4-8 (5 flames)
+    // Tier 3+: Days 9... (7 flames, resetting every 7 days)
+    
+    int setSize;
+    int activeCount;
+    
+    if (streak <= 3) {
+      setSize = 3;
+      activeCount = streak;
+    } else if (streak <= 8) {
+      setSize = 5;
+      activeCount = streak - 3;
+    } else {
+      setSize = 7;
+      final relative = streak - 8;
+      activeCount = ((relative - 1) % 7) + 1;
+    }
 
-    final bool didIncrement = animate && (streak > prevClamped);
-    final bool isCapped = prevClamped >= effectiveMaxFlames;
+    final int effectiveMaxFlames = setSize;
+    final int currentStreakInTier = activeCount;
+
+    // To handle animations (prevClamped represents the old streak position in the tier)
+    int prevActiveCount;
+    if (prevRaw <= 3) {
+      // If we were in Tier 1
+      prevActiveCount = (streak <= 3) ? prevRaw : 3;
+    } else if (prevRaw <= 8) {
+      // If we were in Tier 2
+      prevActiveCount = (streak <= 8) ? (prevRaw - 3) : 5;
+    } else {
+      // If we were in Tier 3+
+      final prevRelative = prevRaw - 8;
+      final prevWeekNum = ((prevRelative - 1) / 7).floor();
+      final currentRelative = streak - 8;
+      final currentWeekNum = ((currentRelative - 1) / 7).floor();
+      
+      if (prevWeekNum < currentWeekNum) {
+        // We crossed a week boundary, treat old week as full for animation prep
+        prevActiveCount = 7;
+      } else {
+        prevActiveCount = ((prevRelative - 1) % 7) + 1;
+      }
+    }
+    
+    final bool didIncrement = animate && (streak > prevRaw);
+    // Boundary crossing detection: if the set just filled or we are at the start of a new set
+    final bool isCrossingTier = (prevActiveCount == 0 && currentStreakInTier == 1) || (prevRaw > 0 && _isSetBoundary(prevRaw));
+    
+    final int animationStartStep = isCrossingTier ? 0 : prevActiveCount;
+
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: List.generate(effectiveMaxFlames, (index) {
         // Streak step labels: 1,2,3,... (up to maxFlames)
         final step = index + 1;
-        final isActive = streak >= step;
+        final isActive = currentStreakInTier >= step;
 
         // Newly earned if it crossed this step during this session.
-        final animateIn = animate && isActive && prevClamped < step;
+        final animateIn = animate && isActive && animationStartStep < step;
 
-        final bool wiggleOnly = didIncrement && isCapped && index == effectiveMaxFlames - 1;
+        final bool wiggleOnly = didIncrement && !isCrossingTier && isActive && index == animationStartStep;
+
 
         // Stagger each newly-earned flame.
         final delay = startDelay + Duration(milliseconds: 120 * index);
@@ -83,7 +126,14 @@ class QuietResultsStreakRow extends StatelessWidget {
       }),
     );
   }
+
+  bool _isSetBoundary(int s) {
+    if (s == 3 || s == 8) return true;
+    if (s > 8) return (s - 8) % 7 == 0;
+    return false;
+  }
 }
+
 
 class _SmallFlame extends StatefulWidget {
   final String label;
@@ -218,14 +268,7 @@ class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderState
             )
           : ShaderMask(
               shaderCallback: (bounds) =>
-                  const LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Color(0xFF5E6874),
-                      Color(0xFF313841),
-                    ],
-                  ).createShader(bounds),
+                  QuietResultsConstants.inactiveGradient.createShader(bounds),
               blendMode: BlendMode.srcIn,
               child: SvgPicture.asset(AppAssets.flame),
             ),

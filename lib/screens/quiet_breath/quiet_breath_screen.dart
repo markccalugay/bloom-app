@@ -8,13 +8,12 @@ import 'widgets/quiet_breath_circle.dart';
 import 'widgets/quiet_breath_controls.dart';
 import 'widgets/quiet_breath_timer_title.dart';
 import 'models/breath_phase_contracts.dart';
-import 'package:quietline_app/screens/mood_checkin/mood_checkin_screen.dart';
-import 'package:quietline_app/screens/mood_checkin/mood_checkin_strings.dart';
-import 'package:quietline_app/core/feature_flags.dart';
+
+
 import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
-import 'package:quietline_app/screens/results/quiet_session_complete_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
+import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
@@ -72,8 +71,16 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
   Future<void> _handleCancel() async {
     final theme = Theme.of(context);
+    
+    // Pause immediately if playing
+    final wasPlaying = controller.isPlaying;
+    if (wasPlaying) {
+      controller.pause();
+    }
+
     final confirmed = await showDialog<bool>(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
         title: Text(
@@ -113,7 +120,11 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     );
 
     if (confirmed == true && mounted) {
+      SoundscapeService.instance.stop();
       Navigator.of(context).pop(); // Go back to home
+    } else if (wasPlaying && mounted) {
+      // Resume if it was playing before
+      controller.play();
     }
   }
 
@@ -133,9 +144,10 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     _checkFirstSession();
 
     controller.listenable.addListener(() {
+      if (mounted) setState(() {}); // Trigger rebuilds for play/pause state changes
       if (controller.isPlaying && !_hasStarted) {
         _hasStarted = true;
-        HapticFeedback.selectionClick();
+        HapticService.selection();
         Future.delayed(const Duration(milliseconds: 120), () {
           if (mounted) {
             setState(() {
@@ -162,67 +174,34 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   }
 
   Future<void> _handleSessionComplete() async {
-    // Keep mood check-ins reconnectable behind a flag.
-    // IMPORTANT: When mood check-ins are enabled, we do NOT increment streak here
-    // to avoid double-incrementing (mood flow currently owns that side-effect).
-    if (FeatureFlags.moodCheckInsEnabled) {
-      if (!mounted) return;
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => MoodCheckinScreen(
-            mode: MoodCheckinMode.post,
-            sessionId: widget.sessionId,
-            onSubmit: (score) {},
-          ),
-        ),
-      );
-      return;
-    }
 
-    // Refresh contract from service to ensure we have the latest selection
-    // if the user changed it just before the countdown.
-    final latestContract = PracticeAccessService.instance.getActiveContract();
-    controller.setContract(latestContract);
-
-    // Check if today was already completed BEFORE this session.
-    final bool hadCompletedTodayBeforeSession =
-        await QuietStreakService.hasCompletedToday();
-
-    // Increment streak here — this is the moment the user earns it.
-    // FTUE flow: 0 -> 1 happens exactly once.
-    final int previous = widget.streak; // 0 on first install
-    final int current = await QuietStreakService.registerSessionCompletedToday();
-
-    // Record metrics (total sessions + total time + practice usage)
-    final int durationSeconds = controller.contract.cycles *
-        controller.contract.phases.fold(0, (int sum, p) => sum + p.seconds);
-    await QuietStreakService.recordSession(
-      durationSeconds,
-      practiceId: controller.contract.id,
-    );
 
     if (!mounted) return;
 
-    // Only show the streak/results screen on the FIRST completion of the day.
-    if (!hadCompletedTodayBeforeSession) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => QuietResultsOkScreen(
-            previousStreak: previous,
-            streak: current,
-            completedToday: true,
-            isNew: current == 1,
-          ),
+    // Check streak to decide which results screen to show
+    final currentStreak = await QuietStreakService.getCurrentStreak();
+    
+    if (!mounted) return;
+    
+    // For results screen, we might need more context, but for now we fallback to standard logic:
+    // "today" is definitely completed now.
+    
+    // We already recorded metrics and streak in the controller.
+    // Just decide on the navigation.
+    
+    // Note: To perfectly match old behavior, we might need to know if today was ALREADY done.
+    // However, the controller now call registerSessionCompletedToday which is idempotent for the same day.
+    
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (_) => QuietResultsOkScreen(
+          previousStreak: widget.streak, // original streak passed into screen
+          streak: currentStreak,
+          completedToday: true,
+          isNew: currentStreak == 1 && widget.streak == 0,
         ),
-      );
-    } else {
-      // Subsequent sessions today skip the streak screen.
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (_) => QuietSessionCompleteScreen(),
-        ),
-      );
-    }
+      ),
+    );
   }
 
   @override
@@ -298,21 +277,33 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   ),
                 ),
 
-
-
             // COUNTDOWN OVERLAY
             if (_countdownValue != null)
               Positioned.fill(
                 child: Container(
                   color: Colors.black.withValues(alpha: 0.4),
                   child: Center(
-                    child: Text(
-                      '$_countdownValue',
-                      style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 80,
-                      ),
+                    child: TweenAnimationBuilder<double>(
+                      key: ValueKey(_countdownValue),
+                      tween: Tween(begin: 1.5, end: 1.0),
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeOutBack,
+                      builder: (context, value, child) {
+                        return Transform.scale(
+                          scale: value,
+                          child: Opacity(
+                            opacity: (value - 0.5).clamp(0.0, 1.0),
+                            child: Text(
+                              '$_countdownValue',
+                              style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 80,
+                                  ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
@@ -423,6 +414,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
           builder: (_, _) => Row(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // 1. Play/Pause
               IconButton(
                 icon: Icon(
                   controller.isPlaying ? Icons.pause : Icons.play_arrow,
@@ -430,11 +422,13 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                 ),
                 onPressed: () {
-                  HapticFeedback.selectionClick();
+                  HapticService.selection();
                   controller.toggle();
                 },
               ),
               const SizedBox(width: 4),
+              
+              // 2. Mute/Unmute
               ListenableBuilder(
                 listenable: SoundscapeService.instance,
                 builder: (context, _) {
@@ -446,7 +440,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     onPressed: () {
-                      HapticFeedback.selectionClick();
+                      HapticService.selection();
                       SoundscapeService.instance.toggleMute();
                     },
                   );
@@ -462,24 +456,24 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   }
 
   Widget _buildRightControls() {
-    // IN-SESSION CANCEL (TOP RIGHT)
-    return AnimatedBuilder(
-      animation: controller.listenable,
-      builder: (context, _) {
-        if (_hasStarted && !controller.isPlaying && _countdownValue == null && !_isFirstSession) {
-          return TextButton(
-            onPressed: _handleCancel,
-            child: Text(
-              'Cancel',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          );
-        }
-        return const SizedBox.shrink();
-      },
+    final showCancel = !_isFirstSession && !controller.isPlaying && _hasStarted && _countdownValue == null;
+
+    return AnimatedOpacity(
+      opacity: showCancel ? 1.0 : 0.0,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeInOut,
+      child: IgnorePointer(
+        ignoring: !showCancel,
+        child: IconButton(
+          icon: const Icon(Icons.close_rounded, size: 24),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+          onPressed: () {
+            HapticService.light();
+            _handleCancel();
+          },
+          tooltip: 'End session',
+        ),
+      ),
     );
   }
 
@@ -511,7 +505,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
             }
 
             // Navigate to library to change practice
-            HapticFeedback.lightImpact();
+            HapticService.light();
             await Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const QuietPracticeLibraryScreen()),
             );

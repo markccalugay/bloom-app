@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:quietline_app/core/services/haptic_service.dart';
 
 class QuietTimePickerSheet extends StatefulWidget {
   final TimeOfDay? initialTime;
@@ -47,7 +47,7 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
   ];
 
   void _confirm() {
-    HapticFeedback.lightImpact();
+    HapticService.light();
     int hour24 = _selectedHour % 12;
     if (!_isAm) {
       hour24 += 12;
@@ -83,7 +83,7 @@ class _QuietTimePickerSheetState extends State<QuietTimePickerSheet> {
         useMagnifier: true,
         onSelectedItemChanged: (index) {
           onChanged(values[index]);
-          HapticFeedback.selectionClick();
+          HapticService.selection();
         },
         children: values
             .map(

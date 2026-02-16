@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:quietline_app/widgets/ql_primary_button.dart';
 import 'package:quietline_app/screens/shell/quiet_shell_screen.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
@@ -12,8 +11,7 @@ import 'quiet_results_constants.dart';
 import 'quiet_results_strings.dart';
 import 'widgets/quiet_results_streak_badge.dart';
 import 'widgets/quiet_results_streak_row.dart';
-import 'package:quietline_app/data/forge/forge_service.dart';
-import 'package:quietline_app/screens/forge/quiet_forge_screen.dart';
+import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/core/backup/backup_coordinator.dart';
@@ -123,7 +121,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
       // Step 2: after the row has had time to play, animate the badge + number.
       await Future.delayed(_badgeStartAfterRow);
       if (!mounted) return;
-      HapticFeedback.mediumImpact();
+      HapticService.medium();
       setState(() {
         _animateBadge = true;
       });
@@ -288,7 +286,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                   QuietInlineUnlockCard(
                     title: 'You’re building momentum.',
                     subtitle:
-                        'QuietLine+ Premium includes deeper practices, progress-based unlocks, and full access to the Armor Room.',
+                        'QuietLine+ Premium includes deeper practices, progress-based unlocks, and expanded affirmation libraries.',
                     ctaLabel: 'View practices',
                     onTap: () {
                       Navigator.of(context).push(
@@ -317,6 +315,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                       return;
                     }
   
+                    if (!context.mounted) return;
                     Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (_) => const QuietShellScreen(),
@@ -452,14 +451,14 @@ class _QuietAffirmationUnlockedScreenState
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
 
-      HapticFeedback.lightImpact();
+      HapticService.light();
       Future.delayed(const Duration(milliseconds: 520), () {
         if (!mounted) return;
-        HapticFeedback.mediumImpact();
+        HapticService.medium();
       });
       Future.delayed(const Duration(milliseconds: 1180), () {
         if (!mounted) return;
-        HapticFeedback.heavyImpact();
+        HapticService.heavy();
       });
 
       Future<void>.delayed(const Duration(milliseconds: 880), () {
@@ -503,7 +502,8 @@ class _QuietAffirmationUnlockedScreenState
     final textTheme = theme.textTheme;
 
     final unlockedLabel =
-        'Unlocked on Session ${widget.streak} ${_formatMonthDayYear(DateTime.now())}';
+        'Unlocked on Day ${widget.streak} ${_formatMonthDayYear(DateTime.now())}';
+
 
     return Scaffold(
       body: SafeArea(
@@ -657,12 +657,12 @@ class _QuietAffirmationUnlockedScreenState
                     ? QLPrimaryButton(
                         label: QuietResultsStrings.continueButton,
                         onPressed: () async {
-                          await ForgeService.instance.advanceProgress();
                           if (!context.mounted) return;
-                          Navigator.of(context).pushReplacement(
+                          Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(
-                              builder: (_) => const QuietForgeScreen(),
+                              builder: (_) => const QuietShellScreen(),
                             ),
+                            (route) => false,
                           );
                         },
                         margin: const EdgeInsets.only(

@@ -24,7 +24,12 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final Color textColor = isDark ? QLColors.sandWhite : Colors.white;
+    
+    // Text: 90% white (E0E0E0) on dark, 90% black (1A1A1A) on light
+    final Color textColor = isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A);
+    
+    // BG: Dark (#1A2A33), Light (#FFFFFF)
+    final Color backgroundColor = isDark ? const Color(0xFF1A2A33) : const Color(0xFFFFFFFF);
 
     return Material(
       color: Colors.transparent,
@@ -35,10 +40,10 @@ class QuietHomeAffirmationsCard extends StatelessWidget {
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            gradient: gradient ?? QLGradients.tealFlame,
+            color: backgroundColor, // Solid background
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.15),
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.05),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

@@ -1,49 +1,66 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../theme/ql_theme.dart';
 import '../backup/backup_coordinator.dart';
 import '../entitlements/premium_entitlement.dart';
+import '../services/user_preferences_service.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeService._();
   static final ThemeService instance = ThemeService._();
 
-  static const String _themeKey = 'user_theme_variant';
+
   
-  ThemeVariant _variant = ThemeVariant.quietLine;
+  ThemeVariant _variant = ThemeVariant.midnight;
   bool _isInitialized = false;
 
   ThemeVariant get variant => _variant;
 
   String get currentThemeLabel {
     switch (_variant) {
-      case ThemeVariant.quietLine:
-        return 'Theme · QuietLine Teal';
-      case ThemeVariant.quietLineLight:
-        return 'Theme · QuietLine Light';
+      case ThemeVariant.midnight:
+        return 'Theme · Midnight (Teal)';
+      case ThemeVariant.morning:
+        return 'Theme · Morning (Light)';
+      case ThemeVariant.charcoal:
+        return 'Theme · Charcoal (Gray)';
     }
   }
 
   static String getLabel(ThemeVariant v) {
     switch (v) {
-      case ThemeVariant.quietLine:
-        return 'QuietLine Teal';
-      case ThemeVariant.quietLineLight:
-        return 'QuietLine Light';
+      case ThemeVariant.midnight:
+        return 'Midnight';
+      case ThemeVariant.morning:
+        return 'Morning';
+      case ThemeVariant.charcoal:
+        return 'Charcoal';
     }
   }
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final savedIndex = prefs.getInt(_themeKey);
-    
-    if (savedIndex != null && savedIndex < ThemeVariant.values.length) {
-      _variant = ThemeVariant.values[savedIndex];
-    }
+    // Listen to preferences service
+    UserPreferencesService.instance.addListener(_updateFromPrefs);
+    _updateFromPrefs();
     
     _isInitialized = true;
+    notifyListeners();
+  }
+
+  void _updateFromPrefs() {
+    final pref = UserPreferencesService.instance.themeMode;
+    switch (pref) {
+      case ThemeModePreference.midnight:
+        _variant = ThemeVariant.midnight;
+        break;
+      case ThemeModePreference.morning:
+        _variant = ThemeVariant.morning;
+        break;
+      case ThemeModePreference.charcoal:
+        _variant = ThemeVariant.charcoal;
+        break;
+    }
     notifyListeners();
   }
 
@@ -55,8 +72,20 @@ class ThemeService extends ChangeNotifier {
   Future<void> setTheme(ThemeVariant v) async {
     _variant = v;
     
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(_themeKey, _variant.index);
+    ThemeModePreference pref;
+    switch (v) {
+      case ThemeVariant.midnight:
+        pref = ThemeModePreference.midnight;
+        break;
+      case ThemeVariant.morning:
+        pref = ThemeModePreference.morning;
+        break;
+      case ThemeVariant.charcoal:
+        pref = ThemeModePreference.charcoal;
+        break;
+    }
+    
+    await UserPreferencesService.instance.setThemeMode(pref);
     
     // Trigger backup if Premium
     if (PremiumEntitlement.instance.isPremium) {

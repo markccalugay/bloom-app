@@ -9,7 +9,6 @@ import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart
 import 'package:quietline_app/screens/home/widgets/quiet_home_affirmations_card.dart';
 import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
 import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
 class QuietHomeAffirmationsCarousel extends StatefulWidget {
   final int streak;
@@ -88,7 +87,9 @@ class _QuietHomeAffirmationsCarouselState
   }
 
   void _onUserInteraction(int index) {
-    _currentIndex = index;
+    setState(() {
+      _currentIndex = index;
+    });
     _autoRotateTimer?.cancel();
   }
 
@@ -117,14 +118,11 @@ class _QuietHomeAffirmationsCarouselState
     }
 
     final List<_AffirmationCardData> cards = [];
-    final tier = _backgroundTierForStreak(widget.streak);
-    final backgrounds = _backgroundsForTier(tier);
 
     if (primary != null) {
       cards.add(
         _AffirmationCardData(
           affirmation: primary,
-          background: backgrounds.primary,
         ),
       );
     }
@@ -158,7 +156,6 @@ class _QuietHomeAffirmationsCarouselState
       cards.add(
         _AffirmationCardData(
           affirmation: secondary,
-          background: backgrounds.secondary[0 % backgrounds.secondary.length],
         ),
       );
     }
@@ -196,7 +193,6 @@ class _QuietHomeAffirmationsCarouselState
       cards.add(
         _AffirmationCardData(
           affirmation: tertiary,
-          background: backgrounds.secondary[1 % backgrounds.secondary.length],
         ),
       );
     }
@@ -208,34 +204,61 @@ class _QuietHomeAffirmationsCarouselState
   Widget build(BuildContext context) {
     if (_isLoading || _cards.isEmpty) return const SizedBox.shrink();
 
-    return SizedBox(
-      height: 192, // Increased height by 20% (160 * 1.2)
-      child: PageView.builder(
-        controller: _pageController,
-        itemCount: _cards.length,
-        onPageChanged: _onUserInteraction,
-        physics: const PageScrollPhysics(),
-        itemBuilder: (context, index) {
-          final card = _cards[index];
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 192, // Increased height by 20% (160 * 1.2)
+          child: PageView.builder(
+            controller: _pageController,
+            itemCount: _cards.length,
+            onPageChanged: _onUserInteraction,
+            physics: const PageScrollPhysics(),
+            itemBuilder: (context, index) {
+              final card = _cards[index];
 
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: QuietHomeAffirmationsCard(
-              title: card.affirmation.text,
-              gradient: card.background,
-              onTap: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => QuietAffirmationFullscreenScreen(
-                      text: card.affirmation.text,
-                    ),
-                  ),
-                );
-              },
-            ),
-          );
-        },
-      ),
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: QuietHomeAffirmationsCard(
+                  title: card.affirmation.text,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => QuietAffirmationFullscreenScreen(
+                          text: card.affirmation.text,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 12),
+        _buildPageIndicator(),
+      ],
+    );
+  }
+
+  Widget _buildPageIndicator() {
+    if (_cards.length <= 1) return const SizedBox.shrink();
+    
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(_cards.length, (index) {
+        final isSelected = _currentIndex == index;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: isSelected ? 0.8 : 0.2),
+          ),
+        );
+      }),
     );
   }
 }
@@ -244,53 +267,8 @@ class _QuietHomeAffirmationsCarouselState
 
 class _AffirmationCardData {
   final Affirmation affirmation;
-  final Gradient background;
 
   const _AffirmationCardData({
     required this.affirmation,
-    required this.background,
   });
-}
-
-enum _BackgroundTier {
-  soft,
-  grounded,
-  steady,
-}
-
-_BackgroundTier _backgroundTierForStreak(int streak) {
-  if (streak >= 7) return _BackgroundTier.steady;
-  if (streak >= 3) return _BackgroundTier.grounded;
-  return _BackgroundTier.soft;
-}
-
-class _TierBackgrounds {
-  final Gradient primary;
-  final List<Gradient> secondary;
-
-  const _TierBackgrounds({
-    required this.primary,
-    required this.secondary,
-  });
-}
-
-_TierBackgrounds _backgroundsForTier(_BackgroundTier tier) {
-  // Mapping to the new Flame Gradient System
-  switch (tier) {
-    case _BackgroundTier.steady:
-      return const _TierBackgrounds(
-        primary: QLGradients.amberFlame,
-        secondary: [QLGradients.amberFlame, QLGradients.tealFlame],
-      );
-    case _BackgroundTier.grounded:
-      return const _TierBackgrounds(
-        primary: QLGradients.steelFlame,
-        secondary: [QLGradients.steelFlame, QLGradients.tealFlame],
-      );
-    case _BackgroundTier.soft:
-      return const _TierBackgrounds(
-        primary: QLGradients.tealFlame,
-        secondary: [QLGradients.tealFlame, QLGradients.midnightFlame],
-      );
-  }
 }

@@ -19,7 +19,6 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onNavigateBrotherhood;
   final VoidCallback? onNavigatePractices;
   final VoidCallback? onNavigateAffirmations;
-  final VoidCallback? onNavigateArmorRoom;
   final VoidCallback? onOpenAccount;
 
   // MVP toggles
@@ -38,7 +37,6 @@ class QLSideMenu extends StatelessWidget {
   final VoidCallback? onOpenWhatsNew;
 
   final String? debugPremiumLabel;
-  final bool highlightArmorRoom;
 
   const QLSideMenu({
     super.key,
@@ -49,7 +47,6 @@ class QLSideMenu extends StatelessWidget {
     this.onNavigateBrotherhood,
     this.onNavigatePractices,
     this.onNavigateAffirmations,
-    this.onNavigateArmorRoom,
     this.onOpenAbout,
     this.onOpenWebsite,
     this.onOpenSupport,
@@ -61,7 +58,6 @@ class QLSideMenu extends StatelessWidget {
     this.showBrotherhood = false,
     this.showJourney = false,
     this.debugPremiumLabel,
-    this.highlightArmorRoom = false,
   });
 
   @override
@@ -122,13 +118,7 @@ class QLSideMenu extends StatelessWidget {
                                       color: baseTextColor,
                                     ),
                                   ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    'Anonymous by default',
-                                    style: textTheme.bodySmall?.copyWith(
-                                      color: baseTextColor.withValues(alpha: 0.6),
-                                    ),
-                                  ),
+
                                 ],
                               ),
                             ),
@@ -177,7 +167,6 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onOpenAccount,
-                      enabled: !highlightArmorRoom,
                     ),
                     if (showBrotherhood)
                       _MenuItem(
@@ -186,7 +175,6 @@ class QLSideMenu extends StatelessWidget {
                         iconColor: iconColor,
                         textColor: baseTextColor,
                         onTap: onNavigateBrotherhood,
-                        enabled: !highlightArmorRoom,
                       ),
                     _MenuItem(
                       icon: Icons.self_improvement_rounded,
@@ -194,7 +182,6 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onNavigatePractices,
-                      enabled: !highlightArmorRoom,
                     ),
                     _MenuItem(
                       icon: Icons.favorite_outline_rounded,
@@ -202,17 +189,7 @@ class QLSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onNavigateAffirmations,
-                      enabled: !highlightArmorRoom,
                     ),
-                    _MenuItem(
-                      icon: Icons.shield_outlined,
-                      label: 'Armor Room',
-                      iconColor: highlightArmorRoom ? const Color(0xFF2FE6D2) : iconColor,
-                      textColor: highlightArmorRoom ? const Color(0xFF2FE6D2) : baseTextColor,
-                      onTap: onNavigateArmorRoom,
-                      highlighted: highlightArmorRoom,
-                    ),
-
                     const SizedBox(height: 16),
                     const _SectionLabel('Support'),
                     _MenuItem(
@@ -283,7 +260,7 @@ class QLSideMenu extends StatelessWidget {
                                 : 'QuietLine+ Premium available',
                             style: textTheme.bodySmall?.copyWith(
                               color: baseTextColor.withValues(alpha: 0.4),
-                              fontSize: 11,
+                              fontSize: 10,
                               letterSpacing: 0.3,
                             ),
                           ),
@@ -302,7 +279,7 @@ class QLSideMenu extends StatelessWidget {
                             label,
                             style: textTheme.bodySmall?.copyWith(
                               color: baseTextColor.withValues(alpha: 0.4),
-                              fontSize: 11,
+                              fontSize: 10,
                               letterSpacing: 0.3,
                             ),
                           );
@@ -352,7 +329,6 @@ class _MenuItem extends StatelessWidget {
   final Color textColor;
   final VoidCallback? onTap;
   final bool enabled;
-  final bool highlighted;
   final Widget? trailing;
 
   const _MenuItem({
@@ -362,7 +338,6 @@ class _MenuItem extends StatelessWidget {
     required this.textColor,
     this.onTap,
     this.enabled = true,
-    this.highlighted = false,
     this.trailing,
   });
 
@@ -385,7 +360,7 @@ class _MenuItem extends StatelessWidget {
               color: isInteractive
                   ? textColor
                   : textColor.withValues(alpha: 0.6),
-              fontWeight: highlighted ? FontWeight.w700 : FontWeight.normal,
+              fontWeight: FontWeight.normal,
             ),
           ),
         ),
@@ -404,12 +379,7 @@ class _MenuItem extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: highlighted 
-            ? Border.all(color: const Color(0xFF2FE6D2).withValues(alpha: 0.5), width: 1.5)
-            : null,
-        color: highlighted 
-            ? const Color(0xFF2FE6D2).withValues(alpha: 0.1)
-            : Colors.transparent,
+        color: Colors.transparent,
       ),
       child: InkWell(
         onTap: onTap,

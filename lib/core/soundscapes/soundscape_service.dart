@@ -3,6 +3,7 @@ import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../app_assets.dart';
 import 'soundscape_models.dart';
 
 class SoundscapeService extends ChangeNotifier {
@@ -24,8 +25,11 @@ class SoundscapeService extends ChangeNotifier {
   double _sfxVolume = 1.0;
   bool _isSfxMuted = false;
   bool _isPlaying = false;
+  bool _isWelcomeHomePlaying = false;
   
   Timer? _fadeTimer;
+
+  bool get isWelcomeHomePlaying => _isWelcomeHomePlaying;
 
   Soundscape get activeSoundscape => _activeSoundscape;
   double get volume => _volume;
@@ -189,10 +193,31 @@ class SoundscapeService extends ChangeNotifier {
   }
 
   Future<void> playCountdown(int value) async {
-    if (value < 1 || value > 3) return;
+    switch (value) {
+      case 1:
+        await playSfx(AppAssets.countdown1);
+        break;
+      case 2:
+        await playSfx(AppAssets.countdown2);
+        break;
+      case 3:
+        await playSfx(AppAssets.countdown3);
+        break;
+    }
+  }
+
+  Future<void> playWelcomeHome() async {
+    _isWelcomeHomePlaying = true;
+    notifyListeners();
     
-    final path = 'sfx/ql_sfx_countdown_$value.wav';
-    await playSfx(path);
+    // ql_bgm_welcome_home.wav is ~45 seconds
+    await playSfx(AppAssets.welcomeHomeBgm);
+    
+    // Wait for the SFX to finish before resetting the state
+    await _sfxPlayer.onPlayerComplete.first;
+    
+    _isWelcomeHomePlaying = false;
+    notifyListeners();
   }
 
   Future<void> playSfx(String assetPath) async {

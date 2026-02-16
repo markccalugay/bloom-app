@@ -206,7 +206,7 @@ class _QuietResultsStreakBadgeState extends State<QuietResultsStreakBadge>
     ]).animate(_animController);
 
     _gradientTween = LinearGradientTween(
-      begin: QuietResultsConstants.inactiveGradient,
+      begin: QuietResultsConstants.inactiveGradient as LinearGradient,
       end: QuietResultsConstants.streakGradient as LinearGradient,
     );
 

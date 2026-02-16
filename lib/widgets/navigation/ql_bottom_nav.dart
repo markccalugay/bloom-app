@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:quietline_app/core/app_assets.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 
-const double _kDockHeight = 70.0;          // height of the gray bar (similar to X)
-const double _kNavTotalHeight = 120.0;      // total space reserved for nav + overlap
-const double _kCenterButtonSize = 75.0;    // Quiet button diameter
-const double _kCenterButtonBottomOffset = 25.0; // how far above bottom it sits
+const double _kNavTotalHeight = 160.0;      // Increased to accommodate larger button/offset
+const double _kCenterButtonSize = 90.0;    // Increased from 75.0 (~20%)
+const double _kCenterButtonBottomOffset = 60.0; // Increased from 25.0 to move it up
 
 /// QuietLine bottom navigation (MVP)
 /// Only the center button is interactive.
@@ -27,8 +25,8 @@ class QLBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final Color dockBackground = theme.brightness == Brightness.dark
-        ? QLColors.deepCharcoal
-        : const Color(0xFFE5E7EA);
+        ? const Color(0xFF132B34) // Matches Home Dark Gradient bottom
+        : const Color(0xFFE2E6EA); // Matches Home Light Gradient bottom
     final Color activeColor = theme.colorScheme.primary;
 
     return SizedBox(
@@ -36,34 +34,7 @@ class QLBottomNav extends StatelessWidget {
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          // Bottom dock background + side icons
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: _kDockHeight,
-              decoration: BoxDecoration(
-                color: dockBackground,
-                border: Border(
-                  top: BorderSide(
-                    color: theme.brightness == Brightness.dark
-                        ? QLColors.steelGray.withValues(alpha: 0.15)
-                        : Colors.transparent,
-                    width: 0.5,
-                  ),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: const [
-                  // MVP: hide left/right items to keep the UI calm and focused.
-                  // Keep the center gap so the floating circle aligns visually.
-                  SizedBox(width: _kCenterButtonSize),
-                ],
-              ),
-            ),
-          ),
+          // Bottom dock background removed.
 
           // Center QuietLine logo button
           Positioned(
@@ -134,6 +105,8 @@ class _PrimaryNavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return SizedBox(
       width: _kCenterButtonSize,
       height: _kCenterButtonSize,
@@ -145,6 +118,21 @@ class _PrimaryNavItem extends StatelessWidget {
           decoration: BoxDecoration(
             color: dockBackground,
             shape: BoxShape.circle,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white.withValues(alpha: 0.08)
+                  : Colors.black.withValues(alpha: 0.05),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? activeColor.withValues(alpha: 0.12)
+                    : Colors.black.withValues(alpha: 0.05),
+                blurRadius: 20,
+                spreadRadius: 2,
+              ),
+            ],
           ),
           child: Center(
             child: SvgPicture.asset(

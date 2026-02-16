@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'quiet_streak_repository.dart';
 
 /// Thin service layer for streak logic.
@@ -41,15 +42,16 @@ class QuietStreakService {
   static Future<void> recordSession(int seconds, {String? practiceId}) async {
     try {
       await repo.recordSession(seconds, practiceId: practiceId);
-    } catch (_) {
-      // Ignore
+    } catch (e) {
+      debugPrint('[QuietStreakService] Error recording session: $e');
     }
   }
 
   static Future<List<String>> getSessionDates() async {
     try {
       return await repo.getSessionDates();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[QuietStreakService] Error getting session dates: $e');
       return [];
     }
   }
@@ -57,7 +59,8 @@ class QuietStreakService {
   static Future<Map<String, int>> getPracticeUsage() async {
     try {
       return await repo.getPracticeUsage();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[QuietStreakService] Error getting practice usage: $e');
       return {};
     }
   }
@@ -69,7 +72,8 @@ class QuietStreakService {
   static Future<int> registerSessionCompletedToday() async {
     try {
       return await repo.registerSessionCompletedToday();
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[QuietStreakService] Error registering completion: $e');
       // MVP stability: if repo isn't initialized yet or storage fails,
       // avoid breaking the completion flow.
       return await getCurrentStreak();
@@ -81,7 +85,8 @@ class QuietStreakService {
     try {
       final now = DateTime.now();
       return await repo.hasCompletedToday(now);
-    } catch (_) {
+    } catch (e) {
+      debugPrint('[QuietStreakService] Error checking today\'s completion: $e');
       // MVP fail-safe: assume not completed so flow is not blocked.
       return false;
     }
@@ -101,8 +106,8 @@ class QuietStreakService {
   static Future<void> resetStreak() async {
     try {
       await repo.resetStreak();
-    } catch (_) {
-      // No-op for MVP stability.
+    } catch (e) {
+      debugPrint('[QuietStreakService] Error resetting streak: $e');
     }
   }
 }

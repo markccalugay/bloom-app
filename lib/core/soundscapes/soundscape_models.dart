@@ -1,3 +1,5 @@
+import 'package:quietline_app/core/app_assets.dart';
+
 class Soundscape {
   final String id;
   final String name;
@@ -16,31 +18,31 @@ const List<Soundscape> allSoundscapes = [
   Soundscape(
     id: 'fire_forge',
     name: 'Fire Forge',
-    assetPath: 'assets/sfx/ql_amb_fire_forge.wav',
+    assetPath: AppAssets.fireForge,
     isPremium: false,
   ),
   Soundscape(
     id: 'river_steady',
     name: 'River Steady',
-    assetPath: 'assets/sfx/ql_amb_river_steady.wav',
+    assetPath: AppAssets.riverSteady,
     isPremium: false,
   ),
   Soundscape(
     id: 'rain_shelter',
     name: 'Rain Shelter',
-    assetPath: 'assets/sfx/ql_amb_rain_shelter.wav',
+    assetPath: AppAssets.rainShelter,
     isPremium: true,
   ),
   Soundscape(
     id: 'void_drone',
     name: 'Void Drone',
-    assetPath: 'assets/sfx/ql_amb_void_drone.mp3',
+    assetPath: AppAssets.voidDrone,
     isPremium: true,
   ),
   Soundscape(
     id: 'wind_pass',
     name: 'Wind Pass',
-    assetPath: 'assets/sfx/ql_amb_wind_pass.wav',
+    assetPath: AppAssets.windPass,
     isPremium: true,
   ),
 ];

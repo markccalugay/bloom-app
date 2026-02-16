@@ -5,6 +5,11 @@ import '../quiet_breath_constants.dart';
 import '../models/breath_phase_contracts.dart';
 import '../../../theme/ql_theme.dart';
 import '../../../core/soundscapes/soundscape_service.dart';
+import '../../../data/streak/quiet_streak_service.dart';
+import '../../../services/first_launch_service.dart';
+import '../../../core/practices/practice_access_service.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
+
 
 /// Central brain for the Quiet Breath screen.
 /// Manages: play/pause, wave phase, rising water, countdown timer.
@@ -58,8 +63,13 @@ class QuietBreathController extends ChangeNotifier {
             // End the session exactly when the fill finishes.
             pause();
             SoundscapeService.instance.stop(); // Fade out soundscape
-            final cb = onSessionComplete;
-            if (cb != null) cb();
+            
+            _handleSessionCompleteInternal().then((_) {
+              WakelockPlus.disable(); // Allow sleep after session completion
+              final cb = onSessionComplete;
+              if (cb != null) cb();
+            });
+
           }
         });
 
@@ -156,7 +166,11 @@ class QuietBreathController extends ChangeNotifier {
     if (isFreshStart) {
       _introCtrl.forward(from: 0.0);
       SoundscapeService.instance.play(); // Fade in soundscape
+      WakelockPlus.enable(); // Prevent sleep when session starts
+    } else {
+      WakelockPlus.enable(); // Re-enable if resuming
     }
+
 
     // Prepare/continue rising water
     if (_riseCtrl.status == AnimationStatus.completed ||
@@ -206,6 +220,9 @@ class QuietBreathController extends ChangeNotifier {
       );
     }
 
+    WakelockPlus.disable(); // Allow sleep when paused
+
+
     notifyListeners();
   }
 
@@ -237,8 +254,33 @@ class QuietBreathController extends ChangeNotifier {
 
     notifyListeners();
 
-    final cb = onSessionComplete;
-    if (cb != null) cb();
+    _handleSessionCompleteInternal().then((_) {
+      final cb = onSessionComplete;
+      if (cb != null) cb();
+    });
+  }
+
+  /// Internal handler for side-effects of session completion.
+  Future<void> _handleSessionCompleteInternal() async {
+    // 1. Mark completion flags (idempotent)
+    await FirstLaunchService.instance.markCompleted();
+    await FirstLaunchService.instance.markCompletedFirstSession();
+
+    // 2. Refresh active contract (safety check)
+    final latestContract = PracticeAccessService.instance.getActiveContract();
+    setContract(latestContract);
+
+    // 3. Record metrics
+    final int durationSeconds = _contract.cycles *
+        _contract.phases.fold(0, (int sum, p) => sum + p.seconds);
+    
+    await QuietStreakService.recordSession(
+      durationSeconds,
+      practiceId: _contract.id,
+    );
+
+    // 4. Register streak completion (this calculates new streak)
+    await QuietStreakService.registerSessionCompletedToday();
   }
 
   /// Update the target number of box-breath cycles for a session.
@@ -262,7 +304,9 @@ class QuietBreathController extends ChangeNotifier {
     _boxCtrl.value = 0.0;
     _secondsLeft = _sessionTotalSeconds;
     SoundscapeService.instance.stop();
+    WakelockPlus.disable(); // Allow sleep when reset
     notifyListeners();
+
   }
 
   /// Switch the active breathing practice.
@@ -298,6 +342,8 @@ class QuietBreathController extends ChangeNotifier {
     _introCtrl.dispose();
     _boxCtrl.dispose();
     SoundscapeService.instance.stop(); // Stop soundscape when screen is closed
+    WakelockPlus.disable(); // Safety: Ensure wakelock is off
     super.dispose();
+
   }
 }

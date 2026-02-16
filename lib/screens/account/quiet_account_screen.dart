@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'quiet_account_strings.dart';
+import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:intl/intl.dart';
 import 'package:quietline_app/core/app_restart.dart';
 import 'package:quietline_app/core/auth/auth_service.dart';
@@ -17,7 +18,6 @@ import 'package:quietline_app/screens/account/widgets/mindful_days_heatmap.dart'
 import 'package:quietline_app/screens/account/widgets/soundscape_selection_modal.dart';
 import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
 import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
@@ -126,24 +126,24 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
       builder: (context) => AlertDialog(
         backgroundColor: Theme.of(context).colorScheme.surface,
         title: const Text(
-          'Wipe all data?',
+          QuietAccountStrings.wipeAllData,
           style: TextStyle(fontWeight: FontWeight.w700),
         ),
         content: const Text(
-          'This will permanently delete your streak, sessions, and preferences. You will be returned to the onboarding screen.',
+          QuietAccountStrings.wipeDataWarning,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
             child: Text(
-              'Cancel',
+              QuietAccountStrings.cancel,
               style: TextStyle(color: Theme.of(context).colorScheme.primary),
             ),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text(
-              'Wipe Data',
+              QuietAccountStrings.wipeData,
               style: TextStyle(color: Colors.redAccent),
             ),
           ),
@@ -168,7 +168,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My account'),
+        title: const Text(QuietAccountStrings.title),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -219,7 +219,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                     CircleAvatar(
                       radius: 32,
                       backgroundColor:
-                          QLColors.primaryTeal.withValues(alpha: 0.2),
+                          theme.colorScheme.primary.withValues(alpha: 0.2),
                       child: Text(
                         emoji,
                         style: const TextStyle(fontSize: 32),
@@ -237,7 +237,10 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                       ),
                     ),
 
-                    // Caption
+                    const SizedBox(height: 4),
+
+
+                    // Member Since
                     Text(
                       'You’re anonymous to other members.',
                       textAlign: TextAlign.center,
@@ -285,7 +288,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                         ),
                       ),
                       child: Text(
-                        'Edit Profile',
+                        QuietAccountStrings.editProfile,
                         style: textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: baseTextColor,
@@ -317,7 +320,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                             elevation: 0,
                           ),
                           child: const Text(
-                            'Unlock QuietLine+ Premium',
+                            QuietAccountStrings.unlockPremium,
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.2,
@@ -345,7 +348,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  'METRICS',
+                                  QuietAccountStrings.metrics,
                                   style: textTheme.labelSmall?.copyWith(
                                     letterSpacing: 0.8,
                                     fontWeight: FontWeight.w600,
@@ -380,7 +383,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
                                 // Mindful Days Heatmap
                                 Text(
-                                  'MINDFUL DAYS',
+                                  QuietAccountStrings.mindfulDays,
                                   style: textTheme.labelSmall?.copyWith(
                                     letterSpacing: 0.8,
                                     fontWeight: FontWeight.w600,
@@ -406,7 +409,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
                                 // Soundscapes Section
                                 Text(
-                                  'SOUNDSCAPES',
+                                  QuietAccountStrings.soundscapes,
                                   style: textTheme.labelSmall?.copyWith(
                                     letterSpacing: 0.8,
                                     fontWeight: FontWeight.w600,
@@ -463,7 +466,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                                   );
                                                 },
                                                 child: Text(
-                                                  'Change',
+                                                  QuietAccountStrings.change,
                                                   style: TextStyle(
                                                     color: theme.colorScheme.primary,
                                                     fontWeight: FontWeight.w600,
@@ -490,7 +493,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                                   child: Slider(
                                                     value: soundService.volume,
                                                     onChanged: (val) {
-                                                      HapticFeedback.selectionClick();
+                                                      HapticService.selection();
                                                       soundService.setVolume(val);
                                                     },
                                                     activeColor: theme.colorScheme.primary,
@@ -544,7 +547,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
                                 // Sound Effects Section
                                 Text(
-                                  'SOUND EFFECTS',
+                                  QuietAccountStrings.soundEffects,
                                   style: textTheme.labelSmall?.copyWith(
                                     letterSpacing: 0.8,
                                     fontWeight: FontWeight.w600,
@@ -606,7 +609,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                                   child: Slider(
                                                     value: soundService.sfxVolume,
                                                     onChanged: (val) {
-                                                      HapticFeedback.selectionClick();
+                                                      HapticService.selection();
                                                       soundService.setSfxVolume(val);
                                                     },
                                                     activeColor: theme.colorScheme.primary,
@@ -660,7 +663,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
 
                                 // Favorite Practices
                                 Text(
-                                  'FAVORITE PRACTICES',
+                                  QuietAccountStrings.favoritePractices,
                                   style: textTheme.labelSmall?.copyWith(
                                     letterSpacing: 0.8,
                                     fontWeight: FontWeight.w600,
@@ -681,7 +684,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
-                        'PREFERENCES',
+                        QuietAccountStrings.preferences,
                         style: textTheme.labelSmall?.copyWith(
                           letterSpacing: 0.8,
                           fontWeight: FontWeight.w600,
@@ -728,7 +731,7 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              'SYNC & BACKUP',
+                              QuietAccountStrings.syncAndBackup,
                               style: textTheme.labelSmall?.copyWith(
                                 letterSpacing: 0.8,
                                 fontWeight: FontWeight.w600,
@@ -1058,7 +1061,7 @@ class _ConnectedProviderCard extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: colorScheme.error,
             ),
-            child: const Text('Disconnect'),
+            child: const Text(QuietAccountStrings.disconnect),
           ),
         ],
       ),

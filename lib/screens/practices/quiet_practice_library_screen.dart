@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'quiet_practice_strings.dart';
+import 'package:quietline_app/core/services/haptic_service.dart';
 
 import 'package:quietline_app/data/practices/practice_catalog.dart';
 import 'package:quietline_app/data/practices/practice_model.dart';
@@ -27,7 +28,7 @@ class _QuietPracticeLibraryScreenState
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Text('Practices'),
+        title: const Text(QuietPracticeStrings.title),
       ),
       body: ValueListenableBuilder<bool>(
         valueListenable: StoreKitService.instance.isPremium,
@@ -63,7 +64,7 @@ class _QuietPracticeLibraryScreenState
           child: Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: Text(
-              'QuietLine+ Premium unlocked.',
+              QuietPracticeStrings.premiumUnlocked,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               ),
@@ -132,7 +133,7 @@ class _QuietPracticeLibraryScreenState
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 12),
           child: Text(
-            'Included with QuietLine+ Premium',
+            QuietPracticeStrings.includedWithPremium,
             style: theme.textTheme.labelSmall?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
               letterSpacing: 0.5,
@@ -188,18 +189,18 @@ class _QuietPracticeLibraryScreenState
               actions: [
                 TextButton(
                   onPressed: () {
-                    HapticFeedback.selectionClick();
+                    HapticService.selection();
                     Navigator.of(context).pop(false);
                   },
                   child: Text(
-                    'Cancel',
+                    QuietPracticeStrings.cancel,
                     style: TextStyle(
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    HapticFeedback.selectionClick();
+                    HapticService.selection();
                     Navigator.of(context).pop(true);
                   },
                   style: ElevatedButton.styleFrom(
@@ -207,7 +208,7 @@ class _QuietPracticeLibraryScreenState
                     foregroundColor: theme.colorScheme.onPrimary,
                     minimumSize: const Size(100, 44),
                   ),
-                  child: const Text('Confirm'),
+                  child: const Text(QuietPracticeStrings.confirm),
                 ),
               ],
             ),
@@ -326,7 +327,7 @@ class _PracticeTile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          'Active',
+                          QuietPracticeStrings.active,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w600,
@@ -344,7 +345,7 @@ class _PracticeTile extends StatelessWidget {
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
                         child: Text(
-                          'Unlock with QuietLine+ Premium',
+                          QuietPracticeStrings.includedWithPremium,
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: theme.colorScheme.primary,
                             fontWeight: FontWeight.w700,
@@ -415,7 +416,7 @@ class _PracticeDetailSheet extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                   child: Text(
-                    'Why This Works',
+                    QuietPracticeStrings.whyThisWorks,
                     style: theme.textTheme.labelSmall?.copyWith(
                       color: theme.colorScheme.primary,
                       fontWeight: FontWeight.w600,
@@ -442,10 +443,10 @@ class _PracticeDetailSheet extends StatelessWidget {
               onPressed: isActive
                   ? null
                   : () {
-                      HapticFeedback.selectionClick();
+                      HapticService.selection();
                       onActivate();
                     },
-              child: Text(isActive ? 'Active' : 'Activate'),
+              child: Text(isActive ? QuietPracticeStrings.active : QuietPracticeStrings.activate),
             ),
           ),
         ],
@@ -456,25 +457,23 @@ class _PracticeDetailSheet extends StatelessWidget {
   String _practiceDetails(String id) {
     switch (id) {
       case 'core_quiet':
-        return 'Technique: 4–4–4 box breathing.\n'
-            'Inhale for 4 seconds, hold for 4, exhale for 4.\n'
-            'Benefits: Calms the nervous system and resets attention.';
+        return '${QuietPracticeStrings.techCoreQuietTitle}\n'
+            '${QuietPracticeStrings.techCoreQuietSub}';
       case 'steady_discipline':
-        return 'Technique: Slow rhythmic breathing with steady pacing.\n'
-            'Benefits: Builds consistency, self-control, and emotional regulation.';
+        return '${QuietPracticeStrings.techSteadyDisciplineTitle}\n'
+            '${QuietPracticeStrings.techSteadyDisciplineSub}';
       case 'monk_calm':
-        return 'Technique: Extended exhales inspired by monastic breathing.\n'
-            'Benefits: Encourages deep calm, patience, and mental stillness.';
+        return '${QuietPracticeStrings.techMonkCalmTitle}\n'
+            '${QuietPracticeStrings.techMonkCalmSub}';
       case 'navy_calm':
-        return 'Technique: 4–7–8 breathing.\n'
-            'Inhale for 4, hold for 7, exhale for 8.\n'
-            'Benefits: Improves stress tolerance and composure under pressure.';
+        return '${QuietPracticeStrings.techNavyCalmTitle}\n'
+            '${QuietPracticeStrings.techNavyCalmSub}';
       case 'athlete_focus':
-        return 'Technique: Performance-focused breathing cycles.\n'
-            'Benefits: Enhances focus, recovery, and physical readiness.';
+        return '${QuietPracticeStrings.techAthleteFocusTitle}\n'
+            '${QuietPracticeStrings.techAthleteFocusSub}';
       case 'cold_resolve':
-        return 'A fast, activating breathing practice inspired by Wim Hof.\n'
-            'Designed to build resilience and sharpen mental control under stress.';
+        return '${QuietPracticeStrings.techColdResolveTitle}\n'
+            '${QuietPracticeStrings.techColdResolveSub}';
       default:
         return '';
     }

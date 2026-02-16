@@ -3,7 +3,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Centralized helper for opening external URLs (website, legal, support).
 class WebLaunchService {
-  // TODO: replace these with your real URLs when the website is live.
   static final Uri _websiteUri = Uri.parse('https://quietline.app/');
   static final Uri _aboutUri = Uri.parse('https://quietline.app/what-is-quietline/');
   static final Uri _supportUri = Uri.parse('https://quietline.app/support/');

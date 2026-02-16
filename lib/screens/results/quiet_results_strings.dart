@@ -5,7 +5,8 @@ class QuietResultsStrings {
   static const okSub =
       'Stillness compounds. Your discipline is being refined.';
 
-  static String dayOfStreak(int n) => 'Session $n';
+  static String dayOfStreak(int n) => 'Day $n';
+
 
   static const continueButton = 'Continue';
 
