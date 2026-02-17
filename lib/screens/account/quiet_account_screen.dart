@@ -158,10 +158,21 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
     );
 
     if (confirmed == true && mounted) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.clear();
-      if (!mounted) return;
-      AppRestart.restart(context);
+      final messenger = ScaffoldMessenger.of(context);
+      try {
+        await AuthService.instance.signOut();
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.clear();
+        if (!mounted) return;
+        AppRestart.restart(context);
+      } catch (e) {
+        debugPrint('[ACCOUNT] Error during data wipe: $e');
+        if (mounted) {
+          messenger.showSnackBar(
+            const SnackBar(content: Text('Error clearing data. Please try again.')),
+          );
+        }
+      }
     }
   }
 
@@ -1018,6 +1029,36 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                           await BackupCoordinator.instance.runBackup();
                                           messenger.showSnackBar(
                                             const SnackBar(content: Text('Progress synced to cloud')),
+                                          );
+                                        } catch (e) {
+                                          debugPrint('[SYNC] Manual sync error: $e');
+                                          
+                                          // Handle missing token (common for cached Apple users)
+                                          if (e.toString().contains('Authentication token missing')) {
+                                            final auth = AuthService.instance;
+                                            if (auth.appleUser != null) {
+                                              // Prompt for Apple Re-auth
+                                              final user = await auth.signInWithApple();
+                                              if (user != null) {
+                                                // Retry once after successful re-auth
+                                                try {
+                                                  await BackupCoordinator.instance.runBackup();
+                                                  messenger.showSnackBar(
+                                                    const SnackBar(content: Text('Progress synced to cloud')),
+                                                  );
+                                                  return;
+                                                } catch (retryErr) {
+                                                  debugPrint('[SYNC] Retry failed: $retryErr');
+                                                }
+                                              }
+                                            }
+                                          }
+                                          
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text('Sync failed: ${e.toString().replaceAll('Exception: ', '')}'),
+                                              backgroundColor: Colors.redAccent,
+                                            ),
                                           );
                                         } finally {
                                           if (mounted) setState(() => _isSyncing = false);

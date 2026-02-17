@@ -12,6 +12,8 @@ class AuthService {
   static const String _kClientId = '1054446804161-o24asbiksgbqas4th02cl0hhqul8epce.apps.googleusercontent.com';
   static const String _kServerClientId = '1054446804161-pj7ndvtml1ls7hadgplvd9ak697iu92g.apps.googleusercontent.com';
   static const String _kAppleUserIdKey = 'apple_user_id';
+  static const String _kAppleEmailKey = 'apple_email';
+  static const String _kAppleDisplayNameKey = 'apple_display_name';
 
   final GoogleSignIn _googleSignIn = GoogleSignIn(
     clientId: _kClientId,
@@ -149,12 +151,14 @@ class AuthService {
       final user = AppleAuthenticatedUser(credential);
       _appleUser = user;
       
-      // Persist Apple User ID
+      // Persist Apple User ID and details
       try {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString(_kAppleUserIdKey, user.id);
+        if (user.email != null) await prefs.setString(_kAppleEmailKey, user.email!);
+        if (user.displayName != null) await prefs.setString(_kAppleDisplayNameKey, user.displayName!);
       } catch (e) {
-        debugPrint('[AUTH] Failed to save Apple User ID: $e');
+        debugPrint('[AUTH] Failed to save Apple User details: $e');
       }
 
       _updateState();
@@ -178,6 +182,8 @@ class AuthService {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_kAppleUserIdKey);
+      await prefs.remove(_kAppleEmailKey);
+      await prefs.remove(_kAppleDisplayNameKey);
       _appleUser = null;
       _updateState();
     } catch (e) {
@@ -200,11 +206,18 @@ class AuthService {
       if (appleUserId != null) {
         final credentialState = await SignInWithApple.getCredentialState(appleUserId);
         if (credentialState == CredentialState.authorized) {
-           debugPrint('[AUTH] Apple User ID found and authorized. Waiting for explicit sign-in for token.');
-           // Note: We don't restore _appleUser object here because we don't have the credential/token.
-           // User needs to tap button again.
+          final email = prefs.getString(_kAppleEmailKey);
+          final displayName = prefs.getString(_kAppleDisplayNameKey);
+          
+          _appleUser = AppleAuthenticatedUser.cached(
+            id: appleUserId,
+            email: email,
+            displayName: displayName,
+          );
+          _updateState();
+          debugPrint('[AUTH] Apple User restored from cache and authorized.');
         } else {
-          await prefs.remove(_kAppleUserIdKey);
+          await signOutApple();
         }
       }
     } catch (e) {

@@ -395,7 +395,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                   decoration: BoxDecoration(
                     color: isSelected
                         ? theme.colorScheme.primary.withValues(alpha: 0.15)
-                        : theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                        : theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(
                       color: isSelected

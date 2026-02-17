@@ -37,80 +37,58 @@ class BackupCoordinator {
   });
 
   Future<void> runBackup() async {
-    try {
-      // Get all connected users (Apple, Google, etc.)
-      final connectedUsers = authService.connectedUsersNotifier.value;
-      if (connectedUsers.isEmpty) return;
+    // Get all connected users (Apple, Google, etc.)
+    final connectedUsers = authService.connectedUsersNotifier.value;
+    if (connectedUsers.isEmpty) return;
 
-      final snapshot = await createSnapshot();
+    final snapshot = await createSnapshot();
+    
+    int successCount = 0;
+    for (final user in connectedUsers) {
+      final idToken = await user.getIdToken();
+      if (idToken == null) {
+        throw Exception('Authentication token missing. Please sign in again.');
+      }
       
-      int successCount = 0;
-      for (final user in connectedUsers) {
-        try {
-          final idToken = await user.getIdToken();
-          if (idToken != null) {
-            await backendService.backup(idToken: idToken, snapshot: snapshot);
-            successCount++;
-          }
-        } catch (e) {
-          debugPrint('[BACKUP] Failed for user ${user.id}: $e');
-        }
-      }
+      await backendService.backup(idToken: idToken, snapshot: snapshot);
+      successCount++;
+    }
 
-      if (successCount > 0) {
-        debugPrint('[BACKUP] Backup successful to $successCount providers');
-      } else {
-        debugPrint('[BACKUP] Backup failed for all providers');
-      }
-    } catch (e, stack) {
-      debugPrint('[BACKUP] Backup failed: $e\n$stack');
+    if (successCount > 0) {
+      debugPrint('[BACKUP] Backup successful to $successCount providers');
     }
   }
 
   Future<void> runRestore() async {
-    try {
-      final connectedUsers = authService.connectedUsersNotifier.value;
-      if (connectedUsers.isEmpty) return;
+    final connectedUsers = authService.connectedUsersNotifier.value;
+    if (connectedUsers.isEmpty) return;
 
-      ProgressSnapshot? bestSnapshot;
+    ProgressSnapshot? bestSnapshot;
+    
+    for (final user in connectedUsers) {
+      final idToken = await user.getIdToken();
+      if (idToken == null) continue; // Skip providers without tokens for restore
       
-      // Check all providers and find the "best" snapshot (e.g. most recent or simply any found)
-      // Since backendService.restore returns the snapshot, we'll try to find one.
-      // TODO: Logic to compare snapshots if multiple exist. For now, first found or last found.
-      // Let's iterate and keep the one with higher totalSeconds (or similar metric) if multiple exist?
-      // Or just simple: try Apple, then Google.
-      
-      for (final user in connectedUsers) {
-         try {
-           final idToken = await user.getIdToken();
-           if (idToken != null) {
-             final snapshot = await backendService.restore(idToken: idToken);
-             if (snapshot != null) {
-               // Simple resolution strategy: Use the one with more quiet time
-               if (bestSnapshot == null || snapshot.totalQuietTimeSeconds > bestSnapshot.totalQuietTimeSeconds) {
-                 bestSnapshot = snapshot;
-               }
-             }
-           }
-         } catch (e) {
-           debugPrint('[RESTORE] Failed check for user ${user.id}: $e');
-         }
-      }
-
-      if (bestSnapshot != null) {
-        await applySnapshot(bestSnapshot);
-        // Restore purchases to ensure premium status is synced
-        try {
-          await StoreKitService.instance.restorePurchases();
-        } catch (e) {
-          debugPrint('[RESTORE] Failed to restore purchases: $e');
+      final snapshot = await backendService.restore(idToken: idToken);
+      if (snapshot != null) {
+        // Simple resolution strategy: Use the one with more quiet time
+        if (bestSnapshot == null || snapshot.totalQuietTimeSeconds > bestSnapshot.totalQuietTimeSeconds) {
+          bestSnapshot = snapshot;
         }
-        debugPrint('[RESTORE] Restore successful');
-      } else {
-        debugPrint('[RESTORE] No backup found on any provider');
       }
-    } catch (e, stack) {
-      debugPrint('[RESTORE] Restore failed: $e\n$stack');
+    }
+
+    if (bestSnapshot != null) {
+      await applySnapshot(bestSnapshot);
+      // Restore purchases to ensure premium status is synced
+      try {
+        await StoreKitService.instance.restorePurchases();
+      } catch (e) {
+        debugPrint('[RESTORE] Failed to restore purchases: $e');
+      }
+      debugPrint('[RESTORE] Restore successful');
+    } else {
+      debugPrint('[RESTORE] No backup found on any provider');
     }
   }
 

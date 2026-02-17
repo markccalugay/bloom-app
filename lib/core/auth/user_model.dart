@@ -45,29 +45,41 @@ class GoogleAuthenticatedUser extends AuthenticatedUser {
 }
 
 class AppleAuthenticatedUser extends AuthenticatedUser {
-  final AuthorizationCredentialAppleID _credential;
+  final String _id;
+  final String? _email;
+  final String? _displayName;
+  final AuthorizationCredentialAppleID? _credential;
 
-  AppleAuthenticatedUser(this._credential);
+  AppleAuthenticatedUser(AuthorizationCredentialAppleID credential)
+      : _id = credential.userIdentifier!,
+        _email = credential.email,
+        _displayName = (credential.givenName != null || credential.familyName != null)
+            ? [credential.givenName, credential.familyName].where((s) => s != null).join(' ')
+            : null,
+        _credential = credential;
+
+  /// Internal constructor for cached users
+  AppleAuthenticatedUser.cached({
+    required String id,
+    String? email,
+    String? displayName,
+  })  : _id = id,
+        _email = email,
+        _displayName = displayName,
+        _credential = null;
 
   @override
-  String get id => _credential.userIdentifier!;
+  String get id => _id;
 
   @override
-  String? get email => _credential.email;
+  String? get email => _email;
 
   @override
-  String? get displayName {
-    final given = _credential.givenName;
-    final family = _credential.familyName;
-    if (given != null || family != null) {
-      return [given, family].where((s) => s != null).join(' ');
-    }
-    return null;
-  }
+  String? get displayName => _displayName;
 
   @override
   Future<String?> getIdToken() async {
-    return _credential.identityToken;
+    return _credential?.identityToken;
   }
 
   @override
