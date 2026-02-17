@@ -62,7 +62,7 @@ class UserPreferencesService extends ChangeNotifier {
         id: 'default_morning_reset',
         name: 'Morning Reset',
         breathPatternId: 'core_quiet',
-        soundscapeId: 'fire_forge',
+        soundscapeId: 'river_steady',
         durationSeconds: 300, // 5 min
       ));
     }

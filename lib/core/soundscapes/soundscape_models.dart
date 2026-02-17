@@ -16,15 +16,15 @@ class Soundscape {
 
 const List<Soundscape> allSoundscapes = [
   Soundscape(
-    id: 'fire_forge',
-    name: 'Fire Forge',
-    assetPath: AppAssets.fireForge,
-    isPremium: false,
-  ),
-  Soundscape(
     id: 'river_steady',
     name: 'River Steady',
     assetPath: AppAssets.riverSteady,
+    isPremium: false,
+  ),
+  Soundscape(
+    id: 'fire_forge',
+    name: 'Fire Forge',
+    assetPath: AppAssets.fireForge,
     isPremium: false,
   ),
   Soundscape(

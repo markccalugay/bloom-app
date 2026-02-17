@@ -19,7 +19,7 @@ class SoundscapeService extends ChangeNotifier {
   static const String _sfxVolumeKey = 'ql_sfx_volume';
   static const String _sfxMuteKey = 'ql_sfx_muted';
 
-  Soundscape _activeSoundscape = allSoundscapes[1]; // River Steady
+  Soundscape _activeSoundscape = allSoundscapes[0]; // River Steady
   double _volume = 1.0; // 0.0 to 1.0
   bool _isMuted = false;
   double _sfxVolume = 1.0;
@@ -45,7 +45,7 @@ class SoundscapeService extends ChangeNotifier {
     if (savedId != null) {
       _activeSoundscape = allSoundscapes.firstWhere(
         (s) => s.id == savedId,
-        orElse: () => allSoundscapes[1],
+        orElse: () => allSoundscapes[0],
       );
     }
 

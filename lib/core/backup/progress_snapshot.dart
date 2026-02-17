@@ -1,4 +1,5 @@
 import 'package:quietline_app/data/forge/forge_service.dart';
+import 'package:quietline_app/screens/practice/models/custom_session_config.dart';
 
 class ProgressSnapshot {
   final int schemaVersion;
@@ -16,6 +17,13 @@ class ProgressSnapshot {
   final bool hasEnabledReminder;
   final Map<String, int> practiceUsage;
   final int? memberSince; // Timestamp in milliseconds
+  
+  // Settings & Preferences
+  final bool hapticEnabled;
+  final double hapticIntensity;
+  final double volume;
+  final String themeMode;
+  final List<CustomSessionConfig> customMixes;
 
   ProgressSnapshot({
     required this.schemaVersion,
@@ -33,6 +41,11 @@ class ProgressSnapshot {
     required this.hasEnabledReminder,
     required this.practiceUsage,
     this.memberSince,
+    required this.hapticEnabled,
+    required this.hapticIntensity,
+    required this.volume,
+    required this.themeMode,
+    required this.customMixes,
   });
 
   Map<String, dynamic> toJson() {
@@ -52,6 +65,11 @@ class ProgressSnapshot {
       'has_enabled_reminder': hasEnabledReminder,
       'practice_usage': practiceUsage,
       'member_since': memberSince,
+      'haptic_enabled': hapticEnabled,
+      'haptic_intensity': hapticIntensity,
+      'volume': volume,
+      'theme_mode': themeMode,
+      'custom_mixes': customMixes.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -72,6 +90,13 @@ class ProgressSnapshot {
       hasEnabledReminder: json['has_enabled_reminder'] ?? false,
       practiceUsage: Map<String, int>.from(json['practice_usage'] ?? {}),
       memberSince: json['member_since'],
+      hapticEnabled: json['haptic_enabled'] ?? true,
+      hapticIntensity: (json['haptic_intensity'] ?? 1.0).toDouble(),
+      volume: (json['volume'] ?? 0.5).toDouble(),
+      themeMode: json['theme_mode'] ?? 'midnight',
+      customMixes: (json['custom_mixes'] as List? ?? [])
+          .map((e) => CustomSessionConfig.fromJson(e))
+          .toList(),
     );
   }
 }

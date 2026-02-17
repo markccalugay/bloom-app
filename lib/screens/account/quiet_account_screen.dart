@@ -51,6 +51,7 @@ class QuietAccountScreen extends StatefulWidget {
 class _QuietAccountScreenState extends State<QuietAccountScreen> {
   late final Future<UserProfile> _userFuture;
   late final Future<Map<String, dynamic>> _metricsFuture;
+  bool _isSyncing = false;
 
   @override
   void initState() {
@@ -997,6 +998,38 @@ class _QuietAccountScreenState extends State<QuietAccountScreen> {
                                     ),
                                   ),
                                 ),
+                              ),
+                            if (googleUser != null || appleUser != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 16.0),
+                                child: _isSyncing 
+                                  ? const Center(child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: SizedBox(
+                                        width: 20, height: 20,
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ))
+                                  : OutlinedButton.icon(
+                                      onPressed: () async {
+                                        final messenger = ScaffoldMessenger.of(context);
+                                        setState(() => _isSyncing = true);
+                                        try {
+                                          await BackupCoordinator.instance.runBackup();
+                                          messenger.showSnackBar(
+                                            const SnackBar(content: Text('Progress synced to cloud')),
+                                          );
+                                        } finally {
+                                          if (mounted) setState(() => _isSyncing = false);
+                                        }
+                                      },
+                                      icon: const Icon(Icons.sync_rounded, size: 18),
+                                      label: const Text('Sync to Cloud Now'),
+                                      style: OutlinedButton.styleFrom(
+                                        minimumSize: const Size(double.infinity, 44),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      ),
+                                    ),
                               ),
                             const SizedBox(height: 24),
                             _buildSectionHeader(theme, 'MEMBERSHIP'),

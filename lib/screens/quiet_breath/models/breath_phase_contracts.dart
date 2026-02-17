@@ -75,7 +75,7 @@ const BreathingPracticeContract coreQuietContract =
     BreathingPracticeContract(
   id: 'core_quiet',
   name: 'Core Quiet',
-  cycles: 3,
+  cycles: 6,
   phases: [
     BreathPhaseContract(type: BreathPhaseType.inhale, seconds: 4),
     BreathPhaseContract(type: BreathPhaseType.hold, seconds: 4),

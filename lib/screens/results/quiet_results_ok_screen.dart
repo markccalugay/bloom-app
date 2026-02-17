@@ -209,7 +209,7 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                   textAlign: TextAlign.left,
                 ),
   
-                const SizedBox(height: 80), // Manual Spacer replacement for scrollable
+                const SizedBox(height: 48), // Reduced from 80
   
                 // Center block: day label, big flame, small flames
                 Center(
@@ -289,14 +289,14 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                         startDelay: Duration.zero,
                       ),
 
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 40), // Reduced from 48
 
                       _buildMoodSelector(theme),
                     ],
                   ),
                 ),
   
-                const SizedBox(height: 80), // Manual Spacer replacement
+                const SizedBox(height: 48), // Reduced from 80
   
                 if (showPracticeUnlock) ...[
                   QuietInlineUnlockCard(
@@ -375,66 +375,61 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 16),
-        const SizedBox(height: 16),
-        Center(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: moods.map((m) {
-                final isSelected = _selectedMood == m['value'];
-                return GestureDetector(
-                  onTap: () {
-                    HapticService.selection();
-                    setState(() {
-                      _selectedMood = m['value'] as int;
-                    });
-                  },
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 8),
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: moods.map((m) {
+            final isSelected = _selectedMood == m['value'];
+            return Expanded(
+              child: GestureDetector(
+                onTap: () {
+                  HapticService.selection();
+                  setState(() {
+                    _selectedMood = m['value'] as int;
+                  });
+                },
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? theme.colorScheme.primary.withValues(alpha: 0.15)
+                        : theme.colorScheme.surfaceVariant.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
                       color: isSelected
-                          ? theme.colorScheme.primary.withValues(alpha: 0.2)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isSelected
-                            ? theme.colorScheme.primary
-                            : Colors.transparent,
-                        width: 2,
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          m['emoji'] as String,
-                          style: const TextStyle(fontSize: 28),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          m['label'] as String,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: isSelected
-                                ? theme.colorScheme.primary
-                                : theme.colorScheme.onSurface
-                                    .withValues(alpha: 0.4),
-                            fontWeight: isSelected
-                                ? FontWeight.bold
-                                : FontWeight.normal,
-                          ),
-                        ),
-                      ],
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.outline.withValues(alpha: 0.2),
+                      width: 1.5,
                     ),
                   ),
-                );
-              }).toList(),
-            ),
-          ),
+                  child: Column(
+                    children: [
+                      Text(
+                        m['emoji'] as String,
+                        style: const TextStyle(fontSize: 26),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        m['label'] as String,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          fontSize: 10,
+                          color: isSelected
+                              ? theme.colorScheme.primary
+                              : theme.colorScheme.onSurface
+                                  .withValues(alpha: 0.5),
+                          fontWeight: isSelected
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
         ),
       ],
     );

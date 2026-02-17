@@ -11,7 +11,9 @@ import 'package:quietline_app/data/streak/quiet_streak_repository.dart';
 import 'package:quietline_app/theme/ql_theme.dart';
 import 'package:quietline_app/core/auth/user_model.dart';
 import 'package:quietline_app/data/user/user_service.dart';
+import 'package:quietline_app/core/services/user_preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class BackupCoordinator {
   static late BackupCoordinator instance;
@@ -141,6 +143,8 @@ class BackupCoordinator {
     final userProfile = await UserService.instance.getOrCreateUser();
     final memberSince = userProfile.createdAt.millisecondsSinceEpoch;
 
+    final prefService = UserPreferencesService.instance;
+
     return ProgressSnapshot(
       schemaVersion: 2,
       streak: streak,
@@ -157,6 +161,11 @@ class BackupCoordinator {
       hasEnabledReminder: reminderState.hasEnabledReminder,
       practiceUsage: practiceUsage,
       memberSince: memberSince,
+      hapticEnabled: prefService.hapticEnabled,
+      hapticIntensity: prefService.hapticIntensity,
+      volume: prefService.volume,
+      themeMode: prefService.themeMode.name,
+      customMixes: prefService.customMixes,
     );
   }
 
@@ -222,8 +231,18 @@ class BackupCoordinator {
       await UserService.instance.updateProfile(updatedProfile);
     }
 
+    // 7. Preferences & Custom Mixes
+    await prefs.setBool('pref_haptic_enabled', snapshot.hapticEnabled);
+    await prefs.setDouble('pref_haptic_intensity', snapshot.hapticIntensity);
+    await prefs.setDouble('pref_volume', snapshot.volume);
+    await prefs.setString('pref_theme_mode', snapshot.themeMode);
+    
+    final List<String> mixesJson = snapshot.customMixes.map((c) => jsonEncode(c.toJson())).toList();
+    await prefs.setStringList('pref_custom_mixes', mixesJson);
+
     // Reload all services
     await forgeService.initialize();
     await themeService.initialize();
+    await UserPreferencesService.instance.initialize();
   }
 }

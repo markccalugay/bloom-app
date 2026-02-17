@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PairRepository {
@@ -13,11 +14,13 @@ class PairRepository {
     if (user == null) throw Exception('Not authenticated');
 
     // Generate random 6 character code (uppercase alphanumeric)
-    // Simple implementation:
-    final code = DateTime.now().millisecondsSinceEpoch.toString().substring(7, 13);
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Avoid ambiguous chars
+    final rnd = Random.secure();
+    final code = String.fromCharCodes(
+      Iterable.generate(6, (_) => chars.codeUnitAt(rnd.nextInt(chars.length)))
+    );
     
-    // Check if user already has a pair?
-    // Ideally we clear old pending pairs first
+    // Clear old pending pairs first
     await _supabase.from('pairs')
       .delete()
       .eq('user_id_1', user.id)
@@ -27,6 +30,7 @@ class PairRepository {
       'user_id_1': user.id,
       'invite_code': code,
       'status': 'pending',
+      'created_at': DateTime.now().toUtc().toIso8601String(),
     });
 
     return code;
@@ -44,7 +48,13 @@ class PairRepository {
       .eq('status', 'pending')
       .maybeSingle();
 
-    if (response == null) throw Exception('Invalid or expired code');
+    if (response == null) {
+      throw Exception('Invalid or expired code');
+    }
+
+    if (response['user_id_1'] == user.id) {
+      throw Exception('You cannot pair with yourself');
+    }
 
     final pairId = response['id'];
     
@@ -111,31 +121,14 @@ class PairRepository {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    // Upsert session
-    // Since we don't have a unique constraint on user_id in the schema specifically for upsert without ID,
-    // we rely on RLS or simple logic. Ideally create table pair_sessions (user_id PK).
-    // Let's assume user_id is unique enough or we query first.
-    // Actually, 'pair_sessions' schema had 'id' PK.
-    // Let's check if we have a session.
-    
-    final existing = await _supabase.from('pair_sessions')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
-      
-    if (existing != null) {
-      await _supabase.from('pair_sessions').update({
-        'status': status,
-        'last_active_at': DateTime.now().toIso8601String(),
-        'started_at': status == 'breathing' ? DateTime.now().toIso8601String() : null,
-      }).eq('id', existing['id']);
-    } else {
-      await _supabase.from('pair_sessions').insert({
-        'user_id': user.id,
-        'status': status,
-        'started_at': status == 'breathing' ? DateTime.now().toIso8601String() : null,
-      });
-    }
+    // Use upsert to prevent race conditions and simplify logic
+    // We assume 'user_id' has a unique constraint in the DB or we handle it via RLS
+    await _supabase.from('pair_sessions').upsert({
+      'user_id': user.id,
+      'status': status,
+      'last_active_at': DateTime.now().toIso8601String(),
+      'started_at': status == 'breathing' ? DateTime.now().toIso8601String() : null,
+    }, onConflict: 'user_id');
   }
   
   // Stream partner's presence
