@@ -72,6 +72,9 @@ const double kQBHeaderToInstructionGap = 12; // px from header to instruction
 
 // ===== Session (cycle-based progression) =====
 // Baseline cycles per session and a simple streak gate to unlock a longer set.
-const int kQBCyclesBaseline   = 3; // cycles when starting out
-const int kQBCyclesUpgraded   = 4; // cycles after streak unlock
+const int kQBCyclesBaseline   = 6;  // ~96 seconds (16s per cycle)
+const int kQBCyclesUpgraded   = 11; // ~176 seconds (approx 3 min)
+const int kQBCycles5Min       = 19; // ~304 seconds (approx 5 min)
+const int kQBCycles10Min      = 38; // ~608 seconds (approx 10 min)
+const int kQBCycles20Min      = 75; // 1200 seconds (exact 20 min)
 const int kQBStreakUpgradeDays = 3; // days needed to unlock upgraded cycles

@@ -7,6 +7,7 @@ import 'package:quietline_app/data/affirmations/affirmations_model.dart';
 import 'package:quietline_app/widgets/monetization/quiet_inline_unlock_card.dart';
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 
+import 'package:quietline_app/core/services/mood_service.dart';
 import 'quiet_results_constants.dart';
 import 'quiet_results_strings.dart';
 import 'widgets/quiet_results_streak_badge.dart';
@@ -62,6 +63,8 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
 
   // Forces the flame widgets to rebuild their internal animation controllers.
   int _animationSeed = 0;
+
+  int? _selectedMood;
 
   // Number count-up (0 -> 1, 1 -> 2, etc)
   late final AnimationController _countController;
@@ -285,6 +288,10 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
                         // row starts immediately when step 1 flips true
                         startDelay: Duration.zero,
                       ),
+
+                      const SizedBox(height: 48),
+
+                      _buildMoodSelector(theme),
                     ],
                   ),
                 ),
@@ -311,8 +318,12 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   
                 QLPrimaryButton(
                   label: QuietResultsStrings.continueButton,
-                  onPressed: () async {
-                    if (sessionIncreased) {
+                    onPressed: () async {
+                      if (_selectedMood != null) {
+                        await MoodService.instance.logMood(_selectedMood!);
+                      }
+
+                      if (sessionIncreased) {
                       final unlockService = AffirmationsUnlockService.instance;
                       await unlockService.unlockIfEligibleForToday(totalSessions);
                       if (!context.mounted) return;
@@ -343,6 +354,89 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMoodSelector(ThemeData theme) {
+    final moods = [
+      {'value': 1, 'emoji': '😔', 'label': 'Lowered'},
+      {'value': 2, 'emoji': '🥱', 'label': 'Tired'},
+      {'value': 3, 'emoji': '😐', 'label': 'Neutral'},
+      {'value': 4, 'emoji': '😌', 'label': 'Calm'},
+      {'value': 5, 'emoji': '✨', 'label': 'Balanced'},
+    ];
+
+    return Column(
+      children: [
+        Text(
+          'How do you feel now?',
+          style: theme.textTheme.labelLarge?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        const SizedBox(height: 16),
+        Center(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: moods.map((m) {
+                final isSelected = _selectedMood == m['value'];
+                return GestureDetector(
+                  onTap: () {
+                    HapticService.selection();
+                    setState(() {
+                      _selectedMood = m['value'] as int;
+                    });
+                  },
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: isSelected
+                            ? theme.colorScheme.primary
+                            : Colors.transparent,
+                        width: 2,
+                      ),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          m['emoji'] as String,
+                          style: const TextStyle(fontSize: 28),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          m['label'] as String,
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.4),
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.normal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

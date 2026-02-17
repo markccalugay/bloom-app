@@ -6,6 +6,8 @@ class AffirmationPackIds {
   static const focus = 'focus';
   static const sleep = 'sleep';
   static const strength = 'strength';
+  static const panic = 'panic';
+  static const meeting = 'meeting';
 }
 
 /// Core pack definition
@@ -40,12 +42,58 @@ const strengthPack = AffirmationPack(
   isSeasonal: false,
 );
 
+/// Panic Reset pack definition
+const panicPack = AffirmationPack(
+  id: AffirmationPackIds.panic,
+  name: 'Panic Reset',
+  description: 'Immediate grounding for high-anxiety moments.',
+  isSeasonal: false,
+);
+
+/// Pre-Meeting Reset pack definition
+const meetingPack = AffirmationPack(
+  id: AffirmationPackIds.meeting,
+  name: 'Pre-Meeting Reset',
+  description: 'Steady clarity and presence before you perform.',
+  isSeasonal: false,
+);
+
 /// All packs (for future library screens).
 const allPacks = <AffirmationPack>[
   corePack,
   focusPack,
   sleepPack,
   strengthPack,
+  panicPack,
+  meetingPack,
+];
+
+/// Panic Reset affirmations (10 - high-impact safety)
+const panicAffirmations = <Affirmation>[
+  Affirmation(id: 'panic_001', packId: AffirmationPackIds.panic, text: 'I am safe in this breath.', isPremium: true),
+  Affirmation(id: 'panic_002', packId: AffirmationPackIds.panic, text: 'This feeling is a wave, and it will pass.', isPremium: true),
+  Affirmation(id: 'panic_003', packId: AffirmationPackIds.panic, text: 'I have air. I have space. I have time.', isPremium: true),
+  Affirmation(id: 'panic_004', packId: AffirmationPackIds.panic, text: 'My body is doing its job. I am okay.', isPremium: true),
+  Affirmation(id: 'panic_005', packId: AffirmationPackIds.panic, text: 'I come back to the physical world.', isPremium: true),
+  Affirmation(id: 'panic_006', packId: AffirmationPackIds.panic, text: 'I don’t have to fight this. I can let it settle.', isPremium: true),
+  Affirmation(id: 'panic_007', packId: AffirmationPackIds.panic, text: 'My heartbeat will find its rhythm again.', isPremium: true),
+  Affirmation(id: 'panic_008', packId: AffirmationPackIds.panic, text: 'I am here. This floor is solid.', isPremium: true),
+  Affirmation(id: 'panic_009', packId: AffirmationPackIds.panic, text: 'I am slowing down, and slow is safe.', isPremium: true),
+  Affirmation(id: 'panic_010', packId: AffirmationPackIds.panic, text: 'I am in control of my next exhale.', isPremium: true),
+];
+
+/// Pre-Meeting Reset affirmations (10 - presence and clarity)
+const meetingAffirmations = <Affirmation>[
+  Affirmation(id: 'meeting_001', packId: AffirmationPackIds.meeting, text: 'I have something valuable to contribute.', isPremium: true),
+  Affirmation(id: 'meeting_002', packId: AffirmationPackIds.meeting, text: 'I am prepared, even if I feel uncertain.', isPremium: true),
+  Affirmation(id: 'meeting_003', packId: AffirmationPackIds.meeting, text: 'I listen as much as I speak.', isPremium: true),
+  Affirmation(id: 'meeting_004', packId: AffirmationPackIds.meeting, text: 'My presence is more important than my perfection.', isPremium: true),
+  Affirmation(id: 'meeting_005', packId: AffirmationPackIds.meeting, text: 'I respond with clarity, not with rush.', isPremium: true),
+  Affirmation(id: 'meeting_006', packId: AffirmationPackIds.meeting, text: 'I am allowed to take a beat before I speak.', isPremium: true),
+  Affirmation(id: 'meeting_007', packId: AffirmationPackIds.meeting, text: 'I belong in this conversation.', isPremium: true),
+  Affirmation(id: 'meeting_008', packId: AffirmationPackIds.meeting, text: 'I focus on the goal, not the ego.', isPremium: true),
+  Affirmation(id: 'meeting_009', packId: AffirmationPackIds.meeting, text: 'I carry my calm into the room.', isPremium: true),
+  Affirmation(id: 'meeting_010', packId: AffirmationPackIds.meeting, text: 'I am ready to hear and be heard.', isPremium: true),
 ];
 
 /// Core affirmations list (edit freely).
@@ -245,4 +293,6 @@ final Map<String, List<Affirmation>> affirmationsByPack = {
   AffirmationPackIds.focus: focusAffirmations,
   AffirmationPackIds.sleep: sleepAffirmations,
   AffirmationPackIds.strength: strengthAffirmations,
+  AffirmationPackIds.panic: panicAffirmations,
+  AffirmationPackIds.meeting: meetingAffirmations,
 };

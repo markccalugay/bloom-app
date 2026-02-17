@@ -9,6 +9,8 @@ import '../../../data/streak/quiet_streak_service.dart';
 import '../../../services/first_launch_service.dart';
 import '../../../core/practices/practice_access_service.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../../core/services/haptic_service.dart';
+import '../../../core/services/user_preferences_service.dart';
 
 
 /// Central brain for the Quiet Breath screen.
@@ -19,6 +21,10 @@ class QuietBreathController extends ChangeNotifier {
 
   /// Exposes the active breathing practice contract as a read-only getter.
   BreathingPracticeContract get contract => _contract;
+  
+  // Active affirmation pack (for Guided Reset Packs)
+  String? _affirmationPackId;
+  String? get affirmationPackId => _affirmationPackId;
 
   // Derived phases from the active contract
   List<BreathPhaseContract> get _phases => _contract.phases;
@@ -82,6 +88,27 @@ class QuietBreathController extends ChangeNotifier {
       vsync: vsync,
       duration: Duration(seconds: _cycleSeconds),
     )..value = 0.0;
+    _boxCtrl.addListener(_handleBoxTick);
+  }
+
+  int _lastPhaseIndex = -1;
+
+  void _handleBoxTick() {
+    if (!_isPlaying) return;
+    
+    final currentPhase = phaseIndex;
+    if (currentPhase != _lastPhaseIndex) {
+      _lastPhaseIndex = currentPhase;
+      _triggerSilentPulse();
+    }
+  }
+
+  void _triggerSilentPulse() {
+    // Silent Pulse only triggers if haptics are enabled globally.
+    // Premium feature check should ideally be handled at the feature level.
+    HapticService.silentPulse(
+      intensity: UserPreferencesService.instance.hapticIntensity,
+    );
   }
 
   // Exposed state
@@ -285,7 +312,7 @@ class QuietBreathController extends ChangeNotifier {
 
   /// Update the target number of box-breath cycles for a session.
   void setTargetCycles(int n) {
-    final clamped = n.clamp(1, 12);
+    final clamped = n.clamp(1, 200); // Allow up to 20 mins+
     _targetCycles = clamped;
     // Update rising fill duration to match new total session length.
     _riseCtrl.duration = Duration(seconds: _sessionTotalSeconds);
@@ -311,10 +338,11 @@ class QuietBreathController extends ChangeNotifier {
 
   /// Switch the active breathing practice.
   /// This resets timing safely without touching animation structure.
-  void setContract(BreathingPracticeContract contract) {
+  void setContract(BreathingPracticeContract contract, {String? affirmationPackId}) {
     assert(contract.phases.isNotEmpty, 'Breathing contract must have phases');
 
     _contract = contract;
+    _affirmationPackId = affirmationPackId;
 
     // Update cycle count from the contract
     _targetCycles = contract.cycles;
@@ -331,6 +359,13 @@ class QuietBreathController extends ChangeNotifier {
       _sessionCompleted = false;
     }
 
+    notifyListeners();
+  }
+
+  /// Set the active affirmation pack for guided sessions.
+  void setAffirmationPack(String? packId) {
+    if (_affirmationPackId == packId) return;
+    _affirmationPackId = packId;
     notifyListeners();
   }
 

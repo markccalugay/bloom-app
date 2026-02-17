@@ -10,8 +10,12 @@ class QuietPracticeStrings {
   static const confirm = 'Confirm';
   static const cancel = 'Cancel';
   static const startToSeeFavorites = 'Start a session to see favorites.';
+  static const resetPacks = 'Guided Reset Packs';
+  static const resetPacksSubtitle = 'Combine specific breathing with guided mental focus.';
+  static const whyGuidedPacks = 'Why Guided Packs?';
   
   static String changePracticePrompt(String id) => 'Set ${id.replaceAll('_', ' ')} as your current active practice?';
+  static String changeResetPackPrompt(String name) => 'Set $name as your current guided practice?';
   
   // Techniques & Benefits
   static const techCoreQuietTitle = 'Technique: 4–4–4 box breathing.';

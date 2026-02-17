@@ -54,12 +54,16 @@ class BreathingPracticeContract {
   /// Whether this practice is considered advanced.
   final bool isAdvanced;
 
+  /// Whether this practice requires a premium subscription.
+  final bool isPremium;
+
   const BreathingPracticeContract({
     required this.id,
     required this.name,
     required this.phases,
     required this.cycles,
     this.isAdvanced = false,
+    this.isPremium = false,
   });
 }
 
@@ -78,6 +82,7 @@ const BreathingPracticeContract coreQuietContract =
     BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 4),
     BreathPhaseContract(type: BreathPhaseType.rest, seconds: 4),
   ],
+  isPremium: false,
 );
 
 const BreathingPracticeContract steadyDisciplineContract =
@@ -90,6 +95,7 @@ const BreathingPracticeContract steadyDisciplineContract =
     BreathPhaseContract(type: BreathPhaseType.hold, seconds: 5),
     BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 5),
   ],
+  isPremium: true,
 );
 
 const BreathingPracticeContract monkCalmContract =
@@ -102,6 +108,7 @@ const BreathingPracticeContract monkCalmContract =
     BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 6),
     BreathPhaseContract(type: BreathPhaseType.rest, seconds: 2),
   ],
+  isPremium: true,
 );
 
 const BreathingPracticeContract navyCalmContract =
@@ -114,6 +121,7 @@ const BreathingPracticeContract navyCalmContract =
     BreathPhaseContract(type: BreathPhaseType.hold, seconds: 7),
     BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 8),
   ],
+  isPremium: true,
 );
 
 const BreathingPracticeContract athleteFocusContract =
@@ -125,6 +133,7 @@ const BreathingPracticeContract athleteFocusContract =
     BreathPhaseContract(type: BreathPhaseType.inhale, seconds: 3),
     BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 3),
   ],
+  isPremium: true,
 );
 
 /* -------------------------------------------------------------------------- */
@@ -146,6 +155,7 @@ const BreathingPracticeContract coldResolveContract =
   name: 'Cold Resolve',
   cycles: 30,
   isAdvanced: true,
+  isPremium: true,
   phases: [
     BreathPhaseContract(type: BreathPhaseType.inhale, seconds: 2),
     BreathPhaseContract(type: BreathPhaseType.exhale, seconds: 2),

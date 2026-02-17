@@ -36,46 +36,66 @@ class SoundscapeSelectionModal extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Flexible(
-            child: ListView.builder(
+            child: ListView(
               shrinkWrap: true,
-              itemCount: allSoundscapes.length,
-              itemBuilder: (context, index) {
-                final soundscape = allSoundscapes[index];
-                final isActive = SoundscapeService.instance.activeSoundscape.id == soundscape.id;
-                final isLocked = soundscape.isPremium && !isPremium;
-
-                return ListTile(
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
-                  leading: Icon(
-                    isActive ? Icons.radio_button_checked : Icons.radio_button_off,
-                    color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.3),
-                  ),
-                  title: Row(
-                    children: [
-                      Text(
-                        soundscape.name,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                          color: isLocked ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : null,
-                        ),
-                      ),
-                      if (isLocked) ...[
-                        const SizedBox(width: 8),
-                        Icon(Icons.lock_outline, size: 14, color: theme.colorScheme.primary.withValues(alpha: 0.6)),
-                      ],
-                    ],
-                  ),
-                  subtitle: isActive 
-                    ? Text('Active', style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w600))
-                    : null,
-                  onTap: () => _handleSelection(context, soundscape, isLocked),
-                );
-              },
+              children: [
+                _buildSectionHeader(theme, 'CORE SOUNDSCAPES'),
+                ...allSoundscapes.where((s) => !s.isPremium).map((s) => _buildSoundscapeTile(context, theme, s, isPremium)),
+                const SizedBox(height: 16),
+                _buildSectionHeader(theme, 'QUIETLINE+ SOUNDSCAPES'),
+                ...allSoundscapes.where((s) => s.isPremium).map((s) => _buildSoundscapeTile(context, theme, s, isPremium)),
+              ],
             ),
           ),
           const SizedBox(height: 24),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Text(
+        title,
+        style: theme.textTheme.labelSmall?.copyWith(
+          letterSpacing: 0.8,
+          fontWeight: FontWeight.w600,
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSoundscapeTile(BuildContext context, ThemeData theme, Soundscape soundscape, bool isPremium) {
+    final isActive = SoundscapeService.instance.activeSoundscape.id == soundscape.id;
+    final isLocked = soundscape.isPremium && !isPremium;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 4),
+      leading: Icon(
+        isActive ? Icons.radio_button_checked : Icons.radio_button_off,
+        color: isActive ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.3),
+      ),
+      title: Row(
+        children: [
+          Text(
+            soundscape.name,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+              color: isLocked ? theme.colorScheme.onSurface.withValues(alpha: 0.5) : null,
+            ),
+          ),
+          if (isLocked) ...[
+            const SizedBox(width: 8),
+            Icon(Icons.lock_outline, size: 14, color: theme.colorScheme.primary.withValues(alpha: 0.6)),
+          ],
+        ],
+      ),
+      subtitle: isActive 
+        ? Text('Active', style: TextStyle(color: theme.colorScheme.primary, fontSize: 12, fontWeight: FontWeight.w600))
+        : null,
+      onTap: () => _handleSelection(context, soundscape, isLocked),
     );
   }
 

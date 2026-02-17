@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+import 'package:in_app_purchase_storekit/in_app_purchase_storekit.dart';
 
 /// Single responsibility:
 /// - Load StoreKit products
@@ -129,6 +130,24 @@ class StoreKitService {
 
     debugPrint('[StoreKit] restorePurchases started');
     await _iap.restorePurchases();
+  }
+
+  /// Checks if a product has a valid introductory offer (Free Trial).
+  /// 
+  /// Returns true ONLY if:
+  /// 1. The product exists
+  /// 2. It is an iOS StoreKit product
+  /// 3. It has a valid `introductoryPrice`
+  bool hasIntroductoryOffer(String productId) {
+    final product = _products[productId];
+    if (product == null) return false;
+
+    // Check for iOS-specific StoreKit details
+    if (product is AppStoreProductDetails) {
+      return product.skProduct.introductoryPrice != null;
+    }
+    
+    return false;
   }
 
   /// Optional cleanup (probably never needed)

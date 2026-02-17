@@ -44,5 +44,21 @@ class HapticService {
     await HapticFeedback.selectionClick();
   }
 
+  /// Silent Pulse - rhythmic haptic feedback for breathing.
+  /// [intensity] 0..1 scale.
+  static Future<void> silentPulse({double intensity = 0.5}) async {
+    if (!UserPreferencesService.instance.hapticEnabled) return;
+    
+    // Silent Pulse is a premium feature, but the triggering logic 
+    // is managed by the caller (BreathController).
+    if (intensity < 0.3) {
+      await HapticFeedback.lightImpact();
+    } else if (intensity > 0.7) {
+      await HapticFeedback.heavyImpact();
+    } else {
+      await HapticFeedback.mediumImpact();
+    }
+  }
+
   /// Error/Success vibrations could be added here later if needed.
 }

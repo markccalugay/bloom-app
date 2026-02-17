@@ -17,6 +17,10 @@ import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
+import 'package:quietline_app/core/storekit/storekit_service.dart';
+import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
+import 'package:quietline_app/data/affirmations/affirmations_model.dart';
+import 'package:quietline_app/data/affirmations/affirmations_service.dart';
 
 class QuietBreathScreen extends StatefulWidget {
   final String sessionId;
@@ -26,12 +30,14 @@ class QuietBreathScreen extends StatefulWidget {
   final int streak;
 
   final BreathingPracticeContract? contract;
+  final String? affirmationPackId;
 
   const QuietBreathScreen({
     super.key,
     required this.sessionId,
     this.streak = 0,
     this.contract,
+    this.affirmationPackId,
   });
 
   @override
@@ -47,6 +53,21 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   int? _countdownValue;
   Timer? _countdownTimer;
   bool _isFirstSession = false;
+  List<Affirmation> _affirmations = [];
+
+  Future<void> _loadAffirmations() async {
+    if (widget.affirmationPackId == null) return;
+    
+    final packAffirmations = const AffirmationsService().getAffirmationsForPack(
+      widget.affirmationPackId!,
+    );
+    
+    if (mounted) {
+      setState(() {
+        _affirmations = packAffirmations;
+      });
+    }
+  }
 
   void _startCountdown() {
     setState(() {
@@ -134,7 +155,10 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     controller = QuietBreathController(vsync: this);
     if (widget.contract != null) {
-      controller.setContract(widget.contract!);
+      controller.setContract(
+        widget.contract!,
+        affirmationPackId: widget.affirmationPackId,
+      );
     }
     controller.onSessionComplete = _handleSessionComplete;
 
@@ -142,6 +166,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     SoundscapeService.instance.play();
 
     _checkFirstSession();
+    _loadAffirmations();
 
     if (kDebugMode) {
       QuietDebugActions.instance.registerAction('Skip Session', () {
@@ -203,6 +228,127 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     );
   }
 
+  Widget _buildDurationSelector() {
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+
+    return ValueListenableBuilder<bool>(
+      valueListenable: StoreKitService.instance.isPremium,
+      builder: (context, isPremium, _) {
+        // Defined in seconds to match CustomMixScreen
+        final List<Map<String, dynamic>> durationTargets = [
+          {'label': '90s', 'seconds': 90, 'premium': false},
+          {'label': '3m', 'seconds': 180, 'premium': false},
+          {'label': '5m', 'seconds': 300, 'premium': true},
+          {'label': '10m', 'seconds': 600, 'premium': true},
+          {'label': '20m', 'seconds': 1200, 'premium': true},
+        ];
+
+        // Calculate cycle duration for the ACTIVE contract
+        final int cycleDuration = controller.contract.phases.fold(0, (sum, p) => sum + p.seconds);
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'DURATION',
+              style: textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
+                letterSpacing: 1.2,
+                fontWeight: FontWeight.w600,
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 12),
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: durationTargets.map((d) {
+                  // Calculate required cycles for this specific duration target
+                  // using the same logic as QuietHomeScreen (round)
+                  final int targetSeconds = d['seconds'] as int;
+                  final int requiredCycles = (targetSeconds / cycleDuration).round();
+                  
+                  final bool isSelected = controller.targetCycles == requiredCycles;
+                  final bool isLocked = (d['premium'] as bool) && !isPremium;
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: SizedBox(
+                      width: 76,
+                      child: ChoiceChip(
+                        padding: EdgeInsets.zero,
+                        label: SizedBox(
+                          width: double.infinity,
+                          child: Center(
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const NeverScrollableScrollPhysics(),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (isLocked) ...[
+                                    const Icon(Icons.lock_outline, size: 14),
+                                    const SizedBox(width: 4),
+                                  ],
+                                  Text(
+                                    d['label'] as String,
+                                    style: textTheme.labelLarge?.copyWith(
+                                      color: isSelected
+                                          ? Colors.white
+                                          : theme.colorScheme.onSurface,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        selected: isSelected,
+                        onSelected: (selected) {
+                          if (isLocked) {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (_) => const QuietPaywallScreen()),
+                            );
+                            return;
+                          }
+                          if (selected) {
+                            HapticService.selection();
+                            controller.setTargetCycles(requiredCycles);
+                            setState(() {});
+                          }
+                        },
+                        selectedColor: theme.colorScheme.primary,
+                        backgroundColor:
+                            theme.colorScheme.surface.withValues(alpha: 0.1),
+                        showCheckmark: false,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: isSelected
+                                ? theme.colorScheme.primary
+                                : theme.colorScheme.onSurface
+                                    .withValues(alpha: 0.1),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -236,7 +382,10 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: AnimatedBuilder(
                         animation: controller.listenable,
-                        builder: (_, _) => QuietBreathTimerTitle(controller: controller),
+                        builder: (_, _) => QuietBreathTimerTitle(
+                          controller: controller,
+                          affirmations: _affirmations,
+                        ),
                       ),
                     ),
                   ),
@@ -263,11 +412,18 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                       curve: Curves.easeOut,
                       child: IgnorePointer(
                         ignoring: _hasStarted || _countdownValue != null,
-                        child: QuietBreathControls(
-                          controller: controller,
-                          hasStarted: _hasStarted,
-                          isPlaying: controller.isPlaying,
-                          onStart: _startCountdown,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _buildDurationSelector(),
+                            const SizedBox(height: 24),
+                            QuietBreathControls(
+                              controller: controller,
+                              hasStarted: _hasStarted,
+                              isPlaying: controller.isPlaying,
+                              onStart: _startCountdown,
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -432,10 +588,19 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
     final theme = Theme.of(context);
     final accessService = PracticeAccessService.instance;
 
-    return ValueListenableBuilder<String>(
-      valueListenable: accessService.activePracticeId,
-      builder: (context, activeId, _) {
-        final practiceName = activeId.replaceAll('_', ' ').toUpperCase();
+    return ListenableBuilder(
+      listenable: Listenable.merge([
+        accessService.activePracticeId,
+        accessService.activeResetPackId,
+      ]),
+      builder: (context, _) {
+        final isPackActive = accessService.isResetPackActive;
+        final activeName = isPackActive
+            ? (accessService.getActiveResetPack()?.name ?? '').toUpperCase()
+            : accessService.activePracticeId.value
+                .replaceAll('_', ' ')
+                .toUpperCase();
+
         return InkWell(
           onTap: () async {
             if (_hasStarted || _countdownValue != null) {
@@ -445,7 +610,8 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   backgroundColor: theme.colorScheme.surface,
                   behavior: SnackBarBehavior.floating,
                   margin: const EdgeInsets.all(20),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   content: Text(
                     'Practice cannot be changed while in session.',
                     style: TextStyle(color: theme.colorScheme.onSurface),
@@ -458,8 +624,16 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
             // Navigate to library to change practice
             HapticService.light();
             await Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const QuietPracticeLibraryScreen()),
+              MaterialPageRoute(
+                  builder: (_) => const QuietPracticeLibraryScreen()),
             );
+
+            // After returning, if a pack is active, update the controller
+            if (!context.mounted) return;
+            final latestContract = accessService.getActiveContract();
+            final activePack = accessService.getActiveResetPack();
+            controller.setContract(latestContract,
+                affirmationPackId: activePack?.affirmationPackId);
           },
           borderRadius: BorderRadius.circular(8),
           child: Padding(
@@ -468,7 +642,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'ACTIVE PRACTICE',
+                  isPackActive ? 'GUIDED RESET' : 'ACTIVE PRACTICE',
                   style: theme.textTheme.labelSmall?.copyWith(
                     fontSize: 8,
                     fontWeight: FontWeight.w800,
@@ -477,7 +651,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                   ),
                 ),
                 Text(
-                  practiceName,
+                  activeName,
                   style: theme.textTheme.labelMedium?.copyWith(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,

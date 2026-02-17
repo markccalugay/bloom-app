@@ -11,6 +11,10 @@ class AppAssets {
   static const rainShelter = 'assets/sfx/ql_amb_rain_shelter.wav';
   static const voidDrone = 'assets/sfx/ql_amb_void_drone.mp3';
   static const windPass = 'assets/sfx/ql_amb_wind_pass.wav';
+  // TODO: Replace placeholders with final assets
+  static const oceanDepth = 'assets/sfx/ql_amb_wind_pass.wav'; 
+  static const deepHall = 'assets/sfx/ql_amb_void_drone.mp3';
+  static const forestNight = 'assets/sfx/ql_amb_rain_shelter.wav';
   static const welcomeHomeBgm = 'assets/bgm/ql_bgm_welcome_home.wav';
 
   // SFX - Countdown

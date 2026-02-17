@@ -20,7 +20,10 @@ import 'package:quietline_app/core/services/user_preferences_service.dart';
 import 'package:quietline_app/core/services/quiet_logger.dart';
 import 'package:quietline_app/core/services/quiet_debug_actions.dart';
 import 'package:quietline_app/core/notifications/notification_service.dart';
+import 'package:quietline_app/core/services/mood_service.dart';
 import 'package:flutter/foundation.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:quietline_app/core/config/supabase_config.dart';
 
 class AppInitializer {
   static Future<ReminderService> initialize() async {
@@ -33,6 +36,13 @@ class AppInitializer {
     await SoundscapeService.instance.initialize();
     await TimezoneService.initialize();
     await UserPreferencesService.instance.initialize();
+    await MoodService.instance.initialize();
+
+    // Supabase
+    await Supabase.initialize(
+      url: SupabaseConfig.url,
+      anonKey: SupabaseConfig.anonKey,
+    );
 
     final prefs = await SharedPreferences.getInstance();
     

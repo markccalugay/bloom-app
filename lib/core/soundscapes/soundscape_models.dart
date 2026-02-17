@@ -45,4 +45,22 @@ const List<Soundscape> allSoundscapes = [
     assetPath: AppAssets.windPass,
     isPremium: true,
   ),
+  Soundscape(
+    id: 'ocean_depth',
+    name: 'Ocean Depth',
+    assetPath: AppAssets.oceanDepth,
+    isPremium: true,
+  ),
+  Soundscape(
+    id: 'deep_hall',
+    name: 'Deep Hall',
+    assetPath: AppAssets.deepHall,
+    isPremium: true,
+  ),
+  Soundscape(
+    id: 'forest_night',
+    name: 'Forest Night',
+    assetPath: AppAssets.forestNight,
+    isPremium: true,
+  ),
 ];
