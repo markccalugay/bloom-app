@@ -133,12 +133,6 @@ class QLGradients {
           end: Alignment.bottomCenter,
           colors: [QLColors.quietAqua, QLColors.slateBlue.withValues(alpha: 0.8)],
         );
-      case ThemeVariant.charcoal:
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [QLColors.steelGray, QLColors.deepStone],
-        );
     }
   }
 
@@ -156,11 +150,31 @@ class QLGradients {
           end: Alignment.bottomCenter,
           colors: [Color(0xFFF5F7FA), Color(0xFFE2E6EA)],
         );
-      case ThemeVariant.charcoal:
+    }
+  }
+
+  static Color getResultsWaveColor(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
+        return const Color(0x26FFFFFF); // 15% white
+      case ThemeVariant.morning:
+        return const Color(0x1A000000); // 10% black
+    }
+  }
+
+  static Gradient getHomeGradient(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
         return const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [Color(0xFF141A20), Color(0xFF1A2229)],
+          colors: [Color(0xFF0F1C24), Color(0xFF132B34)],
+        );
+      case ThemeVariant.morning:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF5F7FA), Color(0xFFE2E6EA)],
         );
     }
   }
@@ -168,7 +182,6 @@ class QLGradients {
   static Color getResultsWaveColor(ThemeVariant variant) {
     switch (variant) {
       case ThemeVariant.midnight:
-      case ThemeVariant.charcoal:
         return const Color(0x26FFFFFF); // 15% white
       case ThemeVariant.morning:
         return const Color(0x1A000000); // 10% black
@@ -282,7 +295,6 @@ class QLTheme {
 
   static ThemeData morning = quietLight; // Alias for Morning variant
 
-
   static ThemeData quietLight = ThemeData(
     brightness: Brightness.light,
     scaffoldBackgroundColor: QLColors.offWhiteFog,
@@ -371,8 +383,6 @@ class QLTheme {
         return dark;
       case ThemeVariant.morning:
         return quietLight;
-      case ThemeVariant.charcoal:
-        return charcoal;
     }
   }
 
@@ -382,8 +392,6 @@ class QLTheme {
         return QLColors.calmTeal;
       case ThemeVariant.morning:
         return QLColors.slateBlue;
-      case ThemeVariant.charcoal:
-        return QLColors.deepStone;
     }
   }
 
@@ -393,8 +401,6 @@ class QLTheme {
         return QLColors.deepCharcoal;
       case ThemeVariant.morning:
         return QLColors.offWhiteFog;
-      case ThemeVariant.charcoal:
-        return const Color(0xFF1A1F24);
     }
   }
 

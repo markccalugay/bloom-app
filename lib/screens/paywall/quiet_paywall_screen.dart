@@ -42,41 +42,8 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                 : _buildPricingFlow(context),
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Text(
-          'Cancel anytime in Settings.',
-          style: textTheme.bodySmall?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
-          ),
-        ),
-        const SizedBox(height: 40),
-        
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            _LegalButton(
-              label: 'Restore',
-              onTap: () async {
-                setState(() => _isProcessing = true);
-                await StoreKitService.instance.restorePurchases();
-                if (mounted) setState(() => _isProcessing = false);
-              },
-            ),
-            _LegalSeparator(),
-            _LegalButton(
-              label: 'Terms',
-              onTap: () => launchUrl(Uri.parse('https://www.apple.com/legal/internet-services/itunes/dev/stdeula/')),
-            ),
-            _LegalSeparator(),
-            _LegalButton(
-              label: 'Privacy',
-              onTap: () => launchUrl(Uri.parse('https://quietline.app/privacy')),
-            ),
-          ],
-        ),
-        const SizedBox(height: 48),
-      ],
+        );
+      },
     );
   }
 
@@ -245,6 +212,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
                     style: textTheme.titleMedium?.copyWith(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: 0.5,
                     ),
                   ),
           ),
@@ -285,6 +253,7 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
       ],
     );
   }
+}
 
   String _getCTAButtonText() {
     if (_selectedProductId == 'quietline.premium.yearly') return 'Start Yearly';
@@ -308,185 +277,6 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
             text,
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PricingCard extends StatelessWidget {
-  final String productId;
-  final String title;
-  final String priceDisplay;
-  final String intervalLabel;
-  final String? secondaryPrice;
-  final String tagline;
-  final bool isSelected;
-  final bool isHighlighted;
-  final VoidCallback onTap;
-
-  const _PricingCard({
-    required this.productId,
-    required this.title,
-    required this.priceDisplay,
-    required this.intervalLabel,
-    this.secondaryPrice,
-    required this.tagline,
-    required this.isSelected,
-    this.isHighlighted = false,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textTheme = theme.textTheme;
-    final accentColor = theme.colorScheme.primary; 
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        clipBehavior: Clip.antiAlias, // Ensure children respect the border radius
-        decoration: BoxDecoration(
-          color: isSelected 
-              ? theme.colorScheme.primary.withValues(alpha: 0.1)
-              : theme.cardColor,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-            width: isSelected ? 2.5 : 1.0,
-          ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  )
-                ]
-              : null,
-        ),
-        child: Column(
-          children: [
-            if (isHighlighted)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                decoration: BoxDecoration(
-                  color: accentColor,
-                ),
-                child: Center(
-                  child: Text(
-                    'Most chosen',
-                    style: textTheme.labelSmall?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ),
-              ),
-            
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: theme.colorScheme.onSurface.withValues(
-                                alpha: isSelected ? 1.0 : 0.6,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            tagline,
-                            style: textTheme.bodySmall?.copyWith(
-                              color: theme.colorScheme.onSurface.withValues(
-                                alpha: isSelected ? 0.8 : 0.4,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        children: [
-                          if (isSelected) ...[
-                            Icon(
-                              Icons.check_circle,
-                              size: 20,
-                              color: theme.colorScheme.primary,
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              RichText(
-                                text: TextSpan(
-                                  children: [
-                                    TextSpan(
-                                      text: priceDisplay,
-                                      style: textTheme.headlineSmall?.copyWith(
-                                        fontWeight: FontWeight.w700,
-                                        color: theme.colorScheme.onSurface,
-                                      ),
-                                    ),
-                                    TextSpan(
-                                      text: intervalLabel,
-                                      style: textTheme.bodySmall?.copyWith(
-                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.5),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              if (secondaryPrice != null) ...[
-                                const SizedBox(height: 2),
-                                Text(
-                                  secondaryPrice!,
-                                  style: textTheme.labelSmall?.copyWith(
-                                    color: accentColor,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  if (productId == 'quietline.premium.yearly') ...[
-                     const SizedBox(height: 12),
-                     Container(
-                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                       decoration: BoxDecoration(
-                         color: accentColor.withValues(alpha: 0.1),
-                         borderRadius: BorderRadius.circular(6),
-                       ),
-                       child: Text(
-                         'Save 40%',
-                         style: textTheme.labelSmall?.copyWith(
-                           color: accentColor,
-                           fontWeight: FontWeight.w800,
-                         ),
-                       ),
-                     ),
-                  ],
-                ],
-              ),
             ),
           ],
         ),

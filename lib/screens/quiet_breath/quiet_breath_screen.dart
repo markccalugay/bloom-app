@@ -1,10 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quietline_app/core/services/quiet_debug_actions.dart';
-import 'package:quietline_app/core/services/quiet_logger.dart';
 import 'package:quietline_app/core/services/quiet_debug_actions.dart';
 import 'package:quietline_app/core/services/quiet_logger.dart';
 import 'controllers/quiet_breath_controller.dart';
@@ -166,13 +163,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       });
     }
 
-    if (kDebugMode) {
-      QuietDebugActions.instance.registerAction('Skip Session', () {
-        QuietLogger.instance.info('Debug: Skipping session...');
-        _handleSessionComplete();
-      });
-    }
-
     controller.listenable.addListener(() {
       if (mounted) setState(() {}); // Trigger rebuilds for play/pause state changes
       if (mounted) setState(() {}); // Trigger rebuilds for play/pause state changes
@@ -200,9 +190,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
   @override
   void dispose() {
-    if (kDebugMode) {
-      QuietDebugActions.instance.unregisterAction('Skip Session');
-    }
     if (kDebugMode) {
       QuietDebugActions.instance.unregisterAction('Skip Session');
     }
@@ -329,10 +316,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                               ),
                             );
                           },
-                        ),
-                      ),
-                    ),
-                  ),
                         ),
                       ),
                     ),
