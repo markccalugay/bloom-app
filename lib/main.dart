@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/entry/quiet_entry_screen.dart';
 import 'core/entitlements/premium_entitlement.dart';
 import 'core/backup/backup_coordinator.dart';
+import 'widgets/debug/quiet_debug_dock.dart';
 
 void main() async {
   final reminderService = await AppInitializer.initialize();

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-enum ThemeModePreference { midnight, morning, charcoal }
+enum ThemeModePreference { midnight, morning }
 
 class UserPreferencesService extends ChangeNotifier {
   static final UserPreferencesService instance = UserPreferencesService._internal();

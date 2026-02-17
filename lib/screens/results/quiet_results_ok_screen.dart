@@ -125,13 +125,13 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
       _animateRow = true;
     });
 
-      // Step 2: after the row has had time to play, animate the badge + number.
-      await Future.delayed(_badgeStartAfterRow);
-      if (!mounted) return;
-      HapticService.medium();
-      setState(() {
-        _animateBadge = true;
-      });
+    // Step 2: after the row has had time to play, animate the badge + number.
+    await Future.delayed(_badgeStartAfterRow);
+    if (!mounted) return;
+    HapticService.medium();
+    setState(() {
+      _animateBadge = true;
+    });
 
     // Start number count-up alongside the badge slam.
     _countController.forward(from: 0.0);

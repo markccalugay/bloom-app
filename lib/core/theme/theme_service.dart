@@ -3,13 +3,16 @@ import '../../theme/ql_theme.dart';
 import '../backup/backup_coordinator.dart';
 import '../entitlements/premium_entitlement.dart';
 import '../services/user_preferences_service.dart';
+import '../services/user_preferences_service.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeService._();
   static final ThemeService instance = ThemeService._();
 
 
+
   
+  ThemeVariant _variant = ThemeVariant.midnight;
   ThemeVariant _variant = ThemeVariant.midnight;
   bool _isInitialized = false;
 
@@ -21,8 +24,6 @@ class ThemeService extends ChangeNotifier {
         return 'Theme · Midnight (Teal)';
       case ThemeVariant.morning:
         return 'Theme · Morning (Light)';
-      case ThemeVariant.charcoal:
-        return 'Theme · Charcoal (Gray)';
     }
   }
 
@@ -32,14 +33,15 @@ class ThemeService extends ChangeNotifier {
         return 'Midnight';
       case ThemeVariant.morning:
         return 'Morning';
-      case ThemeVariant.charcoal:
-        return 'Charcoal';
     }
   }
 
   Future<void> initialize() async {
     if (_isInitialized) return;
 
+    // Listen to preferences service
+    UserPreferencesService.instance.addListener(_updateFromPrefs);
+    _updateFromPrefs();
     // Listen to preferences service
     UserPreferencesService.instance.addListener(_updateFromPrefs);
     _updateFromPrefs();
@@ -56,9 +58,6 @@ class ThemeService extends ChangeNotifier {
         break;
       case ThemeModePreference.morning:
         _variant = ThemeVariant.morning;
-        break;
-      case ThemeModePreference.charcoal:
-        _variant = ThemeVariant.charcoal;
         break;
     }
     notifyListeners();
@@ -79,9 +78,6 @@ class ThemeService extends ChangeNotifier {
         break;
       case ThemeVariant.morning:
         pref = ThemeModePreference.morning;
-        break;
-      case ThemeVariant.charcoal:
-        pref = ThemeModePreference.charcoal;
         break;
     }
     

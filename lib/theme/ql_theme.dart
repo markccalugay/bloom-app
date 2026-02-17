@@ -4,7 +4,6 @@ import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts
 enum ThemeVariant {
   midnight,
   morning,
-  charcoal,
 }
 
 class QLColors {
@@ -202,6 +201,32 @@ class QLGradients {
     }
   }
 
+  static Gradient getHomeGradient(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF0F1C24), Color(0xFF132B34)],
+        );
+      case ThemeVariant.morning:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFFF5F7FA), Color(0xFFE2E6EA)],
+        );
+    }
+  }
+
+  static Color getResultsWaveColor(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
+        return const Color(0x26FFFFFF); // 15% white
+      case ThemeVariant.morning:
+        return const Color(0x1A000000); // 10% black
+    }
+  }
+
   static List<Gradient> getSecondaryGradients(ThemeVariant variant) {
     return [tealFlame, amberFlame, steelFlame, midnightFlame];
   }
@@ -257,28 +282,6 @@ class QLTheme {
 
   static ThemeData morning = quietLight; // Alias for Morning variant
 
-  static ThemeData charcoal = ThemeData(
-    brightness: Brightness.dark,
-    scaffoldBackgroundColor: const Color(0xFF1A1F24),
-    colorScheme: const ColorScheme.dark(
-      surface: Color(0xFF242B31),
-      primary: QLColors.steelGray,
-      secondary: QLColors.deepStone,
-      onSurface: QLColors.armorIronLight,
-      onPrimary: Colors.white,
-    ),
-    textTheme: const TextTheme(
-      bodyMedium: TextStyle(fontSize: 14, color: QLColors.armorIronLight),
-      bodySmall: TextStyle(fontSize: 12, color: QLColors.armorIronDark),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: QLColors.deepStone,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      ),
-    ),
-  );
 
   static ThemeData quietLight = ThemeData(
     brightness: Brightness.light,

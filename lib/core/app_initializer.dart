@@ -114,6 +114,4 @@ class AppInitializer {
       QuietLogger.instance.error('ALL DATA CLEARED. Restart app for clean state.');
     }, isGlobal: true);
   }
-    return reminderService;
-  }
 }
