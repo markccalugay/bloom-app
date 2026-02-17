@@ -3,7 +3,6 @@ import '../../theme/ql_theme.dart';
 import '../backup/backup_coordinator.dart';
 import '../entitlements/premium_entitlement.dart';
 import '../services/user_preferences_service.dart';
-import '../services/user_preferences_service.dart';
 
 class ThemeService extends ChangeNotifier {
   ThemeService._();
@@ -12,7 +11,6 @@ class ThemeService extends ChangeNotifier {
 
 
   
-  ThemeVariant _variant = ThemeVariant.midnight;
   ThemeVariant _variant = ThemeVariant.midnight;
   bool _isInitialized = false;
 
@@ -39,9 +37,6 @@ class ThemeService extends ChangeNotifier {
   Future<void> initialize() async {
     if (_isInitialized) return;
 
-    // Listen to preferences service
-    UserPreferencesService.instance.addListener(_updateFromPrefs);
-    _updateFromPrefs();
     // Listen to preferences service
     UserPreferencesService.instance.addListener(_updateFromPrefs);
     _updateFromPrefs();

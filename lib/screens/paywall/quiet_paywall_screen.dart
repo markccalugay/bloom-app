@@ -253,8 +253,6 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
       ],
     );
   }
-}
-
   String _getCTAButtonText() {
     if (_selectedProductId == 'quietline.premium.yearly') return 'Start Yearly';
     if (_selectedProductId == 'quietline.premium.monthly.v2') return 'Start Monthly';
@@ -267,10 +265,10 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.check,
             size: 16,
-            color: const Color(0xFF4FA095), // Calm Teal
+            color: Color(0xFF4FA095), // Calm Teal
           ),
           const SizedBox(width: 12),
           Text(
@@ -278,8 +276,8 @@ class _QuietPaywallScreenState extends State<QuietPaywallScreen> {
             style: theme.textTheme.bodyLarge?.copyWith(
               color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

@@ -14,7 +14,6 @@ import 'package:quietline_app/screens/results/quiet_results_ok_screen.dart';
 import 'package:quietline_app/data/streak/quiet_streak_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/core/services/haptic_service.dart';
-import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:quietline_app/core/practices/practice_access_service.dart';
 import 'package:quietline_app/screens/practices/quiet_practice_library_screen.dart';
 import 'package:quietline_app/services/first_launch_service.dart';
@@ -79,16 +78,8 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
       controller.pause();
     }
 
-    
-    // Pause immediately if playing
-    final wasPlaying = controller.isPlaying;
-    if (wasPlaying) {
-      controller.pause();
-    }
-
     final confirmed = await showDialog<bool>(
       context: context,
-      barrierDismissible: false,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
         backgroundColor: theme.colorScheme.surface,
@@ -130,11 +121,7 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
     if (confirmed == true && mounted) {
       SoundscapeService.instance.stop();
-      SoundscapeService.instance.stop();
       Navigator.of(context).pop(); // Go back to home
-    } else if (wasPlaying && mounted) {
-      // Resume if it was playing before
-      controller.play();
     } else if (wasPlaying && mounted) {
       // Resume if it was playing before
       controller.play();
@@ -165,10 +152,8 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
     controller.listenable.addListener(() {
       if (mounted) setState(() {}); // Trigger rebuilds for play/pause state changes
-      if (mounted) setState(() {}); // Trigger rebuilds for play/pause state changes
       if (controller.isPlaying && !_hasStarted) {
         _hasStarted = true;
-        HapticService.selection();
         HapticService.selection();
         Future.delayed(const Duration(milliseconds: 120), () {
           if (mounted) {
@@ -387,7 +372,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                 ),
                 onPressed: () {
                   HapticService.selection();
-                  HapticService.selection();
                   controller.toggle();
                 },
               ),
@@ -408,7 +392,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                     ),
                     onPressed: () {
                       HapticService.selection();
-                      HapticService.selection();
                       SoundscapeService.instance.toggleMute();
                     },
                   );
@@ -424,24 +407,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
   }
 
   Widget _buildRightControls() {
-    final showCancel = !_isFirstSession && !controller.isPlaying && _hasStarted && _countdownValue == null;
-
-    return AnimatedOpacity(
-      opacity: showCancel ? 1.0 : 0.0,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
-      child: IgnorePointer(
-        ignoring: !showCancel,
-        child: IconButton(
-          icon: const Icon(Icons.close_rounded, size: 24),
-          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-          onPressed: () {
-            HapticService.light();
-            _handleCancel();
-          },
-          tooltip: 'End session',
-        ),
-      ),
     final showCancel = !_isFirstSession && !controller.isPlaying && _hasStarted && _countdownValue == null;
 
     return AnimatedOpacity(
@@ -491,7 +456,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
             }
 
             // Navigate to library to change practice
-            HapticService.light();
             HapticService.light();
             await Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const QuietPracticeLibraryScreen()),
