@@ -15,6 +15,9 @@ import 'package:quietline_app/core/services/haptic_service.dart';
 import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
 import 'package:quietline_app/core/app_assets.dart';
 import 'package:quietline_app/core/backup/backup_coordinator.dart';
+import 'package:quietline_app/core/services/quiet_debug_actions.dart';
+import 'package:quietline_app/core/services/quiet_logger.dart';
+import 'package:flutter/foundation.dart';
 
 /// “You showed up again” results screen shown when mood >= 3.
 ///
@@ -60,9 +63,6 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
   // Forces the flame widgets to rebuild their internal animation controllers.
   int _animationSeed = 0;
 
-  // Prevents auto-play from retriggering on rebuilds.
-  bool _didAutoPlay = false;
-
   // Number count-up (0 -> 1, 1 -> 2, etc)
   late final AnimationController _countController;
 
@@ -80,43 +80,50 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
       duration: _countDuration,
     );
 
+    if (kDebugMode) {
+      QuietDebugActions.instance.registerAction('Replay Animation', () {
+        QuietLogger.instance.info('Debug: Replaying streak animation...');
+        _triggerAnimation();
+      });
+    }
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
 
       // First frame has been painted.
       await Future.delayed(_screenSettleDelay);
-      if (!mounted) return;
+      _triggerAnimation();
+    });
+  }
 
-      final int streak = _debugStreakOverride ?? widget.streak;
-      final int prevStreak = (_debugPrevOverride ?? widget.previousStreak ?? (widget.isNew ? (streak - 1) : streak))
-          .clamp(0, 999999);
+  Future<void> _triggerAnimation() async {
+    if (!mounted) return;
 
-      final bool streakIncreased = widget.previousStreak != null
-          ? (streak > prevStreak)
-          : widget.isNew;
+    final int streak = _debugStreakOverride ?? widget.streak;
+    final int prevStreak = (_debugPrevOverride ??
+            widget.previousStreak ??
+            (widget.isNew ? (streak - 1) : streak))
+        .clamp(0, 999999);
 
-      if (!streakIncreased) return;
-      if (_didAutoPlay) return;
+    final bool streakIncreased =
+        widget.previousStreak != null ? (streak > prevStreak) : widget.isNew;
 
-      _didAutoPlay = true;
+    if (!streakIncreased) return;
 
-      // Gate opens: this screen is fully visible.
-      if (!mounted) return;
-      setState(() {
-        _shouldAnimateStreak = true;
-        _animationSeed++; // rebuild children so their internal controllers restart
+    // Reset state for replay
+    setState(() {
+      _shouldAnimateStreak = true;
+      _animationSeed++; // rebuild children so their internal controllers restart
+      _animateRow = false;
+      _animateBadge = false;
+    });
 
-        // Sequence state
-        _animateRow = false;
-        _animateBadge = false;
-      });
-
-      // Step 1: animate the small flame row first.
-      await Future.delayed(_rowStartDelay);
-      if (!mounted) return;
-      setState(() {
-        _animateRow = true;
-      });
+    // Step 1: animate the small flame row first.
+    await Future.delayed(_rowStartDelay);
+    if (!mounted) return;
+    setState(() {
+      _animateRow = true;
+    });
 
       // Step 2: after the row has had time to play, animate the badge + number.
       await Future.delayed(_badgeStartAfterRow);
@@ -126,16 +133,18 @@ class _QuietResultsOkScreenState extends State<QuietResultsOkScreen>
         _animateBadge = true;
       });
 
-      // Start number count-up alongside the badge slam.
-      _countController.forward(from: 0.0);
+    // Start number count-up alongside the badge slam.
+    _countController.forward(from: 0.0);
 
-      // Trigger background backup
-      BackupCoordinator.instance.runBackup();
-    });
+    // Trigger background backup
+    BackupCoordinator.instance.runBackup();
   }
 
   @override
   void dispose() {
+    if (kDebugMode) {
+      QuietDebugActions.instance.unregisterAction('Replay Animation');
+    }
     _countController.dispose();
     super.dispose();
   }

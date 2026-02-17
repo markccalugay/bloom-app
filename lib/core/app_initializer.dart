@@ -17,6 +17,10 @@ import 'package:quietline_app/core/auth/auth_service.dart';
 import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
 import 'package:quietline_app/core/config/app_config.dart';
 import 'package:quietline_app/core/services/user_preferences_service.dart';
+import 'package:quietline_app/core/services/quiet_logger.dart';
+import 'package:quietline_app/core/services/quiet_debug_actions.dart';
+import 'package:quietline_app/core/notifications/notification_service.dart';
+import 'package:flutter/foundation.dart';
 
 class AppInitializer {
   static Future<ReminderService> initialize() async {
@@ -60,6 +64,56 @@ class AppInitializer {
 
     debugPrint('[BOOT] Services initialized. Premium=${PremiumEntitlement.instance.isPremium}');
     
+    if (kDebugMode) {
+      QuietLogger.instance.setupGlobalRedirect();
+      _registerGlobalDebugActions(reminderService, quietStreakRepo, prefs);
+    }
+    
+    return reminderService;
+  }
+
+  static void _registerGlobalDebugActions(
+    ReminderService reminderService,
+    QuietStreakRepository streakRepo,
+    SharedPreferences prefs,
+  ) {
+    final actions = QuietDebugActions.instance;
+
+    actions.registerAction('Trigger Reminder (3s)', () async {
+      final notificationService = NotificationService();
+      await notificationService.initialize();
+      // Using rebuildDaily with current time + offset isn't ideal for "instant" testing
+      // but we can schedule a one-off if we had a showImmediate method.
+      // For now, let's just log and rebuild daily for 1 min from now.
+      final now = DateTime.now().add(const Duration(minutes: 1));
+      await notificationService.rebuildDaily(
+        time: TimeOfDay(hour: now.hour, minute: now.minute),
+      );
+      QuietLogger.instance.info('Reminder scheduled for ${now.hour}:${now.minute}');
+    }, isGlobal: true);
+
+    actions.registerAction('Reset Streak', () async {
+      await streakRepo.clearStreak();
+      QuietLogger.instance.warning('Streak reset to 0');
+    }, isGlobal: true);
+
+    actions.registerAction('Toggle Premium', () {
+      final isPremium = StoreKitService.instance.isPremium.value;
+      StoreKitService.instance.isPremium.value = !isPremium;
+      QuietLogger.instance.info('Premium toggled to: ${!isPremium}');
+    }, isGlobal: true);
+
+    actions.registerAction('Unlock All', () async {
+      // We don't have a bulk unlock method, but we can unlock today's or force a state
+      // For now, let's just log.
+      QuietLogger.instance.info('Unlock All triggered (Mock)');
+    }, isGlobal: true);
+
+    actions.registerAction('Clear All Data', () async {
+      await prefs.clear();
+      QuietLogger.instance.error('ALL DATA CLEARED. Restart app for clean state.');
+    }, isGlobal: true);
+  }
     return reminderService;
   }
 }

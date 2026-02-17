@@ -40,6 +40,7 @@ class QuietLineApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeService.instance.themeData,
+          builder: (context, child) => QuietDebugDock(child: child!),
           home: const QuietEntryScreen(),
         );
       },

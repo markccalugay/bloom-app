@@ -14,12 +14,20 @@ class StoreKitService {
 
   final InAppPurchase _iap = InAppPurchase.instance;
 
-  ProductDetails? _premiumProduct;
-
   /// Your subscription product IDs
   static const Set<String> _premiumProductIds = {
-    'quietline.premium.monthly',
+    'quietline.premium.weekly',
+    'quietline.premium.monthly.v2',
+    'quietline.premium.yearly',
   };
+
+  /// All valid product IDs for entitlement (including grandfathered)
+  static const Set<String> _allValidPremiumProductIds = {
+    ..._premiumProductIds,
+    'quietline.premium.monthly', // Grandfathered
+  };
+
+  final Map<String, ProductDetails> _products = {};
 
   final ValueNotifier<bool> isPremium = ValueNotifier<bool>(false);
 
@@ -40,11 +48,21 @@ class StoreKitService {
 
     final response = await _iap.queryProductDetails(_premiumProductIds);
 
+    if (response.error != null) {
+      debugPrint('[StoreKit] Error loading products: ${response.error}');
+    }
+
+    if (response.notFoundIDs.isNotEmpty) {
+      debugPrint('[StoreKit] Products not found: ${response.notFoundIDs}');
+    }
+
     if (response.productDetails.isNotEmpty) {
-      _premiumProduct = response.productDetails.first;
-      debugPrint('[StoreKit] Loaded product: ${_premiumProduct!.id}');
+      for (final product in response.productDetails) {
+        _products[product.id] = product;
+        debugPrint('[StoreKit] Loaded product: ${product.id} - ${product.price}');
+      }
     } else {
-      debugPrint('[StoreKit] No products found');
+      debugPrint('[StoreKit] No products found after query');
     }
 
     // Listen for purchase updates
@@ -63,7 +81,7 @@ class StoreKitService {
     bool premiumFound = false;
 
     for (final purchase in purchases) {
-      if (_premiumProductIds.contains(purchase.productID) &&
+      if (_allValidPremiumProductIds.contains(purchase.productID) &&
           (purchase.status == PurchaseStatus.purchased ||
            purchase.status == PurchaseStatus.restored)) {
         premiumFound = true;
@@ -80,16 +98,16 @@ class StoreKitService {
     }
   }
 
-  Future<void> purchasePremium() async {
-    if (_premiumProduct == null) {
-      debugPrint('[StoreKit] purchasePremium called but product not loaded');
+  Future<void> purchasePremium(String productId) async {
+    final product = _products[productId];
+    if (product == null) {
+      debugPrint('[StoreKit] purchasePremium called for $productId but product not loaded');
       return;
     }
 
-    final purchaseParam = PurchaseParam(productDetails: _premiumProduct!);
+    final purchaseParam = PurchaseParam(productDetails: product);
 
-    // TODO: This MUST be changed to buyNonConsumable → buyNonConsumable ONLY AFTER
-    // confirming product type. Subscriptions require buyNonConsumable() in Flutter IAP.
+    // Subscriptions require buyNonConsumable() in Flutter IAP.
     await _iap.buyNonConsumable(
       purchaseParam: purchaseParam,
     );

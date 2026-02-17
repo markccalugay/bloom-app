@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart';
+import 'package:quietline_app/core/services/quiet_debug_actions.dart';
+import 'package:quietline_app/core/services/quiet_logger.dart';
 import 'controllers/quiet_breath_controller.dart';
 import 'quiet_breath_constants.dart';
 import 'widgets/quiet_breath_circle.dart';
@@ -143,6 +145,13 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
     _checkFirstSession();
 
+    if (kDebugMode) {
+      QuietDebugActions.instance.registerAction('Skip Session', () {
+        QuietLogger.instance.info('Debug: Skipping session...');
+        _handleSessionComplete();
+      });
+    }
+
     controller.listenable.addListener(() {
       if (mounted) setState(() {}); // Trigger rebuilds for play/pause state changes
       if (controller.isPlaying && !_hasStarted) {
@@ -168,6 +177,9 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
 
   @override
   void dispose() {
+    if (kDebugMode) {
+      QuietDebugActions.instance.unregisterAction('Skip Session');
+    }
     _countdownTimer?.cancel();
     controller.dispose();
     super.dispose();
@@ -227,7 +239,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                 ),
 
                 // 2. TIMER TITLE (Positioned relative to the circle)
-                // We center it vertically in the space between the top row and the circle top.
                 Positioned(
                   top: topBarHeight,
                   left: 0,
@@ -253,7 +264,6 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                 ),
 
                 // 4. CONTROLS (Positioned relative to the circle bottom)
-                // We center the start button in the bottom area.
                 Positioned(
                   top: circleBottomY,
                   left: 0,
@@ -322,41 +332,10 @@ class _QuietBreathScreenState extends State<QuietBreathScreen>
                           onPressed: () {
                             controller.completeSessionImmediately();
                           },
-                          child: const Text(
-                            'DEBUG: Skip Session',
-                            style: TextStyle(color: Colors.redAccent, fontSize: 10),
-                          ),
                         ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: 0.4),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: DefaultTextStyle(
-                            style: const TextStyle(
-                              fontSize: 9,
-                              color: Colors.white70,
-                              height: 1.2,
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('DEBUG · ${controller.contract.name}'),
-                                for (final phase in controller.contract.phases)
-                                  Text(
-                                    '${phase.type.name[0].toUpperCase()}${phase.type.name.substring(1)}: ${phase.seconds}s',
-                                  ),
-                                Text('Cycles: ${controller.contract.cycles}'),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ],
               ],
             );
           },
