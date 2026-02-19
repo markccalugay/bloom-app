@@ -31,7 +31,7 @@ class MoodService extends ChangeNotifier {
   MoodService._internal();
 
   final _storage = const FlutterSecureStorage();
-  static const _moodLogsKey = 'ql_mood_logs_encrypted';
+  static const _moodLogsKey = 'bloom_mood_logs_encrypted';
 
   List<MoodLogEntry> _logs = [];
   List<MoodLogEntry> get logs => List.unmodifiable(_logs);

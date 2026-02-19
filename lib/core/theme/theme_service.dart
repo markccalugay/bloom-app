@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../theme/ql_theme.dart';
+import '../../theme/bloom_theme.dart';
 import '../backup/backup_coordinator.dart';
 import '../entitlements/premium_entitlement.dart';
 import '../services/user_preferences_service.dart';
@@ -86,5 +86,5 @@ class ThemeService extends ChangeNotifier {
     notifyListeners();
   }
 
-  ThemeData get themeData => QLTheme.getTheme(_variant);
+  ThemeData get themeData => BloomTheme.getTheme(_variant);
 }

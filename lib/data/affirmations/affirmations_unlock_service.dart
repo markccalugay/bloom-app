@@ -1,6 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:quietline_app/data/affirmations/affirmations_model.dart';
-import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
+import 'package:bloom_app/data/affirmations/affirmations_model.dart';
+import 'package:bloom_app/data/affirmations/affirmations_packs.dart';
 
 class AffirmationsUnlockService {
   // Singleton

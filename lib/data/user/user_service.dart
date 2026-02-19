@@ -2,12 +2,12 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Simple local user profile for QuietLine.
+/// Simple local user profile for Bloom.
 /// For MVP this is an anonymous local user; later we can
 /// attach real auth IDs to it.
 class UserProfile {
   final String id;        // stable internal ID (local for now)
-  final String username;  // e.g. "QuietEmber472"
+  final String username;  // e.g. "BloomEmber472"
   final String avatarId;  // e.g. "avatar_3"
   final DateTime createdAt;
 
@@ -43,10 +43,10 @@ class UserService {
   static final UserService instance = UserService._internal();
 
   // SharedPreferences keys
-  static const _keyId = 'ql_user_id';
-  static const _keyUsername = 'ql_user_username';
-  static const _keyAvatarId = 'ql_user_avatar_id';
-  static const _keyCreatedAt = 'ql_user_created_at';
+  static const _keyId = 'bloom_user_id';
+  static const _keyUsername = 'bloom_user_username';
+  static const _keyAvatarId = 'bloom_user_avatar_id';
+  static const _keyCreatedAt = 'bloom_user_created_at';
 
   UserProfile? _cachedProfile;
 

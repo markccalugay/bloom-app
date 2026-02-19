@@ -1,10 +1,10 @@
-import 'package:quietline_app/data/forge/forge_service.dart';
-import 'package:quietline_app/screens/practice/models/custom_session_config.dart';
+import 'package:bloom_app/data/forge/forge_service.dart';
+import 'package:bloom_app/screens/practice/models/custom_session_config.dart';
 
 class ProgressSnapshot {
   final int schemaVersion;
   final int streak;
-  final int totalQuietTimeSeconds;
+  final int totalBloomTimeSeconds;
   final int totalSessions;
   final List<String> unlockedAffirmationIds;
   final String currentArmorSet;
@@ -28,7 +28,7 @@ class ProgressSnapshot {
   ProgressSnapshot({
     required this.schemaVersion,
     required this.streak,
-    required this.totalQuietTimeSeconds,
+    required this.totalBloomTimeSeconds,
     required this.totalSessions,
     required this.unlockedAffirmationIds,
     required this.currentArmorSet,
@@ -52,7 +52,7 @@ class ProgressSnapshot {
     return {
       'schema_version': schemaVersion,
       'streak': streak,
-      'total_quiet_time_seconds': totalQuietTimeSeconds,
+      'total_bloom_time_seconds': totalBloomTimeSeconds,
       'total_sessions': totalSessions,
       'unlocked_affirmation_ids': unlockedAffirmationIds,
       'current_armor_set': currentArmorSet,
@@ -77,14 +77,14 @@ class ProgressSnapshot {
     return ProgressSnapshot(
       schemaVersion: json['schema_version'] ?? 2,
       streak: json['streak'] ?? 0,
-      totalQuietTimeSeconds: json['total_quiet_time_seconds'] ?? 0,
+      totalBloomTimeSeconds: json['total_bloom_time_seconds'] ?? 0,
       totalSessions: json['total_sessions'] ?? 0,
       unlockedAffirmationIds: List<String>.from(json['unlocked_affirmation_ids'] ?? []),
       currentArmorSet: json['current_armor_set'] ?? ArmorSet.knight.name,
       unlockedArmorPieces: List<String>.from(json['unlocked_armor_pieces'] ?? []),
       ironStage: json['iron_stage'] ?? IronStage.raw.name,
       polishedIngotCount: json['polished_ingot_count'] ?? 0,
-      themeVariant: json['theme_variant'] ?? 'quietLine',
+      themeVariant: json['theme_variant'] ?? 'bloom',
       reminderHour: json['reminder_hour'],
       reminderMinute: json['reminder_minute'],
       hasEnabledReminder: json['has_enabled_reminder'] ?? false,

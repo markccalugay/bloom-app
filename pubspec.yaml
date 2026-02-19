@@ -78,14 +78,14 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#FFFFFF"
-  image: assets/images/splash-quietline-v1.png
+  image: assets/images/splash-bloom-v1.png
 
   android: true
   ios: false
 
   android_12:
     color: "#FFFFFF"
-    image: assets/images/splash-quietline-v1.png
+    image: assets/images/splash-bloom-v1.png
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -94,7 +94,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/images/logo-quietline.svg
+    - assets/images/logo-bloom.svg
     - assets/images/icon-flame.svg
     - assets/sfx/
     - assets/bgm/

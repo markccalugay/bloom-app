@@ -73,12 +73,12 @@ class ReminderService {
   /// Timing, delays, and UI concerns are handled elsewhere.
   bool shouldShowReminderPrompt({
     required bool ftueCompleted,
-    required int quietTimeSessionCount,
+    required int bloomTimeSessionCount,
   }) {
     final ReminderState state = loadState();
 
     if (!ftueCompleted) return false;
-    if (quietTimeSessionCount < 1) return false;
+    if (bloomTimeSessionCount < 1) return false;
     if (state.hasEnabledReminder) return false;
     if (state.promptCount >= 2) return false;
 

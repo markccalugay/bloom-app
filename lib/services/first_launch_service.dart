@@ -4,10 +4,10 @@ class FirstLaunchService {
   FirstLaunchService._internal();
   static final FirstLaunchService instance = FirstLaunchService._internal();
 
-  static const _keyFtueCompleted = 'ql_ftue_completed';
-  static const _keyHomeHintSeen = 'ql_home_hint_seen';
-  static const _keyArmorOnboardingSeen = 'ql_armor_onboarding_seen';
-  static const _keyHasCompletedFirstSession = 'ql_has_completed_first_session';
+  static const _keyFtueCompleted = 'bloom_ftue_completed';
+  static const _keyHomeHintSeen = 'bloom_home_hint_seen';
+  static const _keyArmorOnboardingSeen = 'bloom_armor_onboarding_seen';
+  static const _keyHasCompletedFirstSession = 'bloom_has_completed_first_session';
 
   /// Alias used by routing code. True when FTUE is complete.
   Future<bool> isCompleted() async {
@@ -15,7 +15,7 @@ class FirstLaunchService {
   }
 
   /// Returns true if the user has already completed one full
-  /// QuietLine flow (pre → breath → post → results).
+  /// Bloom flow (pre → breath → post → results).
   Future<bool> hasCompletedFtue() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyFtueCompleted) ?? false;
@@ -51,7 +51,7 @@ class FirstLaunchService {
     await prefs.setBool(_keyArmorOnboardingSeen, true);
   }
 
-  /// Returns true if the user has completed their first quiet session.
+  /// Returns true if the user has completed their first Bloom session.
   ///
   /// This is intentionally separate from FTUE completion, because FTUE may include
   /// other steps depending on routing.
@@ -60,7 +60,7 @@ class FirstLaunchService {
     return prefs.getBool(_keyHasCompletedFirstSession) ?? false;
   }
 
-  /// Marks the first quiet session as completed.
+  /// Marks the first Bloom session as completed.
   Future<void> markCompletedFirstSession() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_keyHasCompletedFirstSession, true);

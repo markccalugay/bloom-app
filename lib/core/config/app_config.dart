@@ -7,5 +7,5 @@ class AppConfig {
   static const String appleUserIdKey = 'apple_user_id';
 
   static const String backendBaseUrl =
-      'https://quietline-backend-zwzwtdwllfiumgiopjwd.a.run.app';
+      'https://bloom-backend-zwzwtdwllfiumgiopjwd.a.run.app';
 }

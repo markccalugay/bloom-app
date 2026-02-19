@@ -1,18 +1,18 @@
 // import 'package:flutter/foundation.dart';
 
-/// Immutable user model used across QuietLine.
+/// Immutable user model used across Bloom.
 /// 
 /// MVP behavior:
 /// - Users start as anonymous.
 /// - Usernames + avatarIndex are assigned automatically.
 /// - Later we can extend this model for real auth (Apple/Google/email).
-class QuietUser {
+class BloomUser {
   final String id;              // internal unique user ID
   final String displayName;     // "Calm River 218"
   final int avatarIndex;        // which default avatar to show
   final bool isAnonymous;       // true until they sign in later
 
-  const QuietUser({
+  const BloomUser({
     required this.id,
     required this.displayName,
     required this.avatarIndex,
@@ -20,13 +20,13 @@ class QuietUser {
   });
 
   /// Create a modified copy – useful for future profile editing.
-  QuietUser copyWith({
+  BloomUser copyWith({
     String? id,
     String? displayName,
     int? avatarIndex,
     bool? isAnonymous,
   }) {
-    return QuietUser(
+    return BloomUser(
       id: id ?? this.id,
       displayName: displayName ?? this.displayName,
       avatarIndex: avatarIndex ?? this.avatarIndex,
@@ -45,8 +45,8 @@ class QuietUser {
   }
 
   /// Convert Map → model
-  factory QuietUser.fromJson(Map<String, dynamic> json) {
-    return QuietUser(
+  factory BloomUser.fromJson(Map<String, dynamic> json) {
+    return BloomUser(
       id: json['id'] as String,
       displayName: json['displayName'] as String,
       avatarIndex: json['avatarIndex'] as int? ?? 0,

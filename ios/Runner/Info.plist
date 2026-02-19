@@ -7,7 +7,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Quietline App</string>
+		<string>Bloomline App</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>quietline_app</string>
+		<string>bloom_app</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -44,7 +44,7 @@
 			<string>UIInterfaceOrientationPortrait</string>
 		</array>
 		<key>NSMicrophoneUsageDescription</key>
-		<string>QuietLine does not record audio. This permission exists only to support audio playback and system sound routing.</string>
+		<string>Bloom does not record audio. This permission exists only to support audio playback and system sound routing.</string>
 		<key>CFBundleURLTypes</key>
 		<array>
 			<dict>

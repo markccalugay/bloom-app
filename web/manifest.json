@@ -1,6 +1,6 @@
 {
-    "name": "quietline_app",
-    "short_name": "quietline_app",
+    "name": "bloom_app",
+    "short_name": "bloom_app",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

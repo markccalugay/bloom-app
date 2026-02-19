@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:quietline_app/screens/practice/models/custom_session_config.dart';
+import 'package:bloom_app/screens/practice/models/custom_session_config.dart';
 
 enum ThemeModePreference { midnight, morning }
 
@@ -61,7 +61,7 @@ class UserPreferencesService extends ChangeNotifier {
       await saveCustomMix(CustomSessionConfig(
         id: 'default_morning_reset',
         name: 'Morning Reset',
-        breathPatternId: 'core_quiet',
+        breathPatternId: 'core_bloom',
         soundscapeId: 'river_steady',
         durationSeconds: 300, // 5 min
       ));

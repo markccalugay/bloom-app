@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/core/services/haptic_service.dart';
-import 'package:quietline_app/core/soundscapes/soundscape_models.dart';
-import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
-import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
-import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
+import 'package:bloom_app/core/services/haptic_service.dart';
+import 'package:bloom_app/core/soundscapes/soundscape_models.dart';
+import 'package:bloom_app/core/soundscapes/soundscape_service.dart';
+import 'package:bloom_app/core/entitlements/premium_entitlement.dart';
+import 'package:bloom_app/screens/paywall/bloom_paywall_screen.dart';
 
 class SoundscapeSelectionModal extends StatelessWidget {
   const SoundscapeSelectionModal({super.key});
@@ -42,7 +42,7 @@ class SoundscapeSelectionModal extends StatelessWidget {
                 _buildSectionHeader(theme, 'CORE SOUNDSCAPES'),
                 ...allSoundscapes.where((s) => !s.isPremium).map((s) => _buildSoundscapeTile(context, theme, s, isPremium)),
                 const SizedBox(height: 16),
-                _buildSectionHeader(theme, 'QUIETLINE+ SOUNDSCAPES'),
+                _buildSectionHeader(theme, 'BLOOM+ SOUNDSCAPES'),
                 ...allSoundscapes.where((s) => s.isPremium).map((s) => _buildSoundscapeTile(context, theme, s, isPremium)),
               ],
             ),
@@ -102,7 +102,7 @@ class SoundscapeSelectionModal extends StatelessWidget {
   Future<void> _handleSelection(BuildContext context, Soundscape soundscape, bool isLocked) async {
     if (isLocked) {
       Navigator.pop(context);
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const QuietPaywallScreen()));
+      Navigator.push(context, MaterialPageRoute(builder: (_) => const BloomPaywallScreen()));
       return;
     }
 

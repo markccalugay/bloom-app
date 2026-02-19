@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
+import 'package:bloom_app/screens/bloom_breath/models/breath_phase_contracts.dart';
 
 enum PracticeTier {
   free,

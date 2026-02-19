@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:quietline_app/core/app_initializer.dart';
-import 'package:quietline_app/core/app_restart.dart';
-import 'package:quietline_app/core/theme/theme_service.dart';
-import 'package:quietline_app/core/notifications/notification_service.dart';
-import 'package:quietline_app/core/timezone/timezone_service.dart';
-import 'package:quietline_app/core/reminder/reminder_service.dart';
+import 'package:bloom_app/core/app_initializer.dart';
+import 'package:bloom_app/core/app_restart.dart';
+import 'package:bloom_app/core/theme/theme_service.dart';
+import 'package:bloom_app/core/notifications/notification_service.dart';
+import 'package:bloom_app/core/timezone/timezone_service.dart';
+import 'package:bloom_app/core/reminder/reminder_service.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'screens/entry/quiet_entry_screen.dart';
+import 'screens/entry/bloom_entry_screen.dart';
 import 'core/entitlements/premium_entitlement.dart';
 import 'core/backup/backup_coordinator.dart';
-import 'widgets/debug/quiet_debug_dock.dart';
+import 'widgets/debug/bloom_debug_dock.dart';
 
 void main() async {
   final reminderService = await AppInitializer.initialize();
@@ -22,7 +22,7 @@ void main() async {
   ]);
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   
-  runApp(const AppRestart(child: QuietLineApp()));
+  runApp(const AppRestart(child: BloomApp()));
   
   WidgetsBinding.instance.addObserver(
     _ReminderAndBackupObserver(reminderService),
@@ -30,8 +30,8 @@ void main() async {
 }
 
 
-class QuietLineApp extends StatelessWidget {
-  const QuietLineApp({super.key});
+class BloomApp extends StatelessWidget {
+  const BloomApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,8 +41,8 @@ class QuietLineApp extends StatelessWidget {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           theme: ThemeService.instance.themeData,
-          builder: (context, child) => QuietDebugDock(child: child!),
-          home: const QuietEntryScreen(),
+          builder: (context, child) => BloomDebugDock(child: child!),
+          home: const BloomEntryScreen(),
         );
       },
     );

@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
-import 'package:quietline_app/core/api/backend_service.dart';
-import 'package:quietline_app/core/auth/auth_service.dart';
-import 'package:quietline_app/core/backup/progress_snapshot.dart';
-import 'package:quietline_app/core/reminder/reminder_service.dart';
-import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'package:quietline_app/core/theme/theme_service.dart';
-import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
-import 'package:quietline_app/data/forge/forge_service.dart';
-import 'package:quietline_app/data/streak/quiet_streak_repository.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
-import 'package:quietline_app/core/auth/user_model.dart';
-import 'package:quietline_app/data/user/user_service.dart';
-import 'package:quietline_app/core/services/user_preferences_service.dart';
+import 'package:bloom_app/core/api/backend_service.dart';
+import 'package:bloom_app/core/auth/auth_service.dart';
+import 'package:bloom_app/core/backup/progress_snapshot.dart';
+import 'package:bloom_app/core/reminder/reminder_service.dart';
+import 'package:bloom_app/core/storekit/storekit_service.dart';
+import 'package:bloom_app/core/theme/theme_service.dart';
+import 'package:bloom_app/data/affirmations/affirmations_unlock_service.dart';
+import 'package:bloom_app/data/forge/forge_service.dart';
+import 'package:bloom_app/data/streak/bloom_streak_repository.dart';
+import 'package:bloom_app/theme/bloom_theme.dart';
+import 'package:bloom_app/core/auth/user_model.dart';
+import 'package:bloom_app/data/user/user_service.dart';
+import 'package:bloom_app/core/services/user_preferences_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
@@ -20,7 +20,7 @@ class BackupCoordinator {
 
   final BackendService backendService;
   final AuthService authService;
-  final QuietStreakRepository streakRepo;
+  final BloomStreakRepository streakRepo;
   final ForgeService forgeService;
   final AffirmationsUnlockService affirmationsService;
   final ThemeService themeService;
@@ -72,7 +72,7 @@ class BackupCoordinator {
       final snapshot = await backendService.restore(idToken: idToken);
       if (snapshot != null) {
         // Simple resolution strategy: Use the one with more quiet time
-        if (bestSnapshot == null || snapshot.totalQuietTimeSeconds > bestSnapshot.totalQuietTimeSeconds) {
+        if (bestSnapshot == null || snapshot.totalBloomTimeSeconds > bestSnapshot.totalBloomTimeSeconds) {
           bestSnapshot = snapshot;
         }
       }
@@ -126,7 +126,7 @@ class BackupCoordinator {
     return ProgressSnapshot(
       schemaVersion: 2,
       streak: streak,
-      totalQuietTimeSeconds: totalSeconds,
+      totalBloomTimeSeconds: totalSeconds,
       totalSessions: totalSessions,
       unlockedAffirmationIds: unlockedAffirmations.toList(),
       currentArmorSet: forgeState.currentSet.name,
@@ -151,18 +151,18 @@ class BackupCoordinator {
     final prefs = await SharedPreferences.getInstance();
     
     // 1. Streak
-    await prefs.setInt('quiet_streak_count', snapshot.streak);
-    await prefs.setInt('quiet_total_seconds', snapshot.totalQuietTimeSeconds);
-    await prefs.setInt('quiet_total_sessions', snapshot.totalSessions);
+    await prefs.setInt('bloom_streak_count', snapshot.streak);
+    await prefs.setInt('bloom_total_seconds', snapshot.totalBloomTimeSeconds);
+    await prefs.setInt('bloom_total_sessions', snapshot.totalSessions);
     // We don't have last_date in snapshot, but we can set it to today to avoid lost streak
-    await prefs.setString('quiet_streak_last_date', DateTime.now().toIso8601String().split('T').first);
+    await prefs.setString('bloom_streak_last_date', DateTime.now().toIso8601String().split('T').first);
     
     // 1b. Practice Usage (Favorites)
     if (snapshot.practiceUsage.isNotEmpty) {
       final List<String> encoded = snapshot.practiceUsage.entries
           .map((e) => '${e.key}:${e.value}')
           .toList();
-      await prefs.setStringList('quiet_practice_usage', encoded);
+      await prefs.setStringList('bloom_practice_usage', encoded);
     }
 
     // 2. Affirmations
@@ -170,15 +170,15 @@ class BackupCoordinator {
 
     // 3. Forge
     final setIdx = ArmorSet.values.indexWhere((e) => e.name == snapshot.currentArmorSet);
-    await prefs.setInt('ql_forge_set', setIdx != -1 ? setIdx : 0);
+    await prefs.setInt('bloom_forge_set', setIdx != -1 ? setIdx : 0);
     
     final stageIdx = IronStage.values.indexWhere((e) => e.name == snapshot.ironStage);
-    await prefs.setInt('ql_forge_iron_stage', stageIdx != -1 ? stageIdx : 0);
+    await prefs.setInt('bloom_forge_iron_stage', stageIdx != -1 ? stageIdx : 0);
     
-    await prefs.setStringList('ql_forge_unlocked_pieces', snapshot.unlockedArmorPieces);
-    await prefs.setInt('ql_forge_ingot_count', snapshot.polishedIngotCount);
-    await prefs.setInt('ql_forge_total_sessions', snapshot.totalSessions);
-    await prefs.setBool('ql_forge_has_seen_explanation', true);
+    await prefs.setStringList('bloom_forge_unlocked_pieces', snapshot.unlockedArmorPieces);
+    await prefs.setInt('bloom_forge_ingot_count', snapshot.polishedIngotCount);
+    await prefs.setInt('bloom_forge_total_sessions', snapshot.totalSessions);
+    await prefs.setBool('bloom_forge_has_seen_explanation', true);
 
     // 4. Theme
     final themeIdx = ThemeVariant.values.indexWhere((e) => e.name == snapshot.themeVariant);

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/core/services/haptic_service.dart';
-import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'package:quietline_app/core/services/user_preferences_service.dart';
-import 'package:quietline_app/core/soundscapes/soundscape_models.dart';
-import 'package:quietline_app/screens/paywall/quiet_paywall_screen.dart';
-import 'package:quietline_app/screens/practice/models/custom_session_config.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
+import 'package:bloom_app/core/services/haptic_service.dart';
+import 'package:bloom_app/core/storekit/storekit_service.dart';
+import 'package:bloom_app/core/services/user_preferences_service.dart';
+import 'package:bloom_app/core/soundscapes/soundscape_models.dart';
+import 'package:bloom_app/screens/paywall/bloom_paywall_screen.dart';
+import 'package:bloom_app/screens/practice/models/custom_session_config.dart';
+import 'package:bloom_app/screens/bloom_breath/models/breath_phase_contracts.dart';
 import 'package:uuid/uuid.dart';
 
 class CustomMixScreen extends StatefulWidget {
@@ -67,7 +67,7 @@ class _CustomMixScreenState extends State<CustomMixScreen> {
     if (practice.isPremium && !StoreKitService.instance.isPremium.value) {
       _showPaywallPrompt(
         'Premium Practice',
-        '${practice.name} is a QuietLine+ feature.\nUpgrade to unlock unlimited access.',
+        '${practice.name} is a Bloom+ feature.\nUpgrade to unlock unlimited access.',
       );
       return;
     }
@@ -91,7 +91,7 @@ class _CustomMixScreenState extends State<CustomMixScreen> {
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const QuietPaywallScreen()),
+                  MaterialPageRoute(builder: (_) => const BloomPaywallScreen()),
               );
             },
             child: const Text('Upgrade', style: TextStyle(fontWeight: FontWeight.bold)),
@@ -179,7 +179,7 @@ class _CustomMixScreenState extends State<CustomMixScreen> {
                       if (isLocked) {
                         _showPaywallPrompt(
                           'Extended Duration',
-                          'Sessions longer than 3 minutes are a QuietLine+ feature.\nUpgrade to unlock up to 20 minutes.',
+                          'Sessions longer than 3 minutes are a Bloom+ feature.\nUpgrade to unlock up to 20 minutes.',
                         );
                         return;
                       }
@@ -220,7 +220,7 @@ class _CustomMixScreenState extends State<CustomMixScreen> {
                       if (isLocked) {
                         _showPaywallPrompt(
                           'Premium Environment',
-                          '${sound.name} is a QuietLine+ feature.\nUpgrade to unlock all audio environments.',
+                          '${sound.name} is a Bloom+ feature.\nUpgrade to unlock all audio environments.',
                         );
                         return;
                       }

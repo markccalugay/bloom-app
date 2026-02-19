@@ -3,17 +3,17 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Centralized helper for opening external URLs (website, legal, support).
 class WebLaunchService {
-  static final Uri _websiteUri = Uri.parse('https://quietline.app/');
-  static final Uri _aboutUri = Uri.parse('https://quietline.app/what-is-quietline/');
-  static final Uri _supportUri = Uri.parse('https://quietline.app/support/');
+  static final Uri _websiteUri = Uri.parse('https://bloom.app/');
+  static final Uri _aboutUri = Uri.parse('https://bloom.app/what-is-bloom/');
+  static final Uri _supportUri = Uri.parse('https://bloom.app/support/');
   static final Uri _privacyUri = Uri.parse(
-    'https://quietline.app/privacy-policy/',
+    'https://bloom.app/privacy-policy/',
   );
   static final Uri _termsUri = Uri.parse(
-    'https://quietline.app/terms-of-service/',
+    'https://bloom.app/terms-of-service/',
   );
   static final Uri _whatsNewUri = Uri.parse(
-    'https://quietline.app/whats-new/',
+    'https://bloom.app/whats-new/',
   );
 
   Future<void> openWebsite() => _open(_websiteUri);

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/core/auth/auth_service.dart';
-import 'package:quietline_app/data/pairs/pair_repository.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
-import 'package:quietline_app/core/theme/theme_service.dart';
+import 'package:bloom_app/core/auth/auth_service.dart';
+import 'package:bloom_app/data/pairs/pair_repository.dart';
+import 'package:bloom_app/theme/bloom_theme.dart';
+import 'package:bloom_app/core/theme/theme_service.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class StrengthPartnerScreen extends StatefulWidget {
@@ -150,7 +150,7 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
       resizeToAvoidBottomInset: true,
       body: Container(
         decoration: BoxDecoration(
-          gradient: QLGradients.getHomeGradient(ThemeService.instance.variant),
+          gradient: BloomGradients.getHomeGradient(ThemeService.instance.variant),
         ),
         child: SafeArea(
           child: user == null ? _buildSignInCta() : _buildContent(theme),

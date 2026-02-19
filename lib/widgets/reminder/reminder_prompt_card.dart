@@ -130,7 +130,7 @@ class _Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      'Would you like a gentle daily reminder to return to Quiet Time?',
+      'Would you like a gentle daily reminder to return to Bloom Time?',
       textAlign: centered ? TextAlign.center : TextAlign.start,
       style: Theme.of(context).textTheme.bodyMedium,
     );

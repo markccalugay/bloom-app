@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:quietline_app/core/storekit/storekit_service.dart';
-import 'package:quietline_app/core/entitlements/premium_entitlement.dart';
-import 'package:quietline_app/core/theme/theme_service.dart';
-import 'package:quietline_app/core/soundscapes/soundscape_service.dart';
-import 'package:quietline_app/core/timezone/timezone_service.dart';
-import 'package:quietline_app/data/streak/quiet_streak_local_store.dart';
-import 'package:quietline_app/data/streak/quiet_streak_repository.dart';
-import 'package:quietline_app/data/streak/quiet_streak_service.dart';
-import 'package:quietline_app/core/practices/practice_access_service.dart';
-import 'package:quietline_app/data/forge/forge_service.dart';
-import 'package:quietline_app/core/reminder/reminder_service.dart';
-import 'package:quietline_app/core/api/backend_service.dart';
-import 'package:quietline_app/core/backup/backup_coordinator.dart';
-import 'package:quietline_app/core/auth/auth_service.dart';
-import 'package:quietline_app/data/affirmations/affirmations_unlock_service.dart';
-import 'package:quietline_app/core/config/app_config.dart';
-import 'package:quietline_app/core/services/user_preferences_service.dart';
-import 'package:quietline_app/core/services/quiet_logger.dart';
-import 'package:quietline_app/core/services/quiet_debug_actions.dart';
-import 'package:quietline_app/core/notifications/notification_service.dart';
-import 'package:quietline_app/core/services/mood_service.dart';
+import 'package:bloom_app/core/storekit/storekit_service.dart';
+import 'package:bloom_app/core/entitlements/premium_entitlement.dart';
+import 'package:bloom_app/core/theme/theme_service.dart';
+import 'package:bloom_app/core/soundscapes/soundscape_service.dart';
+import 'package:bloom_app/core/timezone/timezone_service.dart';
+import 'package:bloom_app/data/streak/bloom_streak_local_store.dart';
+import 'package:bloom_app/data/streak/bloom_streak_repository.dart';
+import 'package:bloom_app/data/streak/bloom_streak_service.dart';
+import 'package:bloom_app/core/practices/practice_access_service.dart';
+import 'package:bloom_app/data/forge/forge_service.dart';
+import 'package:bloom_app/core/reminder/reminder_service.dart';
+import 'package:bloom_app/core/api/backend_service.dart';
+import 'package:bloom_app/core/backup/backup_coordinator.dart';
+import 'package:bloom_app/core/auth/auth_service.dart';
+import 'package:bloom_app/data/affirmations/affirmations_unlock_service.dart';
+import 'package:bloom_app/core/config/app_config.dart';
+import 'package:bloom_app/core/services/user_preferences_service.dart';
+import 'package:bloom_app/core/services/bloom_logger.dart';
+import 'package:bloom_app/core/services/bloom_debug_actions.dart';
+import 'package:bloom_app/core/notifications/notification_service.dart';
+import 'package:bloom_app/core/services/mood_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:quietline_app/core/config/supabase_config.dart';
+import 'package:bloom_app/core/config/supabase_config.dart';
 
 class AppInitializer {
   static Future<ReminderService> initialize() async {
@@ -47,10 +47,10 @@ class AppInitializer {
     final prefs = await SharedPreferences.getInstance();
     
     // Streak & Data
-    final quietStreakRepo = QuietStreakRepository(
-      localStore: QuietStreakLocalStore(prefs),
+    final bloomStreakRepo = BloomStreakRepository(
+      localStore: BloomStreakLocalStore(prefs),
     );
-    QuietStreakService.repo = quietStreakRepo;
+    BloomStreakService.repo = bloomStreakRepo;
 
     await PracticeAccessService.instance.initialize();
     await ForgeService.instance.initialize();
@@ -65,7 +65,7 @@ class AppInitializer {
     BackupCoordinator.instance = BackupCoordinator(
       backendService: backendService,
       authService: AuthService.instance,
-      streakRepo: quietStreakRepo,
+      streakRepo: bloomStreakRepo,
       forgeService: ForgeService.instance,
       affirmationsService: AffirmationsUnlockService.instance,
       themeService: ThemeService.instance,
@@ -75,8 +75,8 @@ class AppInitializer {
     debugPrint('[BOOT] Services initialized. Premium=${PremiumEntitlement.instance.isPremium}');
     
     if (kDebugMode) {
-      QuietLogger.instance.setupGlobalRedirect();
-      _registerGlobalDebugActions(reminderService, quietStreakRepo, prefs);
+      BloomLogger.instance.setupGlobalRedirect();
+      _registerGlobalDebugActions(reminderService, bloomStreakRepo, prefs);
     }
     
     return reminderService;
@@ -84,10 +84,10 @@ class AppInitializer {
 
   static void _registerGlobalDebugActions(
     ReminderService reminderService,
-    QuietStreakRepository streakRepo,
+    BloomStreakRepository streakRepo,
     SharedPreferences prefs,
   ) {
-    final actions = QuietDebugActions.instance;
+    final actions = BloomDebugActions.instance;
 
     actions.registerAction('Trigger Reminder (3s)', () async {
       final notificationService = NotificationService();
@@ -99,29 +99,29 @@ class AppInitializer {
       await notificationService.rebuildDaily(
         time: TimeOfDay(hour: now.hour, minute: now.minute),
       );
-      QuietLogger.instance.info('Reminder scheduled for ${now.hour}:${now.minute}');
+      BloomLogger.instance.info('Reminder scheduled for ${now.hour}:${now.minute}');
     }, isGlobal: true);
 
     actions.registerAction('Reset Streak', () async {
       await streakRepo.clearStreak();
-      QuietLogger.instance.warning('Streak reset to 0');
+      BloomLogger.instance.warning('Streak reset to 0');
     }, isGlobal: true);
 
     actions.registerAction('Toggle Premium', () {
       final isPremium = StoreKitService.instance.isPremium.value;
       StoreKitService.instance.isPremium.value = !isPremium;
-      QuietLogger.instance.info('Premium toggled to: ${!isPremium}');
+      BloomLogger.instance.info('Premium toggled to: ${!isPremium}');
     }, isGlobal: true);
 
     actions.registerAction('Unlock All', () async {
       // We don't have a bulk unlock method, but we can unlock today's or force a state
       // For now, let's just log.
-      QuietLogger.instance.info('Unlock All triggered (Mock)');
+      BloomLogger.instance.info('Unlock All triggered (Mock)');
     }, isGlobal: true);
 
     actions.registerAction('Clear All Data', () async {
       await prefs.clear();
-      QuietLogger.instance.error('ALL DATA CLEARED. Restart app for clean state.');
+      BloomLogger.instance.error('ALL DATA CLEARED. Restart app for clean state.');
     }, isGlobal: true);
   }
 }

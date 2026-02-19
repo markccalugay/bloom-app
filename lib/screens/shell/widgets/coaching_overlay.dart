@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/screens/shell/quiet_shell_controller.dart';
+import 'package:bloom_app/screens/shell/bloom_shell_controller.dart';
 
 class CoachingOverlay extends StatelessWidget {
   final CoachingStep step;
@@ -17,13 +17,13 @@ class CoachingOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     if (step == CoachingStep.none) return const SizedBox.shrink();
 
-    if (step == CoachingStep.quietTimeButton) {
+    if (step == CoachingStep.bloomTimeButton) {
       if (spotlightRect == null) return const SizedBox.shrink();
       return _buildSpotlightOverlay(
         rect: spotlightRect!,
         title: 'Well done.',
         body: 'You just did the hardest part; starting.\n\n'
-            'Use Quiet Time anytime you need a reset.\n'
+            'Use Bloom Time anytime you need a reset.\n'
             'Tap the button at the bottom to begin.',
       );
     }

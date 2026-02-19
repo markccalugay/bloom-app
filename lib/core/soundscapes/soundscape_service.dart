@@ -3,7 +3,7 @@ import 'package:audioplayers/audioplayers.dart' as ap;
 import 'package:just_audio/just_audio.dart' as ja;
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../app_assets.dart';
+import '../bloom_assets.dart';
 import 'soundscape_models.dart';
 
 class SoundscapeService extends ChangeNotifier {
@@ -13,11 +13,11 @@ class SoundscapeService extends ChangeNotifier {
   final ja.AudioPlayer _bgPlayer = ja.AudioPlayer();
   final ap.AudioPlayer _sfxPlayer = ap.AudioPlayer();
 
-  static const String _activeSoundscapeKey = 'ql_soundscape_id';
-  static const String _volumeKey = 'ql_soundscape_volume';
-  static const String _muteKey = 'ql_soundscape_muted';
-  static const String _sfxVolumeKey = 'ql_sfx_volume';
-  static const String _sfxMuteKey = 'ql_sfx_muted';
+  static const String _activeSoundscapeKey = 'bloom_soundscape_id';
+  static const String _volumeKey = 'bloom_soundscape_volume';
+  static const String _muteKey = 'bloom_soundscape_muted';
+  static const String _sfxVolumeKey = 'bloom_sfx_volume';
+  static const String _sfxMuteKey = 'bloom_sfx_muted';
 
   Soundscape _activeSoundscape = allSoundscapes[0]; // River Steady
   double _volume = 1.0; // 0.0 to 1.0
@@ -195,13 +195,13 @@ class SoundscapeService extends ChangeNotifier {
   Future<void> playCountdown(int value) async {
     switch (value) {
       case 1:
-        await playSfx(AppAssets.countdown1);
+        await playSfx(BloomAssets.countdown1);
         break;
       case 2:
-        await playSfx(AppAssets.countdown2);
+        await playSfx(BloomAssets.countdown2);
         break;
       case 3:
-        await playSfx(AppAssets.countdown3);
+        await playSfx(BloomAssets.countdown3);
         break;
     }
   }
@@ -210,8 +210,8 @@ class SoundscapeService extends ChangeNotifier {
     _isWelcomeHomePlaying = true;
     notifyListeners();
     
-    // ql_bgm_welcome_home.wav is ~45 seconds
-    await playSfx(AppAssets.welcomeHomeBgm);
+    // bloom_bgm_welcome_home.wav is ~45 seconds
+    await playSfx(BloomAssets.welcomeHomeBgm);
     
     // Wait for the SFX to finish before resetting the state
     await _sfxPlayer.onPlayerComplete.first;

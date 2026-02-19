@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/core/services/haptic_service.dart';
-import 'package:quietline_app/core/services/user_preferences_service.dart';
-import 'package:quietline_app/screens/practice/custom_mix_screen.dart';
+import 'package:bloom_app/core/services/haptic_service.dart';
+import 'package:bloom_app/core/services/user_preferences_service.dart';
+import 'package:bloom_app/screens/practice/custom_mix_screen.dart';
 
 class MyMixesScreen extends StatelessWidget {
   const MyMixesScreen({super.key});

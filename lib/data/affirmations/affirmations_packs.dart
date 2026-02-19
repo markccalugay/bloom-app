@@ -38,7 +38,7 @@ const sleepPack = AffirmationPack(
 const strengthPack = AffirmationPack(
   id: AffirmationPackIds.strength,
   name: 'Confidence & Strength',
-  description: 'Quiet strength, steady confidence, no bravado.',
+  description: 'Bloom strength, steady confidence, no bravado.',
   isSeasonal: false,
 );
 

@@ -1,0 +1,89 @@
+import 'bloom_streak_local_store.dart';
+import 'bloom_streak_logic.dart';
+
+/// Public API for anything that needs streak information.
+///
+/// For now this is local-only. Later you can plug in account/remote sync
+/// here without changing the rest of the app.
+class BloomStreakRepository {
+  BloomStreakRepository({
+    required BloomStreakLocalStore localStore,
+    BloomStreakLogic? logic,
+  })  : _local = localStore,
+        _logic = logic ?? const BloomStreakLogic();
+
+  final BloomStreakLocalStore _local;
+  final BloomStreakLogic _logic;
+
+  /// Called when a qualifying session has completed *today*.
+  /// Returns the updated streak count.
+  Future<int> registerSessionCompletedToday() async {
+    final current = await _local.getCurrentStreak();
+    final last = await _local.getLastDate();
+    final now = DateTime.now();
+
+    final result = _logic.evaluate(
+      currentStreak: current,
+      lastDate: last,
+      today: now,
+    );
+
+    await _local.saveStreak(
+      count: result.newStreak,
+      lastDate: result.newDate,
+    );
+
+    return result.newStreak;
+  }
+
+  /// Returns the current streak without changing it.
+  Future<int> getCurrentStreak() {
+    return _local.getCurrentStreak();
+  }
+
+  /// Returns total sessions from local storage.
+  Future<int> getTotalSessions() {
+    return _local.getTotalSessions();
+  }
+
+  /// Returns total seconds from local storage.
+  Future<int> getTotalSeconds() {
+    return _local.getTotalSeconds();
+  }
+
+  /// Records a completed session's duration and practice ID.
+  Future<void> recordSession(int seconds, {String? practiceId}) {
+    return _local.incrementMetrics(seconds, practiceId: practiceId);
+  }
+
+  Future<List<String>> getSessionDates() {
+    return _local.getSessionDates();
+  }
+
+  Future<Map<String, int>> getPracticeUsage() {
+    return _local.getPracticeUsage();
+  }
+
+  /// Returns true if a Bloom session has already been completed today (local date-only).
+  Future<bool> hasCompletedToday(DateTime today) {
+    return _local.hasCompletedToday(today);
+  }
+
+  /// Optional helper to wipe streak (for debugging or a “reset progress” feature).
+  Future<void> clearStreak() {
+    return _local.clear();
+  }
+
+  /// Alias for clearStreak() because some callers use resetStreak.
+  Future<void> resetStreak() {
+    return clearStreak();
+  }
+}
+
+// Somewhere near app startup, you’ll create the repository:
+// final prefs = await SharedPreferences.getInstance();
+// final streakRepo = BloomStreakRepository(
+//   localStore: BloomStreakLocalStore(prefs),
+// );
+//
+// final newStreak = await streakRepo.registerSessionCompletedToday();

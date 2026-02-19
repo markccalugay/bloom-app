@@ -79,7 +79,7 @@ class NotificationService {
 
     await _plugin.zonedSchedule(
       id: _dailyReminderId,
-      title: 'Quiet Time',
+      title: 'Bloom Time',
       body: 'Take a moment to return to stillness.',
       scheduledDate: scheduled,
       notificationDetails: details,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/core/auth/user_model.dart';
-import 'package:quietline_app/core/backup/backup_coordinator.dart';
-import 'package:quietline_app/core/backup/progress_snapshot.dart';
-import 'package:quietline_app/data/user/user_service.dart';
-import 'package:quietline_app/data/streak/quiet_streak_service.dart';
+import 'package:bloom_app/core/auth/user_model.dart';
+import 'package:bloom_app/core/backup/backup_coordinator.dart';
+import 'package:bloom_app/core/backup/progress_snapshot.dart';
+import 'package:bloom_app/data/user/user_service.dart';
+import 'package:bloom_app/data/streak/bloom_streak_service.dart';
 import 'package:intl/intl.dart';
 
 class RemoteDataFoundScreen extends StatefulWidget {
@@ -39,8 +39,8 @@ class _RemoteDataFoundScreenState extends State<RemoteDataFoundScreen> {
   }
 
   Future<void> _loadLocalStats() async {
-    final streak = await QuietStreakService.getCurrentStreak();
-    final totalSeconds = await QuietStreakService.getTotalSeconds();
+    final streak = await BloomStreakService.getCurrentStreak();
+    final totalSeconds = await BloomStreakService.getTotalSeconds();
     final profile = await UserService.instance.getOrCreateUser();
     
     if (mounted) {
@@ -155,7 +155,7 @@ class _RemoteDataFoundScreenState extends State<RemoteDataFoundScreen> {
                         context, 
                         title: 'Cloud Save',
                         streak: widget.remoteSnapshot.streak,
-                        time: widget.remoteSnapshot.totalQuietTimeSeconds,
+                        time: widget.remoteSnapshot.totalBloomTimeSeconds,
                         memberSince: _formatDateFromMs(widget.remoteSnapshot.memberSince),
                         isHighlight: true,
                       ),

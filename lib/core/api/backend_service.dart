@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:quietline_app/core/backup/progress_snapshot.dart';
+import 'package:bloom_app/core/backup/progress_snapshot.dart';
 
 class BackendService {
   final String baseUrl;

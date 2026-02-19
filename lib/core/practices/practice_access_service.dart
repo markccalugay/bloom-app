@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/practices/practice_model.dart';
 import '../../data/practices/practice_catalog.dart';
 import'../entitlements/premium_entitlement.dart';
-import '../../screens/quiet_breath/models/breath_phase_contracts.dart';
+import '../../screens/bloom_breath/models/breath_phase_contracts.dart';
 import '../../data/practices/reset_pack_model.dart';
 import '../../data/practices/reset_pack_catalog.dart';
 
@@ -15,7 +15,7 @@ class PracticeAccessService {
   static final PracticeAccessService instance = PracticeAccessService._internal();
   PracticeAccessService._internal();
 
-  final ValueNotifier<String> activePracticeId = ValueNotifier<String>('core_quiet');
+  final ValueNotifier<String> activePracticeId = ValueNotifier<String>('core_bloom');
   final ValueNotifier<String?> activeResetPackId = ValueNotifier<String?>(null);
 
   bool get isResetPackActive => activeResetPackId.value != null;
@@ -24,7 +24,7 @@ class PracticeAccessService {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     activePracticeId.value =
-        prefs.getString(_activePracticeKey) ?? 'core_quiet';
+        prefs.getString(_activePracticeKey) ?? 'core_bloom';
     activeResetPackId.value = prefs.getString(_activeResetPackKey);
   }
 
@@ -52,7 +52,7 @@ class PracticeAccessService {
 
     return PracticeCatalog.all.firstWhere(
       (p) => p.id == activePracticeId.value,
-      orElse: () => PracticeCatalog.coreQuiet,
+      orElse: () => PracticeCatalog.coreBloom,
     ).contract;
   }
 

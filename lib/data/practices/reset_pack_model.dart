@@ -1,4 +1,4 @@
-import '../../screens/quiet_breath/models/breath_phase_contracts.dart';
+import '../../screens/bloom_breath/models/breath_phase_contracts.dart';
 
 /// A Reset Pack combines a specific breathing rhythm with a themed affirmation pool.
 class ResetPack {

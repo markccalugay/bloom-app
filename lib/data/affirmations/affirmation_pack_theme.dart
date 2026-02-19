@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
-import 'package:quietline_app/data/affirmations/affirmations_packs.dart';
+import 'package:bloom_app/theme/bloom_theme.dart';
+import 'package:bloom_app/data/affirmations/affirmations_packs.dart';
 
 /// Centralized visual theming for affirmation packs.
 /// This is the single source of truth for pack backgrounds.
@@ -40,18 +40,18 @@ class AffirmationPackTheme {
 
   // --- Pack definitions ---
 
-  /// Core affirmations — MUST strictly follow QuietLine brand colors.
+  /// Core affirmations — MUST strictly follow Bloom brand colors.
   static final AffirmationPackTheme _core = AffirmationPackTheme(
     backgroundGradient: LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        QLColors.primaryTeal,
-        QLColors.primaryTeal.withValues(alpha: 0.85),
+        BloomColors.primaryTeal,
+        BloomColors.primaryTeal.withValues(alpha: 0.85),
       ],
     ),
-    accentColor: QLColors.primaryTeal,
-    borderColor: QLColors.primaryTeal,
+    accentColor: BloomColors.primaryTeal,
+    borderColor: BloomColors.primaryTeal,
   );
 
   /// Focus — deeper, cooler, performance-oriented.

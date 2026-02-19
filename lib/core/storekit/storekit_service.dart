@@ -17,15 +17,15 @@ class StoreKitService {
 
   /// Your subscription product IDs
   static const Set<String> _premiumProductIds = {
-    'quietline.premium.weekly',
-    'quietline.premium.monthly.v2',
-    'quietline.premium.yearly',
+    'bloom.premium.weekly',
+    'bloom.premium.monthly.v2',
+    'bloom.premium.yearly',
   };
 
   /// All valid product IDs for entitlement (including grandfathered)
   static const Set<String> _allValidPremiumProductIds = {
     ..._premiumProductIds,
-    'quietline.premium.monthly', // Grandfathered
+    'bloom.premium.monthly', // Grandfathered
   };
 
   final Map<String, ProductDetails> _products = {};

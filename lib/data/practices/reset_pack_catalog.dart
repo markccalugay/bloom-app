@@ -1,4 +1,4 @@
-import '../../screens/quiet_breath/models/breath_phase_contracts.dart';
+import '../../screens/bloom_breath/models/breath_phase_contracts.dart';
 import '../affirmations/affirmations_packs.dart';
 import 'reset_pack_model.dart';
 
@@ -21,7 +21,7 @@ class ResetPackCatalog {
     id: ResetPackIds.preMeetingReset,
     name: 'Pre-Meeting Reset',
     description: 'Clear your mind and find steady confidence. Uses logic-based box breathing.',
-    contract: coreQuietContract, // 4-4-4-4
+    contract: coreBloomContract, // 4-4-4-4
     affirmationPackId: 'meeting', // To be created
   );
 

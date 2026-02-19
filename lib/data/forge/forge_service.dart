@@ -67,12 +67,12 @@ class ForgeService extends ChangeNotifier {
   static final ForgeService instance = ForgeService._internal();
   ForgeService._internal();
 
-  static const String _currentSetKey = 'ql_forge_set';
-  static const String _ironStageKey = 'ql_forge_iron_stage';
-  static const String _unlockedPiecesKey = 'ql_forge_unlocked_pieces';
-  static const String _ingotCountKey = 'ql_forge_ingot_count';
-  static const String _totalSessionsKey = 'ql_forge_total_sessions';
-  static const String _hasSeenExplanationKey = 'ql_forge_has_seen_explanation';
+  static const String _currentSetKey = 'bloom_forge_set';
+  static const String _ironStageKey = 'bloom_forge_iron_stage';
+  static const String _unlockedPiecesKey = 'bloom_forge_unlocked_pieces';
+  static const String _ingotCountKey = 'bloom_forge_ingot_count';
+  static const String _totalSessionsKey = 'bloom_forge_total_sessions';
+  static const String _hasSeenExplanationKey = 'bloom_forge_has_seen_explanation';
 
   late ForgeState _state;
   ForgeState get state => _state;

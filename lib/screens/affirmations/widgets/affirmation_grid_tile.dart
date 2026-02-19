@@ -1,9 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:quietline_app/core/app_assets.dart';
-import 'package:quietline_app/data/affirmations/affirmations_model.dart';
-import 'package:quietline_app/theme/ql_theme.dart';
+import 'package:bloom_app/core/bloom_assets.dart';
+import 'package:bloom_app/data/affirmations/affirmations_model.dart';
+import 'package:bloom_app/theme/bloom_theme.dart';
 
 class AffirmationGridTile extends StatelessWidget {
   final Affirmation affirmation;
@@ -51,7 +51,7 @@ class AffirmationGridTile extends StatelessWidget {
             borderRadius: radius,
             color: theme.colorScheme.surface,
             border: Border.all(
-              color: (isDark ? QLColors.steelGray : QLColors.skyAsh).withValues(alpha: 0.5),
+              color: (isDark ? BloomColors.steelGray : BloomColors.skyAsh).withValues(alpha: 0.5),
               width: 1,
             ),
             boxShadow: [
@@ -80,11 +80,11 @@ class AffirmationGridTile extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Top: small QL mark (subtle)
+                          // Top: small Bloom mark (subtle)
                           Align(
                             alignment: Alignment.topRight,
                             child: SvgPicture.asset(
-                              AppAssets.quietlineLogo,
+                              BloomAssets.bloomLogo,
                               width: 12,
                               height: 12,
                               colorFilter: ColorFilter.mode(
@@ -121,7 +121,7 @@ class AffirmationGridTile extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: (isDark ? QLColors.mutedSand : QLColors.slateBlue).withValues(alpha: 0.8),
+                                color: (isDark ? BloomColors.mutedSand : BloomColors.slateBlue).withValues(alpha: 0.8),
                                 fontSize: 9,
                                 letterSpacing: 0.1,
                               ),
@@ -145,9 +145,9 @@ class AffirmationGridTile extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: (isDark ? QLColors.midnightBlue : QLColors.slateBlue).withValues(alpha: 0.8),
+                        color: (isDark ? BloomColors.midnightBlue : BloomColors.slateBlue).withValues(alpha: 0.8),
                         border: Border.all(
-                          color: (isDark ? QLColors.steelGray : QLColors.skyAsh).withValues(alpha: 0.3),
+                          color: (isDark ? BloomColors.steelGray : BloomColors.skyAsh).withValues(alpha: 0.3),
                           width: 1,
                         ),
                       ),
@@ -159,13 +159,13 @@ class AffirmationGridTile extends StatelessWidget {
                                 ? Icons.workspace_premium_rounded
                                 : Icons.lock_outline_rounded,
                             size: 14,
-                            color: isDark ? QLColors.sandWhite : Colors.white,
+                            color: isDark ? BloomColors.sandWhite : Colors.white,
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            isPremiumLocked ? 'QuietLine+' : 'Locked',
+                            isPremiumLocked ? 'Bloom+' : 'Locked',
                             style: theme.textTheme.labelSmall?.copyWith(
-                                color: isDark ? QLColors.sandWhite : Colors.white,
+                                color: isDark ? BloomColors.sandWhite : Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 10,
                               letterSpacing: 0.5,

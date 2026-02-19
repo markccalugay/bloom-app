@@ -1,13 +1,13 @@
 import 'practice_model.dart';
-import 'package:quietline_app/screens/quiet_breath/models/breath_phase_contracts.dart';
+import 'package:bloom_app/screens/bloom_breath/models/breath_phase_contracts.dart';
 
 class PracticeCatalog {
-  static const coreQuiet = Practice(
-    id: 'core_quiet',
-    title: 'Core Quiet',
+  static const coreBloom = Practice(
+    id: 'core_bloom',
+    title: 'Core Bloom',
     description: 'A simple 90-second breathing reset.',
     tier: PracticeTier.free,
-    contract: coreQuietContract,
+    contract: coreBloomContract,
   );
 
   static const steadyDiscipline = Practice(
@@ -51,7 +51,7 @@ class PracticeCatalog {
   );
 
   static const all = <Practice>[
-    coreQuiet,
+    coreBloom,
     steadyDiscipline,
     monkCalm,
     navyCalm,
