@@ -1,7 +1,7 @@
 # Bloom
 
 ## What It Is
-Bloom is a minimalist 90‑second calming ritual designed for men who need a fast, private reset.  
+Bloom is a minimalist 90‑second calming ritual designed for women who need a fast, private reset.  
 No accounts. No noise. No pressure. Just stillness, on demand.
 
 Bloom is not a habit tracker, a wellness feed, or a productivity tool.  
