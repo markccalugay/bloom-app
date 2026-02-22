@@ -9,8 +9,8 @@ class AuthService {
   static final AuthService instance = AuthService._internal();
 
   // TODO: Move these to a secure configuration or environment variable in production
-  static const String _kClientId = '1054446804161-o24asbiksgbqas4th02cl0hhqul8epce.apps.googleusercontent.com';
-  static const String _kServerClientId = '1054446804161-pj7ndvtml1ls7hadgplvd9ak697iu92g.apps.googleusercontent.com';
+  static const String _kClientId = '';
+  static const String _kServerClientId = '';
   static const String _kAppleUserIdKey = 'apple_user_id';
   static const String _kAppleEmailKey = 'apple_email';
   static const String _kAppleDisplayNameKey = 'apple_display_name';
@@ -86,87 +86,15 @@ class AuthService {
   Session? get supabaseSession => Supabase.instance.client.auth.currentSession;
 
   Future<AuthenticatedUser?> signInWithGoogle() async {
-    try {
-      final account = await _googleSignIn.signIn();
-      if (account == null) return null;
-
-      final googleAuth = await account.authentication;
-      final idToken = googleAuth.idToken;
-      final accessToken = googleAuth.accessToken;
-
-      if (idToken == null || accessToken == null) {
-        debugPrint('[AUTH] Google Sign-In missing tokens');
-        return null;
-      }
-
-      // Supabase Exchange
-      try {
-        await Supabase.instance.client.auth.signInWithIdToken(
-          provider: OAuthProvider.google,
-          idToken: idToken,
-          accessToken: accessToken,
-        );
-      } catch (e) {
-        debugPrint('[AUTH] Supabase Google Sign-In Error: $e');
-        // We continue even if Supabase fails? No, simpler to fail or better yet,
-        // treat it as partial success? For Phase 4, we NEED Supabase.
-        // Let's rethrow or return null to enforce backend connection.
-        // But for offline support... let's log and proceed?
-        // No, Strength Partner needs Supabase.
-      }
-
-      // _googleUser is updated by listener
-      return GoogleAuthenticatedUser(account);
-    } catch (e) {
-      debugPrint('[AUTH] Google Sign-In Error: $e');
-      return null;
-    }
+    // Disconnected from QuietLine. Return null until new project is configured.
+    debugPrint('[AUTH] Google Sign-In is currently disabled.');
+    return null;
   }
 
   Future<AuthenticatedUser?> signInWithApple() async {
-    try {
-      final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-          AppleIDAuthorizationScopes.fullName,
-        ],
-      );
-
-      final idToken = credential.identityToken;
-      if (idToken == null) {
-        debugPrint('[AUTH] Apple Sign-In missing identity token');
-        return null;
-      }
-
-      // Supabase Exchange
-      try {
-        await Supabase.instance.client.auth.signInWithIdToken(
-          provider: OAuthProvider.apple,
-          idToken: idToken,
-        );
-      } catch (e) {
-        debugPrint('[AUTH] Supabase Apple Sign-In Error: $e');
-      }
-
-      final user = AppleAuthenticatedUser(credential);
-      _appleUser = user;
-      
-      // Persist Apple User ID and details
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_kAppleUserIdKey, user.id);
-        if (user.email != null) await prefs.setString(_kAppleEmailKey, user.email!);
-        if (user.displayName != null) await prefs.setString(_kAppleDisplayNameKey, user.displayName!);
-      } catch (e) {
-        debugPrint('[AUTH] Failed to save Apple User details: $e');
-      }
-
-      _updateState();
-      return user;
-    } catch (e) {
-      debugPrint('[AUTH] Apple Sign-In Error: $e');
-      return null;
-    }
+    // Disconnected from QuietLine. Return null until new project is configured.
+    debugPrint('[AUTH] Apple Sign-In is currently disabled.');
+    return null;
   }
 
   Future<void> signOutGoogle() async {
@@ -199,36 +127,8 @@ class AuthService {
   }
 
   Future<void> silentSignIn() async {
-    // 1. Check Apple State
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final appleUserId = prefs.getString(_kAppleUserIdKey);
-      if (appleUserId != null) {
-        final credentialState = await SignInWithApple.getCredentialState(appleUserId);
-        if (credentialState == CredentialState.authorized) {
-          final email = prefs.getString(_kAppleEmailKey);
-          final displayName = prefs.getString(_kAppleDisplayNameKey);
-          
-          _appleUser = AppleAuthenticatedUser.cached(
-            id: appleUserId,
-            email: email,
-            displayName: displayName,
-          );
-          _updateState();
-          debugPrint('[AUTH] Apple User restored from cache and authorized.');
-        } else {
-          await signOutApple();
-        }
-      }
-    } catch (e) {
-      debugPrint('[AUTH] Apple Silent Check Error: $e');
-    }
-
-    // 2. Try Google Silent Sign In
-    try {
-      await _googleSignIn.signInSilently();
-    } catch (e) {
-      debugPrint('[AUTH] Google Silent Sign-In Error: $e');
-    }
+    // Silently bypass until new project is configured.
+    debugPrint('[AUTH] Silent Sign-In bypassed.');
+    return;
   }
 }

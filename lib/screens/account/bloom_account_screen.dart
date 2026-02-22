@@ -939,6 +939,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                             ),
                             const SizedBox(height: 16),
                             
+                            /*
                             // 1. Apple Section
                             if (appleUser != null)
                               _ConnectedProviderCard(
@@ -964,7 +965,9 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                   borderRadius: const BorderRadius.all(Radius.circular(12)),
                                 ),
                               ),
+                            */
 
+                            /*
                             // 2. Google Section
                             if (googleUser != null)
                               Padding(
@@ -1010,6 +1013,8 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                   ),
                                 ),
                               ),
+                            */
+                            /*
                             if (googleUser != null || appleUser != null)
                               Padding(
                                 padding: const EdgeInsets.only(top: 16.0),
@@ -1072,6 +1077,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                       ),
                                     ),
                               ),
+                            */
                             const SizedBox(height: 24),
                             _buildSectionHeader(theme, 'MEMBERSHIP'),
                             _buildActionItem(

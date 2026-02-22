@@ -38,11 +38,13 @@ class AppInitializer {
     await UserPreferencesService.instance.initialize();
     await MoodService.instance.initialize();
 
-    // Supabase
+    // Supabase - Disconnected temporarily
+    /*
     await Supabase.initialize(
       url: SupabaseConfig.url,
       anonKey: SupabaseConfig.anonKey,
     );
+    */
 
     final prefs = await SharedPreferences.getInstance();
     
