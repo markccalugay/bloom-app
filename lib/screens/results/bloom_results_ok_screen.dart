@@ -510,24 +510,6 @@ class _BloomAffirmationUnlockedScreenState
       curve: Curves.easeOut,
     );
 
-    final theme = Theme.of(context);
-    final rng = math.Random(42);
-    for (int i = 0; i < 44; i++) {
-      _confettiPieces.add(
-        _ConfettiPiece(
-          x0: (rng.nextDouble() - 0.5) * 220,
-          y0: (rng.nextDouble() - 0.5) * 40,
-          angle: rng.nextDouble() * math.pi * 2,
-          speed: 160 + rng.nextDouble() * 220,
-          size: 4 + rng.nextDouble() * 6,
-          spin: (rng.nextDouble() - 0.5) * 10,
-          color: i % 7 == 0
-              ? theme.colorScheme.primary
-              : theme.colorScheme.secondary.withValues(alpha: 0.9),
-        ),
-      );
-    }
-
     _affirmationFuture =
         AffirmationsUnlockService.instance.getUnlockedForStreak(widget.streak);
 
@@ -566,6 +548,30 @@ class _BloomAffirmationUnlockedScreenState
 
       _controller.forward();
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_confettiPieces.isEmpty) {
+      final theme = Theme.of(context);
+      final rng = math.Random(42);
+      for (int i = 0; i < 44; i++) {
+        _confettiPieces.add(
+          _ConfettiPiece(
+            x0: (rng.nextDouble() - 0.5) * 220,
+            y0: (rng.nextDouble() - 0.5) * 40,
+            angle: rng.nextDouble() * math.pi * 2,
+            speed: 160 + rng.nextDouble() * 220,
+            size: 4 + rng.nextDouble() * 6,
+            spin: (rng.nextDouble() - 0.5) * 10,
+            color: i % 7 == 0
+                ? theme.colorScheme.primary
+                : theme.colorScheme.secondary.withValues(alpha: 0.9),
+          ),
+        );
+      }
+    }
   }
 
   @override
