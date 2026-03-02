@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:bloom_app/screens/bloom_breath/models/breath_phase_contracts.dart';
 
 enum ThemeVariant {
@@ -74,42 +75,36 @@ final bloomLightTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(16)),
     ),
   ),
-  textTheme: const TextTheme(
-    headlineLarge: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+  textTheme: GoogleFonts.interTextTheme(TextTheme(
+    headlineLarge: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
       color: BloomColors.textPrimary,
     ),
-    headlineMedium: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+    headlineMedium: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
       color: BloomColors.textPrimary,
     ),
-    headlineSmall: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+    headlineSmall: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
       color: BloomColors.textPrimary,
     ),
-    bodyLarge: TextStyle(
-      fontFamily: 'Inter',
+    bodyLarge: GoogleFonts.inter(
       color: BloomColors.textPrimary,
     ),
-    bodyMedium: TextStyle(
-      fontFamily: 'Inter',
+    bodyMedium: GoogleFonts.inter(
       color: BloomColors.textPrimary,
     ),
-    bodySmall: TextStyle(
-      fontFamily: 'Inter',
+    bodySmall: GoogleFonts.inter(
       color: BloomColors.textSecondary,
     ),
-  ),
+  )),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: BloomColors.primary,
       foregroundColor: Colors.black87,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
     ),
   ),
 );
@@ -135,42 +130,36 @@ final bloomDarkTheme = ThemeData(
       borderRadius: BorderRadius.all(Radius.circular(16)),
     ),
   ),
-  textTheme: const TextTheme(
-    headlineLarge: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+  textTheme: GoogleFonts.interTextTheme(TextTheme(
+    headlineLarge: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
       color: BloomDarkColors.textPrimary,
     ),
-    headlineMedium: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+    headlineMedium: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
       color: BloomDarkColors.textPrimary,
     ),
-    headlineSmall: TextStyle(
-      fontFamily: 'PlayfairDisplay',
+    headlineSmall: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
       color: BloomDarkColors.textPrimary,
     ),
-    bodyLarge: TextStyle(
-      fontFamily: 'Inter',
+    bodyLarge: GoogleFonts.inter(
       color: BloomDarkColors.textPrimary,
     ),
-    bodyMedium: TextStyle(
-      fontFamily: 'Inter',
+    bodyMedium: GoogleFonts.inter(
       color: BloomDarkColors.textPrimary,
     ),
-    bodySmall: TextStyle(
-      fontFamily: 'Inter',
+    bodySmall: GoogleFonts.inter(
       color: BloomDarkColors.textSecondary,
     ),
-  ),
+  )),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: BloomDarkColors.primary,
       foregroundColor: Colors.black87,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
     ),
   ),
 );
