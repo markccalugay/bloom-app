@@ -25,7 +25,7 @@ class UserPreferencesService extends ChangeNotifier {
   // Defaults
   bool _hapticEnabled = true;
   double _hapticIntensity = 1.0; // 0.5 to 1.5 scaling
-  ThemeModePreference _themeMode = ThemeModePreference.midnight;
+  ThemeModePreference _themeMode = ThemeModePreference.morning;
   double _volume = 0.5;
 
   // Getters
@@ -51,7 +51,7 @@ class UserPreferencesService extends ChangeNotifier {
     final themeStr = _prefs.getString(_themeModeKey);
     _themeMode = ThemeModePreference.values.firstWhere(
       (e) => e.name == themeStr,
-      orElse: () => ThemeModePreference.midnight,
+      orElse: () => ThemeModePreference.morning,
     );
      
     _loadCustomMixes();

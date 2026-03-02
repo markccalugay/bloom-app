@@ -11,7 +11,7 @@ class ThemeService extends ChangeNotifier {
 
 
   
-  ThemeVariant _variant = ThemeVariant.midnight;
+  ThemeVariant _variant = ThemeVariant.morning;
   bool _isInitialized = false;
 
   ThemeVariant get variant => _variant;
@@ -19,18 +19,18 @@ class ThemeService extends ChangeNotifier {
   String get currentThemeLabel {
     switch (_variant) {
       case ThemeVariant.midnight:
-        return 'Theme · Midnight (Teal)';
+        return 'Theme · Evening Bloom (Dark)';
       case ThemeVariant.morning:
-        return 'Theme · Morning (Light)';
+        return 'Theme · Warm Bloom (Light)';
     }
   }
 
   static String getLabel(ThemeVariant v) {
     switch (v) {
       case ThemeVariant.midnight:
-        return 'Midnight';
+        return 'Evening Bloom';
       case ThemeVariant.morning:
-        return 'Morning';
+        return 'Warm Bloom';
     }
   }
 
