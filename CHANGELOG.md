@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0+2] - 2026-03-02
+
+### Added
+- **Feminization of Avatars & Identity**: Replaced masculine-coded avatars and name generation with feminine, nature-inspired options in `bloom_edit_profile_screen.dart` and `UserService`.
+- **Integrated Theme Audit**: Conducted a full project-wide audit to identify and replace all hardcoded "QuietLine" hex values.
+
+### Changed
+- **Brand Alignment & Cleanup**: Complete purge of residual teal colors in `BloomBottomNav`, `BloomResultsStreakBadge`, and navigation elements.
+- **Gradient Standardization**: Renamed legacy gradients (`steelFlame` -> `nightFlame`, `tealFlame` -> `bloomFlame`) for "Warm Bloom" brand consistency.
+- **Theme System Optimization**: Refactored results constants and UI components to be fully dynamic via late-bound `ColorScheme` lookups.
+
 ## [0.1.0+1] - 2026-03-02
 
 ### Added

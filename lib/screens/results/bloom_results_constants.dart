@@ -22,8 +22,8 @@ class BloomResultsConstants {
   static Color get inactiveFlame => BloomLightColors.textSecondary.withValues(alpha: 0.3);
 
   // Gradient for inactive streak flames (big + small)
-  static Gradient get inactiveGradient => BloomGradients.steelFlame;
+  static Gradient get inactiveGradient => BloomGradients.nightFlame;
 
   // Gradient for active streak flames (big + small)
-  static Gradient get streakGradient => BloomGradients.tealFlame;
+  static Gradient get streakGradient => BloomGradients.bloomFlame;
 }

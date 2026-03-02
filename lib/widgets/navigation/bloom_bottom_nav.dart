@@ -24,9 +24,7 @@ class BloomBottomNav extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final Color dockBackground = theme.brightness == Brightness.dark
-        ? const Color(0xFF132B34) // Matches Home Dark Gradient bottom
-        : const Color(0xFFE2E6EA); // Matches Home Light Gradient bottom
+    final Color dockBackground = theme.colorScheme.surface; 
     final Color activeColor = theme.colorScheme.primary;
 
     return SizedBox(

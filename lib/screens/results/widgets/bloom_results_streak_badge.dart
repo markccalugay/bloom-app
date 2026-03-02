@@ -282,7 +282,7 @@ class _BloomResultsStreakBadgeState extends State<BloomResultsStreakBadge>
                         blurRadius: 28 + (22 * glow),
                         spreadRadius: 2 + (6 * glow),
                         offset: const Offset(0, 10),
-                        color: const Color(0xFF3E8F87)
+                        color: Theme.of(context).colorScheme.primary
                             .withValues(alpha: 0.22 + 0.28 * glow),
                       ),
                     ],

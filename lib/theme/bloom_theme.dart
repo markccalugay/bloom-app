@@ -224,6 +224,6 @@ class BloomGradients {
     }
   }
 
-  static Gradient get steelFlame => getHomeGradient(ThemeVariant.midnight);
-  static Gradient get tealFlame => getHomeGradient(ThemeVariant.morning);
+  static Gradient get nightFlame => getHomeGradient(ThemeVariant.midnight);
+  static Gradient get bloomFlame => getHomeGradient(ThemeVariant.morning);
 }
