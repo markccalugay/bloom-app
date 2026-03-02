@@ -4,15 +4,15 @@ import 'package:bloom_app/data/user/user_service.dart';
 // --- Shared Avatar Data ---
 
 const List<Map<String, String>> avatarList = [
-  {'id': 'viking', 'name': 'The Viking'},
-  {'id': 'cowboy', 'name': 'The Cowboy'},
-  {'id': 'wizard', 'name': 'The Wizard'},
-  {'id': 'worker', 'name': 'The Construction Worker'},
-  {'id': 'king', 'name': 'The King'},
-  {'id': 'badboy', 'name': 'The Bad Boy'},
-  {'id': 'gentle', 'name': 'The Gentlemen'},
-  {'id': 'geek', 'name': 'The Geek'},
-  {'id': 'oddball', 'name': 'The Oddball'},
+  {'id': 'flower', 'name': 'Flower'},
+  {'id': 'sun', 'name': 'Sun'},
+  {'id': 'moon', 'name': 'Moon'},
+  {'id': 'butterfly', 'name': 'Butterfly'},
+  {'id': 'sparkles', 'name': 'Sparkles'},
+  {'id': 'leaf', 'name': 'Leaf'},
+  {'id': 'swan', 'name': 'Swan'},
+  {'id': 'cloud', 'name': 'Cloud'},
+  {'id': 'heart', 'name': 'Heart'},
 ];
 
 class BloomEditProfileScreen extends StatefulWidget {
@@ -24,7 +24,7 @@ class BloomEditProfileScreen extends StatefulWidget {
 
 class _BloomEditProfileScreenState extends State<BloomEditProfileScreen> {
   final TextEditingController _usernameController = TextEditingController();
-  String _selectedAvatarId = 'viking';
+  String _selectedAvatarId = 'flower';
   UserProfile? _user;
   bool _isLoading = true;
 

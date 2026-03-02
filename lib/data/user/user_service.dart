@@ -122,7 +122,8 @@ class UserService {
     final username = generateRandomUsername();
 
     // Simple avatar ID – later map this to an actual asset.
-    final avatarId = 'viking'; // Default to viking for new users
+    // Default to flower for new users
+    final avatarId = 'flower';
 
     return UserProfile(
       id: id,
@@ -136,23 +137,23 @@ class UserService {
     final rand = Random();
 
     const adjectives = [
-      'quiet',
-      'still',
-      'steady',
       'soft',
-      'calm',
+      'quiet',
       'gentle',
-      'grounded',
+      'misty',
+      'floral',
+      'lunar',
+      'blooming',
     ];
 
     const nouns = [
-      'ember',
-      'river',
-      'oak',
-      'wave',
-      'stone',
-      'pine',
-      'horizon',
+      'petal',
+      'rose',
+      'lily',
+      'meadow',
+      'willow',
+      'breeze',
+      'dawn',
     ];
 
     final adjective = adjectives[rand.nextInt(adjectives.length)];
