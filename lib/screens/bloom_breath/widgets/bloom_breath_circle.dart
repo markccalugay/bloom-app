@@ -52,7 +52,7 @@ class BloomBreathCircle extends StatelessWidget {
                   painter: BloomBreathRingPainter(
                     phaseProgress: controller.phaseProgress,
                     trackColor: ringTrackColor,
-                    phaseColor: controller.phaseColor,
+                    phaseColor: controller.phaseColor(context),
                   ),
                 ),
               ),

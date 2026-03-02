@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bloom_app/core/bloom_assets.dart';
 import 'package:bloom_app/data/affirmations/affirmations_model.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 
 class AffirmationGridTile extends StatelessWidget {
   final Affirmation affirmation;
@@ -51,7 +50,7 @@ class AffirmationGridTile extends StatelessWidget {
             borderRadius: radius,
             color: theme.colorScheme.surface,
             border: Border.all(
-              color: (isDark ? BloomColors.steelGray : BloomColors.skyAsh).withValues(alpha: 0.5),
+              color: baseTextColor.withValues(alpha: 0.1),
               width: 1,
             ),
             boxShadow: [
@@ -121,7 +120,7 @@ class AffirmationGridTile extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.labelSmall?.copyWith(
-                                color: (isDark ? BloomColors.mutedSand : BloomColors.slateBlue).withValues(alpha: 0.8),
+                                color: baseTextColor.withValues(alpha: 0.6),
                                 fontSize: 9,
                                 letterSpacing: 0.1,
                               ),
@@ -145,9 +144,9 @@ class AffirmationGridTile extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        color: (isDark ? BloomColors.midnightBlue : BloomColors.slateBlue).withValues(alpha: 0.8),
+                        color: (isDark ? theme.colorScheme.surfaceContainerHighest : theme.colorScheme.primaryContainer).withValues(alpha: 0.8),
                         border: Border.all(
-                          color: (isDark ? BloomColors.steelGray : BloomColors.skyAsh).withValues(alpha: 0.3),
+                          color: baseTextColor.withValues(alpha: 0.1),
                           width: 1,
                         ),
                       ),
@@ -159,13 +158,13 @@ class AffirmationGridTile extends StatelessWidget {
                                 ? Icons.workspace_premium_rounded
                                 : Icons.lock_outline_rounded,
                             size: 14,
-                            color: isDark ? BloomColors.sandWhite : Colors.white,
+                              color: isDark ? theme.colorScheme.onSurface : Colors.white,
                           ),
                           const SizedBox(width: 6),
                           Text(
                             isPremiumLocked ? 'Bloom+' : 'Locked',
                             style: theme.textTheme.labelSmall?.copyWith(
-                                color: isDark ? BloomColors.sandWhite : Colors.white,
+                                color: isDark ? theme.colorScheme.onSurface : Colors.white,
                               fontWeight: FontWeight.w700,
                               fontSize: 10,
                               letterSpacing: 0.5,

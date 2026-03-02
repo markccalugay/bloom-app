@@ -5,7 +5,6 @@ import 'package:bloom_app/screens/bloom_breath/bloom_breath_screen.dart';
 
 import 'package:bloom_app/core/bloom_assets.dart';
 import 'package:bloom_app/widgets/bloom_primary_button.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 import 'package:bloom_app/services/web_launch_service.dart';
 
 class BloomWelcomeScreen extends StatefulWidget {
@@ -159,8 +158,8 @@ class _BloomWelcomeScreenState extends State<BloomWelcomeScreen>
                         BloomAssets.bloomLogo,
                         width: 64,
                         height: 64,
-                        colorFilter: const ColorFilter.mode(
-                          BloomColors.primaryTeal,
+                        colorFilter: ColorFilter.mode(
+                          theme.colorScheme.primary,
                           BlendMode.srcIn,
                         ),
                       ),

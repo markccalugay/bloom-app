@@ -57,7 +57,7 @@ class _BloomDebugDockState extends State<BloomDebugDock> {
               color: const Color(0xFF1E1E1E).withValues(alpha: 0.9),
               shape: BoxShape.circle,
               border: Border.all(
-                color: Colors.teal.withValues(alpha: 0.5),
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5),
                 width: 1.5,
               ),
               boxShadow: [
@@ -71,8 +71,8 @@ class _BloomDebugDockState extends State<BloomDebugDock> {
             child: Center(
               child: Text(
                 _isOpen ? '✕' : 'Q',
-                style: const TextStyle(
-                  color: Colors.teal,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
                 ),
@@ -265,16 +265,16 @@ class _TabButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? Colors.teal.withValues(alpha: 0.2) : Colors.transparent,
+          color: isActive ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2) : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? Colors.teal.withValues(alpha: 0.5) : Colors.white10,
+            color: isActive ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.5) : Colors.white10,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isActive ? Colors.teal : Colors.white38,
+            color: isActive ? Theme.of(context).colorScheme.primary : Colors.white38,
             fontSize: 12,
             fontWeight: FontWeight.bold,
           ),
@@ -301,18 +301,18 @@ class _ActionButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: action.isGlobal 
                 ? Colors.white.withValues(alpha: 0.05)
-                : Colors.teal.withValues(alpha: 0.1),
+                : Theme.of(context).colorScheme.primary.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
               color: action.isGlobal 
                   ? Colors.white10 
-                  : Colors.teal.withValues(alpha: 0.3),
+                  : Theme.of(context).colorScheme.primary.withValues(alpha: 0.3),
             ),
           ),
           child: Text(
             action.label,
             style: TextStyle(
-              color: action.isGlobal ? Colors.white70 : Colors.tealAccent,
+              color: action.isGlobal ? Colors.white70 : Theme.of(context).colorScheme.primary,
               fontSize: 13,
               fontWeight: FontWeight.w600,
             ),

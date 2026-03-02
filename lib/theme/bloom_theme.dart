@@ -19,20 +19,7 @@ class BloomColors {
   static const textPrimary = BloomLightColors.textPrimary;
   static const textSecondary = BloomLightColors.textSecondary;
 
-  // Legacy mappings for other components
-  static const primaryTeal = primary;
-  static const quietAqua = primary;
-  static const slateBlue = primary;
-  static const morningMist = secondary;
-  static const armorForgeGlow = primary;
-  static const armorIronBase = secondary;
-  static const steelGray = secondary;
-  static const graphiteGray = textSecondary;
-  static const calmTeal = primary;
-  static const mutedSand = secondary;
-  static const sandWhite = background;
-  static const skyAsh = secondary;
-  static const midnightBlue = BloomDarkColors.background;
+  // No longer mapping QuietLine legacy names. Use ColorScheme or BloomLightColors/BloomDarkColors directly.
 }
 
 final bloomLightTheme = ThemeData(
@@ -192,22 +179,23 @@ class BloomTheme {
     }
   }
 
-  static Color colorForPhase(BreathPhaseType phase) {
+  static Color colorForPhase(BuildContext context, BreathPhaseType phase) {
+    final theme = Theme.of(context);
     switch (phase) {
       case BreathPhaseType.inhale:
-        return BloomLightColors.primary;
+        return theme.colorScheme.primary;
       case BreathPhaseType.hold:
-        return BloomLightColors.highlight;
+        return theme.colorScheme.secondary; // Or a specific highlight if added to scheme
       case BreathPhaseType.exhale:
-        return BloomLightColors.secondary;
+        return theme.colorScheme.secondary.withValues(alpha: 0.8);
       case BreathPhaseType.rest:
-        return BloomLightColors.surface;
+        return theme.colorScheme.surface;
       case BreathPhaseType.power:
-        return BloomLightColors.primary;
+        return theme.colorScheme.primary;
       case BreathPhaseType.retention:
-        return BloomLightColors.highlight;
+        return theme.colorScheme.secondary;
       case BreathPhaseType.recovery:
-        return BloomLightColors.accent;
+        return theme.colorScheme.tertiaryContainer; // Fallback or defined accent
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 
 class BloomIngotParticles extends StatefulWidget {
   const BloomIngotParticles({super.key});
@@ -56,7 +55,7 @@ class _BloomIngotParticlesState extends State<BloomIngotParticles> with SingleTi
           }
         }
         return CustomPaint(
-          painter: _ParticlePainter(_particles),
+          painter: _ParticlePainter(_particles, Theme.of(context)),
           child: const SizedBox.expand(),
         );
       },
@@ -88,11 +87,11 @@ class _Particle {
     y = 1.0;
   }
 }
-
 class _ParticlePainter extends CustomPainter {
   final List<_Particle> particles;
+  final ThemeData theme;
 
-  _ParticlePainter(this.particles);
+  _ParticlePainter(this.particles, this.theme);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -100,8 +99,8 @@ class _ParticlePainter extends CustomPainter {
 
     for (var p in particles) {
       final pos = Offset(p.x * size.width, p.y * size.height);
-      // Use armorForgeGlow for a subtle "warmth" coming from the ingot/armor
-      paint.color = BloomColors.armorForgeGlow.withValues(alpha: p.opacity * (p.y * 0.5)); 
+      // Use theme primary for a subtle "warmth" coming from the ingot/armor
+      paint.color = theme.colorScheme.primary.withValues(alpha: p.opacity * (p.y * 0.5)); 
       canvas.drawCircle(pos, p.size, paint);
     }
   }

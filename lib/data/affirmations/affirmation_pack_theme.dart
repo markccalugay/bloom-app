@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 import 'package:bloom_app/data/affirmations/affirmations_packs.dart';
 
 /// Centralized visual theming for affirmation packs.
@@ -42,16 +41,16 @@ class AffirmationPackTheme {
 
   /// Core affirmations — MUST strictly follow Bloom brand colors.
   static final AffirmationPackTheme _core = AffirmationPackTheme(
-    backgroundGradient: LinearGradient(
+    backgroundGradient: const LinearGradient(
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        BloomColors.primaryTeal,
-        BloomColors.primaryTeal.withValues(alpha: 0.85),
+        Color(0xFFFFC6CA), // Petal Rose
+        Color(0xFFFFCABE), // Warm Peach
       ],
     ),
-    accentColor: BloomColors.primaryTeal,
-    borderColor: BloomColors.primaryTeal,
+    accentColor: const Color(0xFFFFC6CA),
+    borderColor: const Color(0xFFFFC6CA),
   );
 
   /// Focus — deeper, cooler, performance-oriented.
@@ -60,12 +59,12 @@ class AffirmationPackTheme {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
       colors: [
-        Color(0xFF0E2A38), // deep navy-teal
-        Color(0xFF163F52),
+        Color(0xFFD2C7E5), // Lavender Mist
+        Color(0xFFB8A7D6), // Dusky Lavender
       ],
     ),
-    accentColor: const Color(0xFF5FA8D3),
-    borderColor: const Color(0xFF5FA8D3),
+    accentColor: const Color(0xFFD2C7E5),
+    borderColor: const Color(0xFFD2C7E5),
   );
 
   /// Sleep — warm, calm, low-arousal.

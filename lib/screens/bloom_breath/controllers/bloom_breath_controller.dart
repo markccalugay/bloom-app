@@ -162,7 +162,7 @@ class BloomBreathController extends ChangeNotifier {
 
   String get phaseLabel => BloomTheme.labelForPhase(currentPhase);
 
-  Color get phaseColor => BloomTheme.colorForPhase(currentPhase);
+  Color phaseColor(BuildContext context) => BloomTheme.colorForPhase(context, currentPhase);
 
   // UI label for the primary control button
   String get primaryLabel {

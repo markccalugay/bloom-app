@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bloom_app/core/bloom_assets.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 
 /// Main affirmation card on the Home screen.
 class BloomHomeAffirmationsCard extends StatelessWidget {
@@ -25,11 +24,9 @@ class BloomHomeAffirmationsCard extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     
-    // Text: 90% white (E0E0E0) on dark, 90% black (1A1A1A) on light
-    final Color textColor = isDark ? const Color(0xFFE0E0E0) : const Color(0xFF1A1A1A);
-    
-    // BG: Dark (#1A2A33), Light (#FFFFFF)
-    final Color backgroundColor = isDark ? const Color(0xFF1A2A33) : const Color(0xFFFFFFFF);
+    // BG: Surface from theme
+    final Color backgroundColor = theme.colorScheme.surface;
+    final Color textColor = theme.colorScheme.onSurface;
 
     return Material(
       color: Colors.transparent,
@@ -117,7 +114,6 @@ class BloomAffirmationFullscreenScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
     final Color textColor = theme.colorScheme.onSurface;
 
     return Scaffold(
@@ -181,7 +177,7 @@ class BloomAffirmationFullscreenScreen extends StatelessWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: (isDark ? BloomColors.mutedSand : BloomColors.slateBlue).withValues(alpha: 0.8),
+                                color: textColor.withValues(alpha: 0.6),
                               ),
                             ),
                           )
