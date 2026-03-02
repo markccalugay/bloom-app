@@ -293,17 +293,15 @@ class _BloomBreathScreenState extends State<BloomBreathScreen>
                                     const Icon(Icons.lock_outline, size: 14),
                                     const SizedBox(width: 4),
                                   ],
-                                  Text(
-                                    d['label'] as String,
-                                    style: textTheme.labelLarge?.copyWith(
-                                      color: isSelected
-                                          ? Colors.white
-                                          : theme.colorScheme.onSurface,
-                                      fontWeight: isSelected
-                                          ? FontWeight.bold
-                                          : FontWeight.normal,
+                                    Text(
+                                      d['label'] as String,
+                                      style: textTheme.labelLarge?.copyWith(
+                                        color: theme.colorScheme.onSurface,
+                                        fontWeight: isSelected
+                                            ? FontWeight.bold
+                                            : FontWeight.normal,
+                                      ),
                                     ),
-                                  ),
                                 ],
                               ),
                             ),
@@ -434,7 +432,7 @@ class _BloomBreathScreenState extends State<BloomBreathScreen>
                 if (_countdownValue != null)
                   Positioned.fill(
                     child: Container(
-                      color: Colors.black.withValues(alpha: 0.4),
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                       child: Center(
                         child: TweenAnimationBuilder<double>(
                           key: ValueKey(_countdownValue),

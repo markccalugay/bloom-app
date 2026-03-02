@@ -193,6 +193,7 @@ class _BloomResultsOkScreenState extends State<BloomResultsOkScreen>
                   BloomResultsStrings.okHeadline,
                   style: textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
                   ),
                   textAlign: TextAlign.left,
                 ),
@@ -203,7 +204,7 @@ class _BloomResultsOkScreenState extends State<BloomResultsOkScreen>
                 Text(
                   BloomResultsStrings.okSub,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                   textAlign: TextAlign.left,
                 ),
@@ -370,7 +371,7 @@ class _BloomResultsOkScreenState extends State<BloomResultsOkScreen>
         Text(
           'How do you feel now?',
           style: theme.textTheme.labelLarge?.copyWith(
-            color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.75),
             fontWeight: FontWeight.w600,
           ),
         ),

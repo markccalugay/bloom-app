@@ -205,11 +205,6 @@ class _BloomResultsStreakBadgeState extends State<BloomResultsStreakBadge>
       ),
     ]).animate(_animController);
 
-    _gradientTween = LinearGradientTween(
-      begin: BloomResultsConstants.inactiveGradient as LinearGradient,
-      end: BloomResultsConstants.streakGradient as LinearGradient,
-    );
-
     if (widget.wiggleOnly == true) {
       // Immediately set to teal (gradientT=1.0), but play wiggle on demand.
       _animController.value = 1.0;
@@ -221,6 +216,15 @@ class _BloomResultsStreakBadgeState extends State<BloomResultsStreakBadge>
     } else {
       _animController.value = _isActive ? 1.0 : 0.0;
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _gradientTween = LinearGradientTween(
+      begin: BloomResultsConstants.getInactiveGradient(context) as LinearGradient,
+      end: BloomResultsConstants.getActiveGradient(context) as LinearGradient,
+    );
   }
 
   @override

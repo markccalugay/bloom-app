@@ -1,32 +1,43 @@
 import 'package:flutter/material.dart';
 
 class BloomLightColors {
-  static const primary = Color(0xFFFFC6CA);
-  static const primaryPressed = Color(0xFFFFB0B5);
+  // Primary CTA — stronger anchor
+  static const primary = Color(0xFFFFA3B1);
+  static const primaryPressed = Color(0xFFFF8FA0);
 
-  static const secondary = Color(0xFFFFCABE);
-  static const accent = Color(0xFFD2C7E5);
+  // Supporting tone
+  static const secondary = Color(0xFFFFD6CC);
 
-  static const background = Color(0xFFFFE5E7);
-  static const surface = Color(0xFFF9EDE1);
+  // Accent — clearer separation
+  static const accent = Color(0xFFC6B6E2);
 
-  static const success = Color(0xFFD3EADA);
-  static const highlight = Color(0xFFF2D894);
+  // Canvas
+  static const background = Color(0xFFFFF6F4);
 
-  static const textPrimary = Color(0xFF3A2E2E);
-  static const textSecondary = Color(0xFF6E5E66);
+  // Elevated surfaces
+  static const surface = Color(0xFFFFE9E4);
+
+  // Growth state
+  static const success = Color(0xFFC4E3D8);
+
+  // Premium glow
+  static const highlight = Color(0xFFEBCB7A);
+
+  // Typography
+  static const textPrimary = Color(0xFF2F2326);
+  static const textSecondary = Color(0xFF6A5A60);
 }
 
 class BloomDarkColors {
-  static const primary = Color(0xFFDEB499);
-  static const secondary = Color(0xFFB8A7D6);
+  static const primary = Color(0xFFE6A7B1);
+  static const secondary = Color(0xFFC5B3E5);
 
-  static const background = Color(0xFF1E1A22);
-  static const surface = Color(0xFF26212B);
+  static const background = Color(0xFF211C24);
+  static const surface = Color(0xFF2D2630);
 
-  static const accent = Color(0xFFF9C0AF);
-  static const success = Color(0xFF9EBDAF);
+  static const accent = Color(0xFFF5B8A6);
+  static const success = Color(0xFF8FC3B3);
 
-  static const textPrimary = Color(0xFFF4EDE8);
-  static const textSecondary = Color(0xFFB8AEB6);
+  static const textPrimary = Color(0xFFF7F0EA);
+  static const textSecondary = Color(0xFFC2B6BE);
 }

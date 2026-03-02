@@ -21,9 +21,30 @@ class BloomResultsConstants {
   static Color get activeFlameBottom => BloomLightColors.primaryPressed;
   static Color get inactiveFlame => BloomLightColors.textSecondary.withValues(alpha: 0.3);
 
-  // Gradient for inactive streak flames (big + small)
-  static Gradient get inactiveGradient => BloomGradients.nightFlame;
+  // Theme-aware Gradient Getters
+  static Gradient getInactiveGradient(BuildContext context) {
+    final theme = Theme.of(context);
+    // Inactive state uses a subtle blend of surface colors
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        theme.colorScheme.surface,
+        theme.colorScheme.onSurface.withValues(alpha: 0.08),
+      ],
+    );
+  }
 
-  // Gradient for active streak flames (big + small)
-  static Gradient get streakGradient => BloomGradients.bloomFlame;
+  static Gradient getActiveGradient(BuildContext context) {
+    final theme = Theme.of(context);
+    // Active state uses the primary brand gradient
+    return LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        theme.colorScheme.primary,
+        theme.colorScheme.secondary,
+      ],
+    );
+  }
 }

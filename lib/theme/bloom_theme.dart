@@ -82,11 +82,11 @@ final bloomDarkTheme = ThemeData(
   colorScheme: ColorScheme(
     brightness: Brightness.dark,
     primary: BloomDarkColors.primary,
-    onPrimary: Colors.black87,
+    onPrimary: Colors.white,
     secondary: BloomDarkColors.secondary,
     onSecondary: BloomDarkColors.textPrimary,
     error: Colors.redAccent.shade100,
-    onError: Colors.black87,
+    onError: Colors.white,
     surface: BloomDarkColors.surface,
     onSurface: BloomDarkColors.textPrimary,
   ),
@@ -124,7 +124,7 @@ final bloomDarkTheme = ThemeData(
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
       backgroundColor: BloomDarkColors.primary,
-      foregroundColor: Colors.black87,
+      foregroundColor: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),

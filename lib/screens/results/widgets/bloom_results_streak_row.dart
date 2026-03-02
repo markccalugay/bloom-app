@@ -250,7 +250,7 @@ class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderState
     final theme = Theme.of(context);
 
     final textStyle = theme.textTheme.bodySmall?.copyWith(
-      color: Colors.white.withValues(alpha: widget.isActive ? 1.0 : 0.55),
+      color: theme.colorScheme.onSurface.withValues(alpha: widget.isActive ? 0.9 : 0.55),
       fontWeight: FontWeight.w600,
     );
 
@@ -262,13 +262,13 @@ class _SmallFlameState extends State<_SmallFlame> with SingleTickerProviderState
       child: showTeal
           ? ShaderMask(
               shaderCallback: (bounds) =>
-                  BloomResultsConstants.streakGradient.createShader(bounds),
+                  BloomResultsConstants.getActiveGradient(context).createShader(bounds),
               blendMode: BlendMode.srcIn,
               child: SvgPicture.asset(BloomAssets.flame),
             )
           : ShaderMask(
               shaderCallback: (bounds) =>
-                  BloomResultsConstants.inactiveGradient.createShader(bounds),
+                  BloomResultsConstants.getInactiveGradient(context).createShader(bounds),
               blendMode: BlendMode.srcIn,
               child: SvgPicture.asset(BloomAssets.flame),
             ),

@@ -24,10 +24,10 @@ class BloomInlineUnlockCard extends StatelessWidget {
       margin: const EdgeInsets.only(top: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: theme.cardColor.withValues(alpha: 0.12),
+        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.white.withValues(alpha: 0.08),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.08),
         ),
       ),
       child: Column(
