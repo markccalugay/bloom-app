@@ -186,13 +186,13 @@ class UserService {
 }
 
 const Map<String, String> avatarPresets = {
-  'viking': '🛡️',
-  'cowboy': '🤠',
-  'wizard': '🧙',
-  'worker': '👷',
-  'king': '👑',
-  'badboy': '🧢',
-  'gentle': '🎩',
-  'geek': '🚁',
-  'oddball': '🗼',
+  'flower': '🌸',
+  'sun': '☀️',
+  'moon': '🌙',
+  'butterfly': '🦋',
+  'sparkles': '✨',
+  'leaf': '🍃',
+  'swan': '🦢',
+  'cloud': '☁️',
+  'heart': '💖',
 };
