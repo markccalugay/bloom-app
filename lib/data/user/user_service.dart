@@ -66,14 +66,23 @@ class UserService {
           ? DateTime.parse(createdAtString) 
           : DateTime.now(); // Fallback for existing users
 
+      // Migration: Check if avatarId is still valid, if not, pick a random one
+      String effectiveAvatarId = avatarId;
+      bool avatarMigrated = false;
+      if (!avatarPresets.containsKey(avatarId)) {
+        final avatarKeys = avatarPresets.keys.toList();
+        effectiveAvatarId = avatarKeys[Random().nextInt(avatarKeys.length)];
+        avatarMigrated = true;
+      }
+
       // If we previously stored a spaced username (e.g. "Soft Pine 225"),
       // migrate it once to the no-space format (e.g. "SoftPine225").
-      // Also migrate if createdAt was missing.
-      if (normalizedUsername != username || createdAtString == null) {
+      // Also migrate if createdAt was missing or avatar was invalid.
+      if (normalizedUsername != username || createdAtString == null || avatarMigrated) {
         final migrated = UserProfile(
           id: id,
           username: normalizedUsername,
-          avatarId: avatarId,
+          avatarId: effectiveAvatarId,
           createdAt: createdAt,
         );
         await _saveProfile(prefs, migrated);
@@ -121,9 +130,9 @@ class UserService {
 
     final username = generateRandomUsername();
 
-    // Simple avatar ID – later map this to an actual asset.
-    // Default to flower for new users
-    final avatarId = 'flower';
+    // Pick a random avatar on first launch
+    final avatarKeys = avatarPresets.keys.toList();
+    final avatarId = avatarKeys[Random().nextInt(avatarKeys.length)];
 
     return UserProfile(
       id: id,

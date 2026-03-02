@@ -494,7 +494,7 @@ class _BloomBreathScreenState extends State<BloomBreathScreen>
 
   Widget _buildLeftControls() {
     // PRE-SESSION BACK BUTTON
-    if (!_hasStarted && _countdownValue == null) {
+    if (!_hasStarted && _countdownValue == null && !_isFirstSession) {
       return IconButton(
         icon: Icon(
           Icons.arrow_back,
