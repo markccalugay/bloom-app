@@ -250,7 +250,7 @@ class _BloomResultsStreakBadgeState extends State<BloomResultsStreakBadge>
     final textStyle = Theme.of(context).textTheme.headlineMedium?.copyWith(
           fontSize: 40,
           fontWeight: FontWeight.w700,
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.onPrimary,
         );
 
     return SizedBox(

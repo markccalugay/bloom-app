@@ -197,6 +197,7 @@ class _BloomShellScreenState extends State<BloomShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     const double menuWidth = 280.0;
     _maybeMeasureBloomTimeButton();
 
@@ -241,7 +242,7 @@ class _BloomShellScreenState extends State<BloomShellScreen> {
           Positioned.fill(
             child: GestureDetector(
               onTap: _controller.toggleMenu,
-              child: Container(color: Colors.black.withValues(alpha: 0.4)),
+              child: Container(color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
             ),
           ),
 
@@ -267,7 +268,7 @@ class _BloomShellScreenState extends State<BloomShellScreen> {
                     onOpenThemeSelection: () async {
                       await showModalBottomSheet(
                         context: context,
-                        backgroundColor: Colors.transparent,
+                        backgroundColor: theme.colorScheme.surface,
                         isScrollControlled: true,
                         builder: (_) => const BloomThemeSelectionSheet(),
                       );

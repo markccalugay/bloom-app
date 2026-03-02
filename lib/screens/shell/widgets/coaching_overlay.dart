@@ -20,6 +20,7 @@ class CoachingOverlay extends StatelessWidget {
     if (step == CoachingStep.bloomTimeButton) {
       if (spotlightRect == null) return const SizedBox.shrink();
       return _buildSpotlightOverlay(
+        context,
         rect: spotlightRect!,
         title: 'Well done.',
         body: 'You just did the hardest part; starting.\n\n'
@@ -30,6 +31,7 @@ class CoachingOverlay extends StatelessWidget {
 
     if (step == CoachingStep.mentalToughness) {
       return _buildMessageOverlay(
+        context,
         title: 'Building Resilience',
         body: 'Whenever you complete a session, you are building towards mental toughness.\n\n'
             'Keep showing up and you will see your progress become something tangible.',
@@ -39,11 +41,13 @@ class CoachingOverlay extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Widget _buildSpotlightOverlay({
+  Widget _buildSpotlightOverlay(
+    BuildContext context, {
     required Rect rect,
     required String title,
     required String body,
   }) {
+    final theme = Theme.of(context);
     const double holePadding = 12.0;
     final Rect holeRect = rect.inflate(holePadding);
 
@@ -54,7 +58,10 @@ class CoachingOverlay extends StatelessWidget {
             behavior: HitTestBehavior.opaque,
             onTap: onDismiss,
             child: CustomPaint(
-              painter: _SpotlightPainter(holeRect: holeRect),
+              painter: _SpotlightPainter(
+                holeRect: holeRect,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.65),
+              ),
             ),
           ),
         ),
@@ -69,7 +76,7 @@ class CoachingOverlay extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: const Color(0xFF2FE6D2),
+                  color: theme.colorScheme.primary,
                   width: 3,
                 ),
               ),
@@ -93,13 +100,13 @@ class CoachingOverlay extends StatelessWidget {
     );
   }
 
-  Widget _buildMessageOverlay({required String title, required String body}) {
+  Widget _buildMessageOverlay(BuildContext context, {required String title, required String body}) {
     return Stack(
       children: [
         GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: onDismiss,
-          child: Container(color: Colors.black.withValues(alpha: 0.75)),
+          child: Container(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.75)),
         ),
         Center(
           child: Padding(
@@ -118,12 +125,13 @@ class CoachingOverlay extends StatelessWidget {
 
 class _SpotlightPainter extends CustomPainter {
   final Rect holeRect;
+  final Color color;
 
-  _SpotlightPainter({required this.holeRect});
+  _SpotlightPainter({required this.holeRect, required this.color});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()..color = Colors.black.withValues(alpha: 0.65);
+    final paint = Paint()..color = color;
     final backgroundPath = Path()..addRect(Rect.fromLTWH(0, 0, size.width, size.height));
     final holePath = Path()..addOval(holeRect);
     
@@ -149,20 +157,21 @@ class _CoachingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFF0F141A),
+          color: theme.colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: const Color(0xFF2A3340),
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.1),
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.2),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -174,30 +183,29 @@ class _CoachingCard extends StatelessWidget {
           children: [
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w700,
-                color: Colors.white,
+                color: theme.colorScheme.onSurface,
                 decoration: TextDecoration.none,
               ),
             ),
             const SizedBox(height: 12),
             Text(
               body,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 height: 1.4,
-                color: Color(0xFFB9C3CF),
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
                 decoration: TextDecoration.none,
               ),
             ),
             if (onTap != null) ...[
               const SizedBox(height: 16),
-              const Text(
+              Text(
                 'Tap to continue',
                 style: TextStyle(
-                  fontSize: 12,
-                  color: Color(0xFF2FE6D2),
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.w600,
                   decoration: TextDecoration.none,
                 ),

@@ -1,36 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:bloom_app/screens/bloom_breath/models/breath_phase_contracts.dart';
+import 'bloom_colors.dart';
 
 enum ThemeVariant {
   midnight,
   morning,
 }
 
+// Legacy BloomColors class for backward compatibility and internal logic
 class BloomColors {
-  // Primary CTA (from Soft Rose / Theme Set 01)
-  static const primary = Color(0xFFFFC6CA);
+  static const primary = BloomLightColors.primary;
+  static const secondary = BloomLightColors.secondary;
+  static const accent = BloomLightColors.accent;
+  static const background = BloomLightColors.background;
+  static const surface = BloomLightColors.surface;
+  static const highlight = BloomLightColors.highlight;
+  static const textPrimary = BloomLightColors.textPrimary;
+  static const textSecondary = BloomLightColors.textSecondary;
 
-  // Secondary Lavender (Mist Blossom / Theme Set 04)
-  static const secondary = Color(0xFFE8DFF5);
-
-  // Accent
-  static const accent = Color(0xFFFFD4E5);
-
-  // Background
-  static const background = Color(0xFFFAFAFB);
-
-  // Surface
-  static const surface = Color(0xFFF1F1F3);
-
-  // Highlight / Growth Glow
-  static const highlight = Color(0xFFD2C7E5);
-
-  // Text
-  static const textPrimary = Color(0xFF1E1E22);
-  static const textSecondary = Color(0xFF6E6E75);
-
-  // Legacy support for other components
+  // Legacy mappings for other components
   static const primaryTeal = primary;
   static const quietAqua = primary;
   static const slateBlue = primary;
@@ -43,32 +32,24 @@ class BloomColors {
   static const mutedSand = secondary;
   static const sandWhite = background;
   static const skyAsh = secondary;
-  static const midnightBlue = Color(0xFF121214); // Matches dark background
-}
-
-class BloomDarkColors {
-  static const primary = Color(0xFFDEB499);
-  static const background = Color(0xFF121214);
-  static const surface = Color(0xFF1C1C20);
-  static const textPrimary = Color(0xFFEAEAF0);
-  static const textSecondary = Color(0xFF9A9AA3);
+  static const midnightBlue = BloomDarkColors.background;
 }
 
 final bloomLightTheme = ThemeData(
   brightness: Brightness.light,
   colorScheme: ColorScheme(
     brightness: Brightness.light,
-    primary: BloomColors.primary,
-    onPrimary: Colors.black87,
-    secondary: BloomColors.secondary,
-    onSecondary: Colors.black87,
+    primary: BloomLightColors.primary,
+    onPrimary: Colors.white,
+    secondary: BloomLightColors.secondary,
+    onSecondary: BloomLightColors.textPrimary,
     error: Colors.redAccent,
     onError: Colors.white,
-    surface: BloomColors.surface,
-    onSurface: BloomColors.textPrimary,
+    surface: BloomLightColors.surface,
+    onSurface: BloomLightColors.textPrimary,
   ),
-  scaffoldBackgroundColor: BloomColors.background,
-  cardColor: BloomColors.surface,
+  scaffoldBackgroundColor: BloomLightColors.background,
+  cardColor: BloomLightColors.surface,
   cardTheme: const CardThemeData(
     elevation: 2,
     shape: RoundedRectangleBorder(
@@ -78,30 +59,30 @@ final bloomLightTheme = ThemeData(
   textTheme: GoogleFonts.interTextTheme(TextTheme(
     headlineLarge: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
-      color: BloomColors.textPrimary,
+      color: BloomLightColors.textPrimary,
     ),
     headlineMedium: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
-      color: BloomColors.textPrimary,
+      color: BloomLightColors.textPrimary,
     ),
     headlineSmall: GoogleFonts.playfairDisplay(
       fontWeight: FontWeight.w600,
-      color: BloomColors.textPrimary,
+      color: BloomLightColors.textPrimary,
     ),
     bodyLarge: GoogleFonts.inter(
-      color: BloomColors.textPrimary,
+      color: BloomLightColors.textPrimary,
     ),
     bodyMedium: GoogleFonts.inter(
-      color: BloomColors.textPrimary,
+      color: BloomLightColors.textPrimary,
     ),
     bodySmall: GoogleFonts.inter(
-      color: BloomColors.textSecondary,
+      color: BloomLightColors.textSecondary,
     ),
   )),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ElevatedButton.styleFrom(
-      backgroundColor: BloomColors.primary,
-      foregroundColor: Colors.black87,
+      backgroundColor: BloomLightColors.primary,
+      foregroundColor: Colors.white,
       elevation: 0,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       textStyle: GoogleFonts.inter(fontWeight: FontWeight.w600),
@@ -115,10 +96,10 @@ final bloomDarkTheme = ThemeData(
     brightness: Brightness.dark,
     primary: BloomDarkColors.primary,
     onPrimary: Colors.black87,
-    secondary: BloomColors.secondary.withValues(alpha: 0.8),
-    onSecondary: Colors.white,
-    error: Colors.redAccent,
-    onError: Colors.white,
+    secondary: BloomDarkColors.secondary,
+    onSecondary: BloomDarkColors.textPrimary,
+    error: Colors.redAccent.shade100,
+    onError: Colors.black87,
     surface: BloomDarkColors.surface,
     onSurface: BloomDarkColors.textPrimary,
   ),
@@ -165,7 +146,6 @@ final bloomDarkTheme = ThemeData(
 );
 
 class BloomTheme {
-  // Legacy support for ThemeService
   static ThemeData getTheme(ThemeVariant variant) {
     switch (variant) {
       case ThemeVariant.midnight:
@@ -180,7 +160,7 @@ class BloomTheme {
       case ThemeVariant.midnight:
         return BloomDarkColors.primary;
       case ThemeVariant.morning:
-        return BloomColors.primary;
+        return BloomLightColors.primary;
     }
   }
 
@@ -189,7 +169,7 @@ class BloomTheme {
       case ThemeVariant.midnight:
         return BloomDarkColors.background;
       case ThemeVariant.morning:
-        return BloomColors.background;
+        return BloomLightColors.background;
     }
   }
 
@@ -213,23 +193,21 @@ class BloomTheme {
   }
 
   static Color colorForPhase(BreathPhaseType phase) {
-    // In new theme, we use primary (Soft Rose) for inhale/exhale 
-    // and secondary (Lavender) or neutral for others
     switch (phase) {
       case BreathPhaseType.inhale:
-        return BloomColors.primary;
+        return BloomLightColors.primary;
       case BreathPhaseType.hold:
-        return BloomColors.highlight;
+        return BloomLightColors.highlight;
       case BreathPhaseType.exhale:
-        return BloomColors.primary.withValues(alpha: 0.8);
+        return BloomLightColors.secondary;
       case BreathPhaseType.rest:
-        return BloomColors.surface;
+        return BloomLightColors.surface;
       case BreathPhaseType.power:
-        return BloomColors.primary;
+        return BloomLightColors.primary;
       case BreathPhaseType.retention:
-        return BloomColors.highlight;
+        return BloomLightColors.highlight;
       case BreathPhaseType.recovery:
-        return BloomColors.accent;
+        return BloomLightColors.accent;
     }
   }
 }
@@ -238,12 +216,12 @@ class BloomGradients {
   static Gradient getHomeGradient(ThemeVariant variant) {
     switch (variant) {
       case ThemeVariant.midnight:
-        return LinearGradient(
+        return const LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
             BloomDarkColors.background,
-            BloomDarkColors.background.withValues(alpha: 0.8),
+            BloomDarkColors.surface,
           ],
         );
       case ThemeVariant.morning:
@@ -251,14 +229,13 @@ class BloomGradients {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [
-            BloomColors.background,
-            BloomColors.secondary,
+            BloomLightColors.background,
+            BloomLightColors.surface,
           ],
         );
     }
   }
 
-  // Legacy support
   static Gradient get steelFlame => getHomeGradient(ThemeVariant.midnight);
   static Gradient get tealFlame => getHomeGradient(ThemeVariant.morning);
 }

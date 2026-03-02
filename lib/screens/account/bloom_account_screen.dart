@@ -144,7 +144,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final iconColor = theme.colorScheme.primary;
-    final Color baseTextColor = textTheme.bodyMedium?.color ?? Colors.white;
+    final Color baseTextColor = theme.colorScheme.onSurface;
 
     return Scaffold(
       appBar: AppBar(
@@ -444,7 +444,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                                   showModalBottomSheet(
                                                     context: context,
                                                     isScrollControlled: true,
-                                                    backgroundColor: Colors.transparent,
+                                                    backgroundColor: theme.colorScheme.surface,
                                                     builder: (context) => const SoundscapeSelectionModal(),
                                                   );
                                                 },

@@ -34,14 +34,14 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
                     end: Alignment.bottomRight,
                     colors: isDark
                         ? [
-                            const Color(0xFF0F172A), // Slate 900
-                            const Color(0xFF1E293B), // Slate 800
-                            const Color(0xFF0F172A),
+                            theme.colorScheme.surface,
+                            theme.colorScheme.surface,
+                            theme.colorScheme.surface,
                           ]
                         : [
-                            const Color(0xFFE2E8F0), // Slate 200
-                            const Color(0xFFF8FAFC), // Slate 50
-                            const Color(0xFFE2E8F0),
+                            theme.colorScheme.surface,
+                            theme.colorScheme.surface,
+                            theme.colorScheme.surface,
                           ],
                   ),
                 ),
@@ -166,7 +166,7 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
             child: Text(
               'BLOOM+ PREMIUM',
               style: theme.textTheme.labelMedium?.copyWith(
-                color: Colors.white,
+                color: theme.colorScheme.onPrimary,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2.0,
               ),
@@ -257,8 +257,8 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
                     if (mounted) setState(() => _isProcessing = false);
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF4FA6A1), // BloomAqua (Teal) always
-              foregroundColor: Colors.white,
+              backgroundColor: theme.brightness == Brightness.dark ? theme.colorScheme.primary : const Color(0xFF4FA6A1), // Use theme primary in dark, BloomAqua in light
+              foregroundColor: theme.colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(vertical: 20),
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -266,17 +266,17 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
               ),
             ),
             child: _isProcessing
-                ? const SizedBox(
+                ? SizedBox(
                     height: 24,
                     width: 24,
-                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                    child: CircularProgressIndicator(color: theme.colorScheme.onPrimary, strokeWidth: 2),
                   )
                 : Text(
                     isYearly 
                         ? 'Start 7-Day Free Trial' 
                         : 'Subscribe Now',
                     style: theme.textTheme.titleMedium?.copyWith(
-                      color: Colors.white, // Enforce White text
+                      color: theme.colorScheme.onPrimary, // Enforce contrast text
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -439,7 +439,7 @@ class _PricingCard extends StatelessWidget {
                           child: Text(
                             saveLabel!,
                             style: theme.textTheme.labelSmall?.copyWith(
-                              color: Colors.white,
+                              color: theme.colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
                               fontSize: 10,
                             ),

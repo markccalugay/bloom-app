@@ -72,7 +72,7 @@ class _BloomEditProfileScreenState extends State<BloomEditProfileScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
-    final Color baseTextColor = textTheme.bodyMedium?.color ?? Colors.white;
+    final Color baseTextColor = theme.colorScheme.onSurface;
 
     if (_isLoading) {
       return Scaffold(
