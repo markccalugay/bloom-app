@@ -105,9 +105,9 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
+            child: Text(
               BloomAccountStrings.wipeData,
-              style: TextStyle(color: Colors.redAccent),
+              style: TextStyle(color: theme.colorScheme.error),
             ),
           ),
         ],
@@ -433,7 +433,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                                     Text(
                                                       'Muted',
                                                       style: textTheme.bodySmall?.copyWith(
-                                                        color: Colors.redAccent.withValues(alpha: 0.7),
+                                                        color: theme.colorScheme.error.withValues(alpha: 0.7),
                                                         fontWeight: FontWeight.w500,
                                                       ),
                                                     ),
@@ -568,7 +568,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                                 Text(
                                                   'Muted',
                                                   style: textTheme.bodySmall?.copyWith(
-                                                    color: Colors.redAccent.withValues(alpha: 0.7),
+                                                    color: theme.colorScheme.error.withValues(alpha: 0.7),
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
@@ -865,7 +865,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                 child: Text(
                                   'Data Wipe',
                                   style: TextStyle(
-                                    color: Colors.redAccent.withValues(alpha: 0.7),
+                                    color: theme.colorScheme.error.withValues(alpha: 0.7),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -970,7 +970,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
     required VoidCallback onTap,
   }) {
     final theme = Theme.of(context);
-    final baseTextColor = theme.textTheme.bodyMedium?.color ?? Colors.black;
+    final baseTextColor = theme.textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
     return Padding(
       padding: const EdgeInsets.only(bottom: 12.0),
       child: PreferenceTile(

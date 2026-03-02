@@ -443,8 +443,8 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
                 width: 8, height: 8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isActive ? Colors.green : theme.disabledColor,
-                  boxShadow: isActive ? [BoxShadow(color: Colors.green.withValues(alpha: 0.3), blurRadius: 6)] : null,
+                  color: isActive ? theme.colorScheme.tertiary : theme.disabledColor,
+                  boxShadow: isActive ? [BoxShadow(color: theme.colorScheme.tertiary.withValues(alpha: 0.3), blurRadius: 6)] : null,
                 ),
               ),
               const SizedBox(width: 8),

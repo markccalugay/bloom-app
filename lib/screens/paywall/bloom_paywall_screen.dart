@@ -30,19 +30,12 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
               Container(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: isDark
-                        ? [
-                            theme.colorScheme.surface,
-                            theme.colorScheme.surface,
-                            theme.colorScheme.surface,
-                          ]
-                        : [
-                            theme.colorScheme.surface,
-                            theme.colorScheme.surface,
-                            theme.colorScheme.surface,
-                          ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      theme.scaffoldBackgroundColor,
+                      theme.cardColor,
+                    ],
                   ),
                 ),
               ),
@@ -257,8 +250,8 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
                     if (mounted) setState(() => _isProcessing = false);
                   },
             style: ElevatedButton.styleFrom(
-              backgroundColor: theme.brightness == Brightness.dark ? theme.colorScheme.primary : const Color(0xFF4FA6A1), // Use theme primary in dark, BloomAqua in light
-              foregroundColor: theme.colorScheme.onPrimary,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 20),
               elevation: 0,
               shape: RoundedRectangleBorder(
@@ -395,9 +388,6 @@ class _PricingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final borderColor = isSelected 
-        ? theme.colorScheme.primary 
-        : theme.colorScheme.onSurface.withValues(alpha: 0.1);
     
     return GestureDetector(
       onTap: onTap,
@@ -406,12 +396,14 @@ class _PricingCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: isSelected 
-              ? theme.colorScheme.primary.withValues(alpha: 0.05)
+              ? theme.colorScheme.primary.withValues(alpha: 0.12)
               : theme.cardColor,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: borderColor,
-            width: isSelected ? 2 : 1,
+            color: isSelected 
+                ? theme.colorScheme.primary 
+                : theme.colorScheme.onSurface.withValues(alpha: 0.08),
+            width: isSelected ? 2 : 1.5,
           ),
         ),
         child: Row(

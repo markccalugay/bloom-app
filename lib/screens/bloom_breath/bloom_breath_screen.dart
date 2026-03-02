@@ -447,7 +447,7 @@ class _BloomBreathScreenState extends State<BloomBreathScreen>
                                 child: Text(
                                   '$_countdownValue',
                                   style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                                        color: Colors.white,
+                                        color: theme.colorScheme.onPrimary,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 80,
                                       ),

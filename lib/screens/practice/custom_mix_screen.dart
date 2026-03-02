@@ -294,7 +294,7 @@ class _SelectionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: color,
           borderRadius: BorderRadius.circular(16),
-          border: isSelected ? null : Border.all(color: Colors.grey.withValues(alpha: 0.3)),
+          border: isSelected ? null : Border.all(color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -308,7 +308,7 @@ class _SelectionCard extends StatelessWidget {
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : null,
+                color: isSelected ? theme.colorScheme.onPrimary : null,
               ),
             ),
             if (subtitle != null && !isLocked) ...[
@@ -317,7 +317,7 @@ class _SelectionCard extends StatelessWidget {
                 subtitle!,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: isSelected ? Colors.white70 : null,
+                  color: isSelected ? theme.colorScheme.onPrimary.withValues(alpha: 0.7) : null,
                   fontSize: 10,
                 ),
               ),

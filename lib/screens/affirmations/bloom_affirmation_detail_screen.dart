@@ -113,7 +113,7 @@ class _BloomAffirmationDetailScreenState
                       child: Text(
                         widget.unlockedLabel!,
                         style: textTheme.bodySmall?.copyWith(
-                          color: (textTheme.bodySmall?.color ?? Colors.white)
+                          color: (textTheme.bodySmall?.color ?? theme.colorScheme.onSurface)
                               .withValues(alpha: 0.8),
                         ),
                         maxLines: 1,

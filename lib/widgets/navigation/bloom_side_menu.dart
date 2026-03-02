@@ -65,7 +65,7 @@ class BloomSideMenu extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    final Color baseTextColor = textTheme.bodyMedium?.color ?? Colors.white;
+    final Color baseTextColor = textTheme.bodyMedium?.color ?? theme.colorScheme.onSurface;
     final Color iconColor = theme.colorScheme.primary;
 
     return Material(
@@ -305,8 +305,9 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    final Color baseColor = textTheme.bodySmall?.color ?? Colors.white;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
+    final Color baseColor = textTheme.bodySmall?.color ?? theme.colorScheme.onSurface;
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),

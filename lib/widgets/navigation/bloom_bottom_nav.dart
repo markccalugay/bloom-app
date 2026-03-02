@@ -117,16 +117,14 @@ class _PrimaryNavItem extends StatelessWidget {
             color: dockBackground,
             shape: BoxShape.circle,
             border: Border.all(
-              color: isDark
-                  ? Colors.white.withValues(alpha: 0.08)
-                  : Colors.black.withValues(alpha: 0.05),
+              color: theme.colorScheme.onSurface.withValues(alpha: isDark ? 0.08 : 0.05),
               width: 1.5,
             ),
             boxShadow: [
               BoxShadow(
                 color: isDark
                     ? activeColor.withValues(alpha: 0.12)
-                    : Colors.black.withValues(alpha: 0.05),
+                    : theme.colorScheme.onSurface.withValues(alpha: 0.05),
                 blurRadius: 20,
                 spreadRadius: 2,
               ),

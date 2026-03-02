@@ -803,9 +803,7 @@ class _AffirmationUnlockCard extends StatelessWidget {
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
 
-    final Color textColor = theme.brightness == Brightness.dark
-        ? Colors.white
-        : theme.colorScheme.onSurface;
+    final Color textColor = theme.colorScheme.onSurface;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
@@ -815,15 +813,13 @@ class _AffirmationUnlockCard extends StatelessWidget {
             ? theme.cardColor.withValues(alpha: 0.18)
             : theme.colorScheme.surface.withValues(alpha: 0.90),
         border: Border.all(
-          color: theme.brightness == Brightness.dark
-              ? Colors.white.withValues(alpha: 0.10)
-              : theme.colorScheme.onSurface.withValues(alpha: 0.10),
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.10),
         ),
         boxShadow: [
           BoxShadow(
             blurRadius: 22,
             offset: const Offset(0, 12),
-            color: Colors.black.withValues(alpha: theme.brightness == Brightness.dark ? 0.22 : 0.08),
+            color: theme.colorScheme.onSurface.withValues(alpha: theme.brightness == Brightness.dark ? 0.22 : 0.08),
           ),
         ],
       ),
