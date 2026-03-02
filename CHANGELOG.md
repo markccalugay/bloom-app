@@ -5,13 +5,21 @@ All notable changes to this project will be documented in this file.
 ## [0.1.0+2] - 2026-03-02
 
 ### Added
-- **Feminization of Avatars & Identity**: Replaced masculine-coded avatars and name generation with feminine, nature-inspired options in `bloom_edit_profile_screen.dart` and `UserService`.
-- **Integrated Theme Audit**: Conducted a full project-wide audit to identify and replace all hardcoded "QuietLine" hex values.
+- **High-Contrast Design System Mapping**: Created `bloom_haven_design_system.md` as the single source of truth for all color tokens and their UX rationale.
+- **Semantic Success Tokens**: Integrated `tertiary` (Mint) and `tertiaryContainer` (Gold) into the global `ColorScheme` for health and achievement states.
 
 ### Changed
+- **Bloom Haven Palette Upgrade**: Completely replaced the color backbone with refined, higher-contrast tokens.
+- **Typography Overhaul**: Switched all primary text and headlines to **Deep Cocoa (#2F2326)** for maximum legibility and brand premium feel.
+- **Full Project Refactor**: Purged all hardcoded `Colors.black`, `Colors.white`, and unique hex values from UI components in favor of theme-mapped tokens.
+- **Results Screen Refinement**: Implemented theme-aware "inactive" flame tints and balanced "active" gradients.
+- **Paywall UI Refactor**: Updated the subscription action button and pricing cards to the new brand pink with high-contrast text.
+- **Onboarding UX**: Simplified the breath screen by hiding the back button during the first session to prevent "dead-end" navigation.
+- **Feminization of Avatars & Identity**: Replaced masculine-coded avatars and name generation with feminine, nature-inspired options.
+- **Integrated Theme Audit**: Replaced all hardcoded "QuietLine" hex values.
 - **Brand Alignment & Cleanup**: Complete purge of residual teal colors in `BloomBottomNav`, `BloomResultsStreakBadge`, and navigation elements.
-- **Gradient Standardization**: Renamed legacy gradients (`steelFlame` -> `nightFlame`, `tealFlame` -> `bloomFlame`) for "Warm Bloom" brand consistency.
-- **Theme System Optimization**: Refactored results constants and UI components to be fully dynamic via late-bound `ColorScheme` lookups.
+- **Gradient Standardization**: Renamed legacy gradients (`steelFlame` -> `nightFlame`, `tealFlame` -> `bloomFlame`) for consistency.
+- **Theme System Optimization**: Refactored results constants and UI components to be fully dynamic.
 
 ## [0.1.0+1] - 2026-03-02
 
