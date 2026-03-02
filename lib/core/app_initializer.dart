@@ -22,8 +22,6 @@ import 'package:bloom_app/core/services/bloom_debug_actions.dart';
 import 'package:bloom_app/core/notifications/notification_service.dart';
 import 'package:bloom_app/core/services/mood_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:bloom_app/core/config/supabase_config.dart';
 
 class AppInitializer {
   static Future<ReminderService> initialize() async {
