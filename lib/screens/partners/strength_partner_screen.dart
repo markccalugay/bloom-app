@@ -136,7 +136,7 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
                           Navigator.pop(context);
                           _repo.leavePair().then((_) => _checkStatus());
                         },
-                        child: const Text('Disconnect', style: TextStyle(color: Colors.red)),
+                        child: Text('Disconnect', style: TextStyle(color: theme.colorScheme.error)),
                       ),
                     ],
                   ),
@@ -189,7 +189,7 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
 
   Widget _buildContent(ThemeData theme) {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Colors.white));
+      return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary));
     }
 
     if (_activePair != null) {
@@ -201,10 +201,9 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
 
   Widget _buildPairingView(ThemeData theme) {
     // Determine input fill color based on brightness
-    final isDark = theme.brightness == Brightness.dark;
-    final inputFill = isDark ? Colors.white10 : Colors.grey.shade100;
-    final containerFill = isDark ? Colors.white10 : Colors.white;
-    final containerBorder = isDark ? Colors.white24 : Colors.black12;
+    final inputFill = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
+    final containerFill = theme.colorScheme.surface;
+    final containerBorder = theme.colorScheme.onSurface.withValues(alpha: 0.1);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24.0),
@@ -304,7 +303,7 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
             onPressed: _joinPair,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
-              backgroundColor: isDark ? Colors.white24 : Colors.black.withValues(alpha: 0.05),
+              backgroundColor: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               foregroundColor: theme.colorScheme.onSurface,
               minimumSize: const Size.fromHeight(52), // Match theme buttons
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -332,8 +331,7 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
     
     final partnerName = partnerData?['username'] ?? 'Partner';
     
-    final isDark = theme.brightness == Brightness.dark;
-    final inputFill = isDark ? Colors.white10 : Colors.grey.shade200;
+    final inputFill = theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5);
     
     return Column(
       children: [
@@ -445,8 +443,8 @@ class _StrengthPartnerScreenState extends State<StrengthPartnerScreen> {
                 width: 8, height: 8,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isActive ? Colors.greenAccent : theme.disabledColor,
-                  boxShadow: isActive ? [BoxShadow(color: Colors.greenAccent.withValues(alpha: 0.5), blurRadius: 6)] : null,
+                  color: isActive ? Colors.green : theme.disabledColor,
+                  boxShadow: isActive ? [BoxShadow(color: Colors.green.withValues(alpha: 0.3), blurRadius: 6)] : null,
                 ),
               ),
               const SizedBox(width: 8),

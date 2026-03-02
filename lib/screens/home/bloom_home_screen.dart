@@ -130,10 +130,9 @@ class _BloomHomeHaloState extends State<_BloomHomeHalo> with SingleTickerProvide
       animation: _controller,
       builder: (context, child) {
         final theme = Theme.of(context);
-        final isDark = theme.brightness == Brightness.dark;
         
-        // Dark: Teal (#2F6F6B), Light: Soft Blue (#4A90E2)
-        final haloColor = isDark ? const Color(0xFF2F6F6B) : const Color(0xFF4A90E2);
+        // Dark: Sage/Brown, Light: Soft Rose/Pink
+        final haloColor = theme.colorScheme.primary.withValues(alpha: 0.4);
 
         // Combined logic: base animation + audio pulse
         // When audio is playing, _audioScale > 0.
@@ -351,20 +350,20 @@ class _BloomHomeScreenState extends State<BloomHomeScreen> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF1E2A29), // Dark slate/teal
-        title: const Text('Introducing Mixes', style: TextStyle(color: Colors.white)),
-        content: const Column(
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text('Introducing Mixes', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               'Your personal practice, your way.',
-              style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.9), fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 12),
             Text(
               'Mixes allow you to combine any breathing pattern with any soundscape, for a duration of your choice.\n\nSave your favorites for quick access right here on the Home screen.',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7), fontSize: 14),
             ),
           ],
         ),
@@ -374,7 +373,7 @@ class _BloomHomeScreenState extends State<BloomHomeScreen> {
               UserPreferencesService.instance.setHasSeenMixIntro();
               Navigator.of(ctx).pop();
             },
-            child: const Text('Got it', style: TextStyle(color: Colors.tealAccent, fontWeight: FontWeight.bold)),
+            child: Text('Got it', style: TextStyle(color: Theme.of(context).colorScheme.primary, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

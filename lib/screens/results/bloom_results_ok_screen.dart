@@ -203,8 +203,7 @@ class _BloomResultsOkScreenState extends State<BloomResultsOkScreen>
                 Text(
                   BloomResultsStrings.okSub,
                   style: textTheme.bodyMedium?.copyWith(
-                    color: (textTheme.bodyMedium?.color ?? Colors.white)
-                        .withValues(alpha: 0.85),
+                    color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                   ),
                   textAlign: TextAlign.left,
                 ),
@@ -400,7 +399,7 @@ class _BloomResultsOkScreenState extends State<BloomResultsOkScreen>
                     border: Border.all(
                       color: isSelected
                           ? theme.colorScheme.primary
-                          : theme.colorScheme.outline.withValues(alpha: 0.2),
+                          : theme.colorScheme.onSurface.withValues(alpha: 0.1),
                       width: 1.5,
                     ),
                   ),
@@ -511,6 +510,7 @@ class _BloomAffirmationUnlockedScreenState
       curve: Curves.easeOut,
     );
 
+    final theme = Theme.of(context);
     final rng = math.Random(42);
     for (int i = 0; i < 44; i++) {
       _confettiPieces.add(
@@ -522,8 +522,8 @@ class _BloomAffirmationUnlockedScreenState
           size: 4 + rng.nextDouble() * 6,
           spin: (rng.nextDouble() - 0.5) * 10,
           color: i % 7 == 0
-              ? const Color(0xFF3E8F87)
-              : Colors.white.withValues(alpha: 0.9),
+              ? theme.colorScheme.primary
+              : theme.colorScheme.secondary.withValues(alpha: 0.9),
         ),
       );
     }
@@ -626,8 +626,7 @@ class _BloomAffirmationUnlockedScreenState
               Text(
                 unlockedLabel,
                 style: textTheme.bodyMedium?.copyWith(
-                  color: (textTheme.bodyMedium?.color ?? Colors.white)
-                      .withValues(alpha: 0.85),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
                 ),
               ),
 

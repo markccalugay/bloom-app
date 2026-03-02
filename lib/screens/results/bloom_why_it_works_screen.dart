@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:bloom_app/widgets/bloom_primary_button.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 
 class BloomWhyItWorksScreen extends StatefulWidget {
   final String practiceId;
@@ -67,7 +66,7 @@ class _BloomWhyItWorksScreenState extends State<BloomWhyItWorksScreen> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  ...content.sections.map((s) => _buildSection(s.text, bullets: s.bullets, isBold: s.isBold)),
+                  ...content.sections.map((s) => _buildSection(theme, s.text, bullets: s.bullets, isBold: s.isBold)),
                   const SizedBox(height: 48),
                   
                   // Sources Toggle
@@ -152,8 +151,7 @@ class _BloomWhyItWorksScreenState extends State<BloomWhyItWorksScreen> {
     );
   }
 
-  Widget _buildSection(String text, {List<String>? bullets, bool isBold = false}) {
-    final theme = Theme.of(context);
+  Widget _buildSection(ThemeData theme, String text, {List<String>? bullets, bool isBold = false}) {
     final onSurface = theme.colorScheme.onSurface;
 
     return Padding(
@@ -182,7 +180,7 @@ class _BloomWhyItWorksScreenState extends State<BloomWhyItWorksScreen> {
                           width: 4,
                           height: 4,
                           decoration: BoxDecoration(
-                            color: BloomColors.primaryTeal,
+                            color: theme.colorScheme.primary,
                             shape: BoxShape.circle,
                           ),
                         ),

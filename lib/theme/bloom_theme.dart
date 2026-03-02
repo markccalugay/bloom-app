@@ -7,322 +7,200 @@ enum ThemeVariant {
 }
 
 class BloomColors {
-  // ── Light Mode — “Morning Calm” ──
-  // Core Brand
-  static const slateBlue = Color(0xFF2B3E51);    // Primary
-  static const quietAqua = Color(0xFF4FA6A1);    // Secondary
-  static const desertSand = Color(0xFFE8D1A7);   // Tertiary
-  static const warmGray = Color(0xFF9BA4AB);     // Alternate
+  // Primary CTA (from Soft Rose / Theme Set 01)
+  static const primary = Color(0xFFFFC6CA);
 
-  // Accents
-  static const morningMist = Color(0xFFD7EBE7);  // Accent 1
-  static const clayBeige = Color(0xFFDABF9F);    // Accent 2
-  static const skyAsh = Color(0xFFBCC6CA);       // Accent 3
-  static const deepStone = Color(0xFF45515A);    // Accent 4
+  // Secondary Lavender (Mist Blossom / Theme Set 04)
+  static const secondary = Color(0xFFE8DFF5);
 
-  // Utility
-  static const charcoalInk = Color(0xFF2B2F33);  // Primary Text
-  static const graphiteGray = Color(0xFF5E6874); // Secondary Text
-  static const offWhiteFog = Color(0xFFF5F4F1);  // Primary BG
-  static const paleStone = Color(0xFFEEE9E3);    // Secondary BG
+  // Accent
+  static const accent = Color(0xFFFFD4E5);
 
-  // Semantic
-  static const steadyGreen = Color(0xFF4B8E76);  // Success
-  static const brickRed = Color(0xFFC65A54);     // Error
-  static const cautionAmber = Color(0xFFE1B259); // Warning
-  static const tranquilBlue = Color(0xFF5DA3B3); // Info
+  // Background
+  static const background = Color(0xFFFAFAFB);
 
-  // ── Dark Mode — “Midnight Composure” ──
-  // Core Brand
-  static const midnightBlue = Color(0xFF1D2731); // Primary
-  static const calmTeal = Color(0xFF3F8E89);     // Secondary
-  static const steelGray = Color(0xFF5E6874);    // Tertiary
-  static const mutedSand = Color(0xFFE8DCC6);    // Alternate
+  // Surface
+  static const surface = Color(0xFFF1F1F3);
 
-  // Accents
-  static const deepTeal = Color(0xFF2E6D69);     // Accent 1
-  static const warmBronze = Color(0xFFA17E57);   // Accent 2
-  static const fadedSky = Color(0xFF729E99);     // Accent 3
-  static const cloudGray = Color(0xFFC6C2B8);    // Accent 4 / Secondary Text (Dark)
+  // Highlight / Growth Glow
+  static const highlight = Color(0xFFD2C7E5);
 
-  // Utility
-  static const sandWhite = Color(0xFFF5F4F1);    // Primary Text (identical to offWhiteFog)
-  static const deepCharcoal = Color(0xFF11161C); // Primary BG (Dark)
-  static const ironGray = Color(0xFF232B33);     // Secondary BG (Dark)
+  // Text
+  static const textPrimary = Color(0xFF1E1E22);
+  static const textSecondary = Color(0xFF6E6E75);
 
-  // Semantic
-  static const gentleEmerald = Color(0xFF6FBF9E); // Success
-  static const softCrimson = Color(0xFFB35A57);   // Error
-  static const mutedAmber = Color(0xFFD4A758);    // Warning
-  static const horizonBlue = Color(0xFF67B4C2);   // Info
-  
-  // ── Armor Design System ──
-  // Core Armor Neutrals (Midnight Composure compatible)
-  static const armorIronDark   = Color(0xFF45515A); // Lightened: deepStone
-  static const armorIronBase   = Color(0xFF708090); // Lightened: slate gray
-  static const armorIronLight  = Color(0xFFD1D7DD); // Lightened: soft silver highlight
-
-  // Armor Outline / Stroke
-  static const armorOutline    = Color(0xFF4A565F); // aligns w/ deepStone
-
-  // Forging / Progress Accents (Warm, restrained)
-  static const armorForgeWarm  = Color(0xFF7A5C3A); // muted bronze
-  static const armorForgeGlow  = Color(0xFFA17E57); // reuses warmBronze
-
-  // Locked State (Silhouette)
-  static const armorLockedFill     = Color(0xFF141A20); // near background
-  static const armorLockedLine     = Color(0xFF232B33); // ironGray
-  static const armorLockedFillDark = Color(0xFF1E262D); // Raised value for Dark Mode visibility
-  static const armorLockedLineDark = Color(0xFF2F3A44); // Raised value for Dark Mode visibility
-
-  // Unlocked / Polished Style
-  static const armorIronUnlocked  = Color(0xFF8FAFB0); // "Earned" - slight teal bias, mid-value
-  static const armorIronSaturated = Color(0xFF89D6CE); // polished metallic teal
-
-  // Glow / Presence
-  static final armorUnlockedGlow  = const Color(0xFF3F8E89).withValues(alpha: 0.12);
-
-  // ── Component & Legacy Mapping ──
-  static const ringTrack = Color(0x1A000000); // 10% black for Light mode default
-  
-  // These mapping getters adapt based on context if needed, 
-  // but for raw static access we default to brand core identity.
-  static const background = deepCharcoal;
-  static const primaryTeal = calmTeal;
+  // Legacy support for other components
+  static const primaryTeal = primary;
+  static const quietAqua = primary;
+  static const slateBlue = primary;
+  static const morningMist = secondary;
+  static const armorForgeGlow = primary;
+  static const armorIronBase = secondary;
+  static const steelGray = secondary;
+  static const graphiteGray = textSecondary;
+  static const calmTeal = primary;
+  static const mutedSand = secondary;
+  static const sandWhite = background;
+  static const skyAsh = secondary;
+  static const midnightBlue = Color(0xFF121214); // Matches dark background
 }
 
-class BloomGradients {
-  // ── Flame Gradient System ──
-
-  // 1. Teal Flame (Core Identity)
-  static const Gradient tealFlame = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [BloomColors.calmTeal, Color(0xFF2C6C68)],
-  );
-
-  // 2. Amber Flame (High Streak / Mastery)
-  static const Gradient amberFlame = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [BloomColors.mutedSand, Color(0xFFC7A86E)],
-  );
-
-  // 3. Steel Flame (Reset / Pause State)
-  static const Gradient steelFlame = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [BloomColors.steelGray, Color(0xFF313841)],
-  );
-
-  // 4. Midnight Flame (Inactive / Reflection Mode)
-  static const Gradient midnightFlame = LinearGradient(
-    begin: Alignment.topCenter,
-    end: Alignment.bottomCenter,
-    colors: [BloomColors.midnightBlue, Color(0xFF0E141B)],
-  );
-
-  // Mapping to current theme
-  static Gradient getPrimaryGradient(ThemeVariant variant) {
-    switch (variant) {
-      case ThemeVariant.midnight:
-        return tealFlame;
-      case ThemeVariant.morning:
-        return LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [BloomColors.quietAqua, BloomColors.slateBlue.withValues(alpha: 0.8)],
-        );
-    }
-  }
-
-  static Gradient getHomeGradient(ThemeVariant variant) {
-    switch (variant) {
-      case ThemeVariant.midnight:
-        return const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFF0F1C24), Color(0xFF132B34)],
-        );
-      case ThemeVariant.morning:
-        return const LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [Color(0xFFF5F7FA), Color(0xFFE2E6EA)],
-        );
-    }
-  }
-
-  static Color getResultsWaveColor(ThemeVariant variant) {
-    switch (variant) {
-      case ThemeVariant.midnight:
-        return const Color(0x26FFFFFF); // 15% white
-      case ThemeVariant.morning:
-        return const Color(0x1A000000); // 10% black
-    }
-  }
-
-  static List<Gradient> getSecondaryGradients(ThemeVariant variant) {
-    return [tealFlame, amberFlame, steelFlame, midnightFlame];
-  }
+class BloomDarkColors {
+  static const primary = Color(0xFFDEB499);
+  static const background = Color(0xFF121214);
+  static const surface = Color(0xFF1C1C20);
+  static const textPrimary = Color(0xFFEAEAF0);
+  static const textSecondary = Color(0xFF9A9AA3);
 }
+
+final bloomLightTheme = ThemeData(
+  brightness: Brightness.light,
+  colorScheme: ColorScheme(
+    brightness: Brightness.light,
+    primary: BloomColors.primary,
+    onPrimary: Colors.black87,
+    secondary: BloomColors.secondary,
+    onSecondary: Colors.black87,
+    error: Colors.redAccent,
+    onError: Colors.white,
+    surface: BloomColors.surface,
+    onSurface: BloomColors.textPrimary,
+  ),
+  scaffoldBackgroundColor: BloomColors.background,
+  cardColor: BloomColors.surface,
+  cardTheme: const CardThemeData(
+    elevation: 2,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+    ),
+  ),
+  textTheme: const TextTheme(
+    headlineLarge: TextStyle(
+      fontFamily: 'PlayfairDisplay',
+      fontWeight: FontWeight.w600,
+      color: BloomColors.textPrimary,
+    ),
+    headlineMedium: TextStyle(
+      fontFamily: 'PlayfairDisplay',
+      fontWeight: FontWeight.w600,
+      color: BloomColors.textPrimary,
+    ),
+    headlineSmall: TextStyle(
+      fontFamily: 'PlayfairDisplay',
+      fontWeight: FontWeight.w600,
+      color: BloomColors.textPrimary,
+    ),
+    bodyLarge: TextStyle(
+      fontFamily: 'Inter',
+      color: BloomColors.textPrimary,
+    ),
+    bodyMedium: TextStyle(
+      fontFamily: 'Inter',
+      color: BloomColors.textPrimary,
+    ),
+    bodySmall: TextStyle(
+      fontFamily: 'Inter',
+      color: BloomColors.textSecondary,
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: BloomColors.primary,
+      foregroundColor: Colors.black87,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+    ),
+  ),
+);
+
+final bloomDarkTheme = ThemeData(
+  brightness: Brightness.dark,
+  colorScheme: ColorScheme(
+    brightness: Brightness.dark,
+    primary: BloomDarkColors.primary,
+    onPrimary: Colors.black87,
+    secondary: BloomColors.secondary.withValues(alpha: 0.8),
+    onSecondary: Colors.white,
+    error: Colors.redAccent,
+    onError: Colors.white,
+    surface: BloomDarkColors.surface,
+    onSurface: BloomDarkColors.textPrimary,
+  ),
+  scaffoldBackgroundColor: BloomDarkColors.background,
+  cardColor: BloomDarkColors.surface,
+  cardTheme: const CardThemeData(
+    elevation: 2,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.all(Radius.circular(16)),
+    ),
+  ),
+  textTheme: const TextTheme(
+    headlineLarge: TextStyle(
+      fontFamily: 'PlayfairDisplay',
+      fontWeight: FontWeight.w600,
+      color: BloomDarkColors.textPrimary,
+    ),
+    headlineMedium: TextStyle(
+      fontFamily: 'PlayfairDisplay',
+      fontWeight: FontWeight.w600,
+      color: BloomDarkColors.textPrimary,
+    ),
+    headlineSmall: TextStyle(
+      fontFamily: 'PlayfairDisplay',
+      fontWeight: FontWeight.w600,
+      color: BloomDarkColors.textPrimary,
+    ),
+    bodyLarge: TextStyle(
+      fontFamily: 'Inter',
+      color: BloomDarkColors.textPrimary,
+    ),
+    bodyMedium: TextStyle(
+      fontFamily: 'Inter',
+      color: BloomDarkColors.textPrimary,
+    ),
+    bodySmall: TextStyle(
+      fontFamily: 'Inter',
+      color: BloomDarkColors.textSecondary,
+    ),
+  ),
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: BloomDarkColors.primary,
+      foregroundColor: Colors.black87,
+      elevation: 0,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      textStyle: const TextStyle(fontWeight: FontWeight.w600),
+    ),
+  ),
+);
 
 class BloomTheme {
-  static ThemeData dark = ThemeData(
-    brightness: Brightness.dark,
-    scaffoldBackgroundColor: BloomColors.deepCharcoal, // Ultra-dark premium base
-    colorScheme: const ColorScheme.dark(
-      surface: BloomColors.ironGray,
-      primary: BloomColors.calmTeal,
-      secondary: BloomColors.fadedSky,
-      error: BloomColors.softCrimson,
-      onSurface: BloomColors.sandWhite,
-      onPrimary: Colors.white,
-    ),
-    textTheme: const TextTheme(
-      headlineSmall: TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        color: BloomColors.sandWhite,
-      ),
-      titleLarge: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: BloomColors.sandWhite,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 14,
-        color: BloomColors.sandWhite,
-      ),
-      bodySmall: TextStyle(
-        fontSize: 12,
-        color: BloomColors.cloudGray,
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: BloomColors.calmTeal,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        minimumSize: const Size.fromHeight(52),
-      ),
-    ),
-    dividerTheme: const DividerThemeData(
-      color: BloomColors.steelGray,
-      thickness: 1,
-    ),
-  );
-
-  static ThemeData morning = quietLight; // Alias for Morning variant
-
-  static ThemeData quietLight = ThemeData(
-    brightness: Brightness.light,
-    scaffoldBackgroundColor: BloomColors.offWhiteFog,
-    colorScheme: const ColorScheme.light(
-      surface: BloomColors.paleStone,
-      primary: BloomColors.slateBlue,
-      secondary: BloomColors.quietAqua,
-      error: BloomColors.brickRed,
-      onSurface: BloomColors.charcoalInk,
-      onPrimary: Colors.white,
-    ),
-    textTheme: const TextTheme(
-      headlineSmall: TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.w600,
-        color: BloomColors.charcoalInk,
-      ),
-      titleLarge: TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w600,
-        color: BloomColors.charcoalInk,
-      ),
-      bodyMedium: TextStyle(
-        fontSize: 14,
-        color: BloomColors.charcoalInk,
-      ),
-      bodySmall: TextStyle(
-        fontSize: 12,
-        color: BloomColors.graphiteGray,
-      ),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: BloomColors.quietAqua,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        minimumSize: const Size.fromHeight(52),
-      ),
-    ),
-    dividerTheme: const DividerThemeData(
-      color: BloomColors.skyAsh,
-      thickness: 1,
-    ),
-  );
-
-  // Black & White Adaptive Framework
-  static ThemeData blackAndWhite(bool isDark) {
-    if (isDark) {
-      return ThemeData(
-        brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF0F1114),
-        colorScheme: const ColorScheme.dark(
-          surface: Color(0xFF1A1A1A),
-          primary: Colors.white,
-          secondary: Color(0xFFBDBDBD),
-          onSurface: Color(0xFFE8E8E8),
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Color(0xFFE8E8E8)),
-          bodySmall: TextStyle(color: Color(0xFF707070)),
-        ),
-      );
-    } else {
-      return ThemeData(
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF8F8F8),
-        colorScheme: const ColorScheme.light(
-          surface: Colors.white,
-          primary: Colors.black,
-          secondary: Color(0xFF333333),
-          onSurface: Color(0xFF111111),
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Color(0xFF333333)),
-          bodySmall: TextStyle(color: Color(0xFF999999)),
-        ),
-      );
-    }
-  }
-
+  // Legacy support for ThemeService
   static ThemeData getTheme(ThemeVariant variant) {
     switch (variant) {
       case ThemeVariant.midnight:
-        return dark;
+        return bloomDarkTheme;
       case ThemeVariant.morning:
-        return quietLight;
+        return bloomLightTheme;
     }
   }
 
   static Color getPrimaryColor(ThemeVariant variant) {
     switch (variant) {
       case ThemeVariant.midnight:
-        return BloomColors.calmTeal;
+        return BloomDarkColors.primary;
       case ThemeVariant.morning:
-        return BloomColors.slateBlue;
+        return BloomColors.primary;
     }
   }
 
   static Color getBackgroundColor(ThemeVariant variant) {
     switch (variant) {
       case ThemeVariant.midnight:
-        return BloomColors.deepCharcoal;
+        return BloomDarkColors.background;
       case ThemeVariant.morning:
-        return BloomColors.offWhiteFog;
+        return BloomColors.background;
     }
   }
 
@@ -346,21 +224,52 @@ class BloomTheme {
   }
 
   static Color colorForPhase(BreathPhaseType phase) {
+    // In new theme, we use primary (Soft Rose) for inhale/exhale 
+    // and secondary (Lavender) or neutral for others
     switch (phase) {
       case BreathPhaseType.inhale:
-        return BloomColors.calmTeal;
+        return BloomColors.primary;
       case BreathPhaseType.hold:
-        return BloomColors.steelGray;
+        return BloomColors.highlight;
       case BreathPhaseType.exhale:
-        return BloomColors.calmTeal.withValues(alpha: 0.8);
+        return BloomColors.primary.withValues(alpha: 0.8);
       case BreathPhaseType.rest:
-        return BloomColors.steelGray.withValues(alpha: 0.5);
+        return BloomColors.surface;
       case BreathPhaseType.power:
-        return BloomColors.calmTeal;
+        return BloomColors.primary;
       case BreathPhaseType.retention:
-        return BloomColors.steelGray;
+        return BloomColors.highlight;
       case BreathPhaseType.recovery:
-        return BloomColors.calmTeal;
+        return BloomColors.accent;
     }
   }
+}
+
+class BloomGradients {
+  static Gradient getHomeGradient(ThemeVariant variant) {
+    switch (variant) {
+      case ThemeVariant.midnight:
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            BloomDarkColors.background,
+            BloomDarkColors.background.withValues(alpha: 0.8),
+          ],
+        );
+      case ThemeVariant.morning:
+        return const LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            BloomColors.background,
+            BloomColors.secondary,
+          ],
+        );
+    }
+  }
+
+  // Legacy support
+  static Gradient get steelFlame => getHomeGradient(ThemeVariant.midnight);
+  static Gradient get tealFlame => getHomeGradient(ThemeVariant.morning);
 }
