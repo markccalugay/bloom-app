@@ -4,8 +4,8 @@ import 'package:bloom_app/screens/bloom_breath/models/breath_phase_contracts.dar
 import 'bloom_colors.dart';
 
 enum ThemeVariant {
-  midnight,
   morning,
+  midnight,
 }
 
 // Legacy BloomColors class for backward compatibility and internal logic
