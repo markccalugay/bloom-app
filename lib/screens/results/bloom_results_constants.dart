@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:bloom_app/theme/bloom_theme.dart';
 import 'package:bloom_app/theme/bloom_colors.dart';
 
 /// Layout and styling constants specific to the results screens.
