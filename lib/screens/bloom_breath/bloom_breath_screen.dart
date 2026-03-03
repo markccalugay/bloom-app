@@ -440,13 +440,14 @@ class _BloomBreathScreenState extends State<BloomBreathScreen>
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeOutBack,
                           builder: (context, value, child) {
+                            final theme = Theme.of(context);
                             return Transform.scale(
                               scale: value,
                               child: Opacity(
                                 opacity: (value - 0.5).clamp(0.0, 1.0),
                                 child: Text(
                                   '$_countdownValue',
-                                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                                  style: theme.textTheme.displayLarge?.copyWith(
                                         color: theme.colorScheme.onPrimary,
                                         fontWeight: FontWeight.w700,
                                         fontSize: 80,

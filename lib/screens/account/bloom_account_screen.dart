@@ -86,32 +86,35 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
   Future<void> _handleDataWipe() async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        title: const Text(
-          BloomAccountStrings.wipeAllData,
-          style: TextStyle(fontWeight: FontWeight.w700),
-        ),
-        content: const Text(
-          BloomAccountStrings.wipeDataWarning,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              BloomAccountStrings.cancel,
-              style: TextStyle(color: Theme.of(context).colorScheme.primary),
-            ),
+      builder: (context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          backgroundColor: theme.colorScheme.surface,
+          title: const Text(
+            BloomAccountStrings.wipeAllData,
+            style: TextStyle(fontWeight: FontWeight.w700),
           ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              BloomAccountStrings.wipeData,
-              style: TextStyle(color: theme.colorScheme.error),
-            ),
+          content: const Text(
+            BloomAccountStrings.wipeDataWarning,
           ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(
+                BloomAccountStrings.cancel,
+                style: TextStyle(color: theme.colorScheme.primary),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(
+                BloomAccountStrings.wipeData,
+                style: TextStyle(color: theme.colorScheme.error),
+              ),
+            ),
+          ],
+        );
+      },
     );
 
     if (confirmed == true && mounted) {
