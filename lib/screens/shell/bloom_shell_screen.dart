@@ -10,6 +10,7 @@ import 'package:bloom_app/services/web_launch_service.dart';
 import 'package:bloom_app/services/support_call_service.dart';
 import 'package:bloom_app/screens/account/bloom_account_screen.dart';
 import 'package:bloom_app/screens/affirmations/bloom_affirmations_library_screen.dart';
+import 'package:bloom_app/screens/account/mixes/my_mixes_screen.dart';
 import 'package:bloom_app/screens/practices/bloom_practice_library_screen.dart';
 import 'package:bloom_app/core/reminder/reminder_service.dart';
 import 'package:bloom_app/core/practices/practice_access_service.dart';import 'package:bloom_app/core/theme/theme_service.dart';
@@ -297,6 +298,14 @@ class _BloomShellScreenState extends State<BloomShellScreen> {
               await Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => BloomAffirmationsLibraryScreen(),
+                ),
+              );
+            },
+            onNavigateMixes: () async {
+              _controller.closeMenu();
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const MyMixesScreen(),
                 ),
               );
             },

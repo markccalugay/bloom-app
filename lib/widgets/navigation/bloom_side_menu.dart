@@ -19,6 +19,7 @@ class BloomSideMenu extends StatelessWidget {
   final VoidCallback? onNavigateBrotherhood;
   final VoidCallback? onNavigatePractices;
   final VoidCallback? onNavigateAffirmations;
+  final VoidCallback? onNavigateMixes;
   final VoidCallback? onOpenAccount;
 
   // MVP toggles
@@ -47,6 +48,7 @@ class BloomSideMenu extends StatelessWidget {
     this.onNavigateBrotherhood,
     this.onNavigatePractices,
     this.onNavigateAffirmations,
+    this.onNavigateMixes,
     this.onOpenAbout,
     this.onOpenWebsite,
     this.onOpenSupport,
@@ -189,6 +191,13 @@ class BloomSideMenu extends StatelessWidget {
                       iconColor: iconColor,
                       textColor: baseTextColor,
                       onTap: onNavigateAffirmations,
+                    ),
+                    _MenuItem(
+                      icon: Icons.auto_awesome_swat_rounded, // or Icons.auto_awesome, or Icons.queue_music_rounded
+                      label: 'My Mixes',
+                      iconColor: iconColor,
+                      textColor: baseTextColor,
+                      onTap: onNavigateMixes,
                     ),
                     const SizedBox(height: 16),
                     const _SectionLabel('Support'),
