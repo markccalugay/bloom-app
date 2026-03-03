@@ -25,7 +25,7 @@ class BloomHomeAffirmationsCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     
     // BG: Surface from theme
-    final Color backgroundColor = theme.colorScheme.surface;
+    final Color backgroundColor = isDark ? theme.colorScheme.surface : Colors.white;
     final Color textColor = theme.colorScheme.onSurface;
 
     return Material(
