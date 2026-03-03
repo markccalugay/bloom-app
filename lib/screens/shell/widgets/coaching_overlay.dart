@@ -206,6 +206,7 @@ class _CoachingCard extends StatelessWidget {
                 'Tap to continue',
                 style: TextStyle(
                   color: theme.colorScheme.primary,
+                  fontSize: 14,
                   fontWeight: FontWeight.w600,
                   decoration: TextDecoration.none,
                 ),
