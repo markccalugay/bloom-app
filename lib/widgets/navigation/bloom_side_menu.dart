@@ -193,7 +193,7 @@ class BloomSideMenu extends StatelessWidget {
                       onTap: onNavigateAffirmations,
                     ),
                     _MenuItem(
-                      icon: Icons.auto_awesome_swat_rounded, // or Icons.auto_awesome, or Icons.queue_music_rounded
+                      icon: Icons.auto_awesome_rounded, 
                       label: 'My Mixes',
                       iconColor: iconColor,
                       textColor: baseTextColor,
