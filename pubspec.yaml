@@ -56,6 +56,7 @@ dependencies:
   supabase_flutter: ^2.12.0
   timeago: ^3.7.1
   google_fonts: ^6.2.1
+  rive: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -99,6 +100,8 @@ flutter:
     - assets/images/icon-flame.svg
     - assets/sfx/
     - assets/bgm/
+    - assets/animations/
+
 
   # To add assets to your application, add an assets section, like this:
   # assets:
