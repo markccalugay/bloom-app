@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rive/rive.dart';
 import 'package:bloom_app/core/storekit/storekit_service.dart';
 import 'package:bloom_app/core/entitlements/premium_entitlement.dart';
 import 'package:bloom_app/core/theme/theme_service.dart';
@@ -26,6 +27,7 @@ import 'package:flutter/foundation.dart';
 class AppInitializer {
   static Future<ReminderService> initialize() async {
     WidgetsFlutterBinding.ensureInitialized();
+    await RiveNative.init();
 
     // Core services
     await StoreKitService.instance.initialize();

@@ -1,4 +1,6 @@
+import 'package:rive/rive.dart' as rive;
 import 'package:flutter/material.dart';
+
 import 'package:flutter/scheduler.dart';
 import 'package:bloom_app/theme/bloom_theme.dart';
 import 'package:bloom_app/services/first_launch_service.dart';
@@ -213,6 +215,26 @@ class _BloomHomeScreenState extends State<BloomHomeScreen> {
         // 2. Animated Halo
         const Center(
           child: _BloomHomeHalo(),
+        ),
+
+        // TEST: Rive Animation (Remove later)
+        Center(
+          child: SizedBox(
+            width: 300,
+            height: 300,
+            child: rive.RiveWidgetBuilder(
+              fileLoader: rive.FileLoader.fromAsset(
+                'assets/animations/8379-16091-happy-flower.riv',
+                riveFactory: rive.Factory.rive,
+              ),
+              builder: (context, state) {
+                if (state is rive.RiveLoaded) {
+                  return rive.RiveWidget(controller: state.controller);
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
         ),
 
         // 3. Foreground Content
