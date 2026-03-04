@@ -21,6 +21,9 @@ All notable changes to this project will be documented in this file.
 - **Gradient Standardization**: Renamed legacy gradients (`steelFlame` -> `nightFlame`, `tealFlame` -> `bloomFlame`) for consistency.
 - **Theme System Optimization**: Refactored results constants and UI components to be fully dynamic.
 
+### Fixed
+- **Onboarding UX**: Corrected the font size for the 'Tap to continue' text in the coaching overlay from H1 to paragraph size.
+
 ## [0.1.0+1] - 2026-03-02
 
 ### Added
