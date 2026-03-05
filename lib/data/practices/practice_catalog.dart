@@ -26,12 +26,12 @@ class PracticeCatalog {
     contract: monkCalmContract,
   );
 
-  static const navyCalm = Practice(
-    id: 'navy_calm',
-    title: 'Navy Calm',
-    description: 'Controlled breathing for stress tolerance and composure.',
+  static const serenity478 = Practice(
+    id: 'serenity_478',
+    title: 'Serenity 4-7-8',
+    description: 'Deeply relaxing breath to reduce anxiety and promote inner peace.',
     tier: PracticeTier.premium,
-    contract: navyCalmContract,
+    contract: serenity478Contract,
   );
 
   static const athleteFocus = Practice(
@@ -54,7 +54,7 @@ class PracticeCatalog {
     coreBloom,
     steadyDiscipline,
     monkCalm,
-    navyCalm,
+    serenity478,
     athleteFocus,
     coldResolve,
   ];

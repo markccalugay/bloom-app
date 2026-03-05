@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
 - **Rive Runtime Linking**: Corrected CocoaPods `.xcconfig` include paths in `ios/Flutter/` to ensure static native libraries (`librive.a`, etc.) are properly linked.
 - **Native Dependency Management**: Standardized iOS deployment target to 14.0 for compatibility with latest Rive renderer features.
 - **Project Structure**: Restored missing `Profile.xcconfig` to ensure consistent build configurations across all target schemes.
+- **Renaming & Reframing (2026-03-05 16:09)**: Renamed "Navy Calm" 4-7-8 breathing to "Serenity 4-7-8" across all catalogs and UI screens; rephrased "Why It Works" content to move from military-focused framing to wellness-oriented language for Bloom's audience.
 
 ## [0.1.0+2] - 2026-03-02
 

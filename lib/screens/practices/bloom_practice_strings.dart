@@ -27,8 +27,8 @@ class BloomPracticeStrings {
   static const techMonkCalmTitle = 'Technique: Extended exhales inspired by monastic breathing.';
   static const techMonkCalmSub = 'Benefits: Encourages deep calm, patience, and mental stillness.';
   
-  static const techNavyCalmTitle = 'Technique: 4–7–8 breathing.';
-  static const techNavyCalmSub = 'Inhale for 4, hold for 7, exhale for 8.\nBenefits: Improves stress tolerance and composure under pressure.';
+  static const techSerenity478Title = 'Technique: 4–7–8 breathing.';
+  static const techSerenity478Sub = 'Inhale for 4, hold for 7, exhale for 8.\nBenefits: Deep relaxation and emotional balance.';
   
   static const techAthleteFocusTitle = 'Technique: Performance-focused breathing cycles.';
   static const techAthleteFocusSub = 'Benefits: Enhances focus, recovery, and physical readiness.';

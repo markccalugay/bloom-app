@@ -111,10 +111,10 @@ const BreathingPracticeContract monkCalmContract =
   isPremium: true,
 );
 
-const BreathingPracticeContract navyCalmContract =
+const BreathingPracticeContract serenity478Contract =
     BreathingPracticeContract(
-  id: 'navy_calm',
-  name: 'Navy Calm',
+  id: 'serenity_478',
+  name: 'Serenity 4-7-8',
   cycles: 4,
   phases: [
     BreathPhaseContract(type: BreathPhaseType.inhale, seconds: 4),
@@ -167,7 +167,7 @@ const List<BreathingPracticeContract> allBreathingPractices = [
   coreBloomContract,
   steadyDisciplineContract,
   monkCalmContract,
-  navyCalmContract,
+  serenity478Contract,
   athleteFocusContract,
   coldResolveContract,
 ];

@@ -244,16 +244,16 @@ class _BloomWhyItWorksScreenState extends State<BloomWhyItWorksScreen> {
             'Porges, S. W. (2007). The polyvagal perspective. Biological Psychology, 74(2), 116–143. https://doi.org/10.1016/j.biopsycho.2006.06.009',
           ],
         );
-      case 'navy_calm':
+      case 'serenity_478':
         return const _WhyContent(
           sections: [
-            _WhySection(text: 'Breathing patterns that include longer holds and extended exhales slow the nervous system’s stress response. When breathing lengthens, signals from the lungs and heart tell the brain that the body is no longer in immediate danger.'),
-            _WhySection(text: 'This reduces sympathetic nervous system activity, which drives fight-or-flight reactions. As arousal decreases, heart rate slows and muscle tension eases. Emotional responses become less reactive, making it easier to maintain composure in demanding situations.'),
-            _WhySection(text: 'Because of these effects, extended breathing cycles are commonly taught in environments that require calm decision-making under pressure, including military training and emergency response. Slowing the breath creates a physiological pause, allowing clearer thinking and more deliberate action to replace impulsive reactions.'),
+            _WhySection(text: 'Rhythmic breathing patterns that include timed holds and extended exhales are designed to recalibrate the nervous system. By lengthening the breath, the lungs and heart send signals to the brain that the body is safe and at rest.'),
+            _WhySection(text: 'This reduces the activity of the sympathetic nervous system, which governs "fight or flight" responses. As the body settles, heart rate slows and physical tension begins to melt away. This physiological shift makes it easier to navigate emotional waves and find a sense of inner steady.'),
+            _WhySection(text: 'Because of these deeply regulating effects, the 4-7-8 rhythm is a foundational tool for managing anxiety and improving sleep quality. Slowing the breath creates a necessary pause, allowing clarity and calm to return. It is a natural way to regain emotional balance and mental quiet whenever the day feels overwhelming.'),
           ],
           sources: [
             'Jerath, R., Edry, J. W., Barnes, V. A., & Jerath, V. (2015). Physiology of long pranayamic breathing: Neural respiratory elements may provide a mechanism that explains how slow deep breathing shifts the autonomic nervous system. Medical Hypotheses, 85(3), 486–496. https://doi.org/10.1016/j.mehy.2015.07.007',
-            'Brown, R. P., & Gerbarg, P. L. (2005). Sudarshan Kriya yogic breathing in the treatment of stress, anxiety, and depression. Journal of Alternative and Complementary Medicine, 11(4), 711–717. https://doi.org/10.1089/acm.2005.11.711',
+            'Weil, A. (2014). The 4-7-8 Breath: Health Benefits and How-To. Andrew Weil, M.D. Center for Integrative Medicine.',
           ],
         );
       case 'athlete_focus':

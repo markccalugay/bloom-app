@@ -12,8 +12,8 @@ class ResetPackCatalog {
   static const panicReset = ResetPack(
     id: ResetPackIds.panicReset,
     name: 'Panic Reset',
-    description: 'Ground yourself instantly when anxiety peaks. Uses the 4-7-8 rhythm.',
-    contract: navyCalmContract, // 4-7-8
+    description: 'Ground yourself instantly with the deeply calming 4-7-8 rhythm.',
+    contract: serenity478Contract, // 4-7-8
     affirmationPackId: 'panic', // To be created
   );
 

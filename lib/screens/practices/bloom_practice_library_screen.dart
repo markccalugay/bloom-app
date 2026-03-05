@@ -132,9 +132,9 @@ class _BloomPracticeLibraryScreenState
     String activeId,
   ) {
     final coreBloom = practices.firstWhere((p) => p.id == 'core_bloom');
-    final navyCalm = practices.firstWhere((p) => p.id == 'navy_calm');
+    final serenity478 = practices.firstWhere((p) => p.id == 'serenity_478');
     final otherPremium = practices
-        .where((p) => p.tier == PracticeTier.premium && p.id != 'navy_calm')
+        .where((p) => p.tier == PracticeTier.premium && p.id != 'serenity_478')
         .toList();
 
     return ListView(
@@ -155,7 +155,7 @@ class _BloomPracticeLibraryScreenState
 
         // NEXT PRACTICE (PRIMARY LOCKED CARD)
         _PracticeTile(
-          practice: navyCalm,
+          practice: serenity478,
           locked: true,
           isActive: false,
           isPrimaryLocked: true,
@@ -598,9 +598,9 @@ class _PracticeDetailSheet extends StatelessWidget {
       case 'monk_calm':
         return '${BloomPracticeStrings.techMonkCalmTitle}\n'
             '${BloomPracticeStrings.techMonkCalmSub}';
-      case 'navy_calm':
-        return '${BloomPracticeStrings.techNavyCalmTitle}\n'
-            '${BloomPracticeStrings.techNavyCalmSub}';
+      case 'serenity_478':
+        return '${BloomPracticeStrings.techSerenity478Title}\n'
+            '${BloomPracticeStrings.techSerenity478Sub}';
       case 'athlete_focus':
         return '${BloomPracticeStrings.techAthleteFocusTitle}\n'
             '${BloomPracticeStrings.techAthleteFocusSub}';
