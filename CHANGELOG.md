@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0+2] - 2026-03-05
+
+### Fixed
+- **iOS Build System**: Resolved `CompileAssetCatalogVariant` failure caused by non-asset files (`README.md`) in specialized `.imageset` directories.
+- **Rive Runtime Linking**: Corrected CocoaPods `.xcconfig` include paths in `ios/Flutter/` to ensure static native libraries (`librive.a`, etc.) are properly linked.
+- **Native Dependency Management**: Standardized iOS deployment target to 14.0 for compatibility with latest Rive renderer features.
+- **Project Structure**: Restored missing `Profile.xcconfig` to ensure consistent build configurations across all target schemes.
+
 ## [0.1.0+2] - 2026-03-02
+
 
 ### Added
 - **High-Contrast Design System Mapping**: Created `bloom_haven_design_system.md` as the single source of truth for all color tokens and their UX rationale.
