@@ -18,14 +18,14 @@ class StoreKitService {
   /// Your subscription product IDs
   static const Set<String> _premiumProductIds = {
     'bloom.premium.weekly',
-    'bloom.premium.monthly.v2',
+    'bloom.premium.monthly',
     'bloom.premium.yearly',
   };
 
   /// All valid product IDs for entitlement (including grandfathered)
   static const Set<String> _allValidPremiumProductIds = {
     ..._premiumProductIds,
-    'bloom.premium.monthly', // Grandfathered
+    'bloom.premium.monthly.v2', // Old/V2
   };
 
   final Map<String, ProductDetails> _products = {};

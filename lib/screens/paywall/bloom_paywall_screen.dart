@@ -201,15 +201,15 @@ class _BloomPaywallScreenState extends State<BloomPaywallScreen> {
         ),
         const SizedBox(height: 16),
         _PricingCard(
-          productId: 'bloom.premium.monthly.v2',
+          productId: 'bloom.premium.monthly',
           title: 'Monthly',
           priceDisplay: '\$6.99',
           intervalLabel: '/ month',
           secondaryPrice: 'Flexible commitment',
-          isSelected: _selectedProductId == 'bloom.premium.monthly.v2',
+          isSelected: _selectedProductId == 'bloom.premium.monthly',
           onTap: () {
             HapticService.selection();
-            setState(() => _selectedProductId = 'bloom.premium.monthly.v2');
+            setState(() => _selectedProductId = 'bloom.premium.monthly');
           },
         ),
         const SizedBox(height: 16),
