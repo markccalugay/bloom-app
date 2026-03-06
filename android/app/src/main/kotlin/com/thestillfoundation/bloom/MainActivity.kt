@@ -1,4 +1,4 @@
-package com.example.quietline_app
+package com.thestillfoundation.bloom
 
 import io.flutter.embedding.android.FlutterActivity
 

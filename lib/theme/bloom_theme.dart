@@ -19,7 +19,7 @@ class BloomColors {
   static const textPrimary = BloomLightColors.textPrimary;
   static const textSecondary = BloomLightColors.textSecondary;
 
-  // No longer mapping QuietLine legacy names. Use ColorScheme or BloomLightColors/BloomDarkColors directly.
+  // No longer mapping legacy names. Use ColorScheme or BloomLightColors/BloomDarkColors directly.
 }
 
 final bloomLightTheme = ThemeData(

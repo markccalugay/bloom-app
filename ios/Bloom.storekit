@@ -39,7 +39,7 @@
       "localizations" : [
 
       ],
-      "name" : "QuietLine Premium",
+      "name" : "Bloom Premium",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -56,13 +56,13 @@
           "localizations" : [
             {
               "description" : "Full access to guided practices and premium tools.",
-              "displayName" : "QuietLine Premium",
+              "displayName" : "Bloom Premium",
               "locale" : "en_US"
             }
           ],
-          "productID" : "quietline.premium.monthly",
+          "productID" : "bloom.premium.monthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "QuietLine Premium Monthly",
+          "referenceName" : "Bloom Premium Monthly",
           "subscriptionGroupID" : "21899742",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

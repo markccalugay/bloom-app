@@ -85,13 +85,13 @@ class AuthService {
   Session? get supabaseSession => Supabase.instance.client.auth.currentSession;
 
   Future<AuthenticatedUser?> signInWithGoogle() async {
-    // Disconnected from QuietLine. Return null until new project is configured.
+    // Return null until new project is configured.
     debugPrint('[AUTH] Google Sign-In is currently disabled.');
     return null;
   }
 
   Future<AuthenticatedUser?> signInWithApple() async {
-    // Disconnected from QuietLine. Return null until new project is configured.
+    // Return null until new project is configured.
     debugPrint('[AUTH] Apple Sign-In is currently disabled.');
     return null;
   }

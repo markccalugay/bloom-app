@@ -1,11 +1,11 @@
 {
-    "name": "bloom_app",
-    "short_name": "bloom_app",
+    "name": "Bloom",
+    "short_name": "Bloom",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Bloom — a guided growth and reflection app focused on personal development and emotional clarity.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
