@@ -47,12 +47,12 @@ class BloomStreakService {
     }
   }
 
-  static Future<List<String>> getSessionDates() async {
+  static Future<Map<String, int>> getSessionDates() async {
     try {
       return await repo.getSessionDates();
     } catch (e) {
       debugPrint('[BloomStreakService] Error getting session dates: $e');
-      return [];
+      return {};
     }
   }
 

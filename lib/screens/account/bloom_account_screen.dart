@@ -384,7 +384,7 @@ class _BloomAccountScreenState extends State<BloomAccountScreen> {
                                     ),
                                   ),
                                   child: MindfulDaysHeatmap(
-                                    sessionDates: metrics['dates'] as List<String>,
+                                    sessionCounts: metrics['dates'] as Map<String, int>,
                                     baseTextColor: baseTextColor,
                                   ),
                                 ),

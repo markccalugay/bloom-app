@@ -56,7 +56,7 @@ class BloomStreakRepository {
     return _local.incrementMetrics(seconds, practiceId: practiceId);
   }
 
-  Future<List<String>> getSessionDates() {
+  Future<Map<String, int>> getSessionDates() {
     return _local.getSessionDates();
   }
 

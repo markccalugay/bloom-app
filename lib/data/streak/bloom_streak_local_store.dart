@@ -70,10 +70,29 @@ class BloomStreakLocalStore {
     // Record date
     final today = _formatDate(DateTime.now());
     final dates = _prefs.getStringList(_kSessionDatesKey) ?? [];
-    if (!dates.contains(today)) {
-      dates.add(today);
-      await _prefs.setStringList(_kSessionDatesKey, dates);
+    
+    int existingIndex = -1;
+    for (int i = 0; i < dates.length; i++) {
+      if (dates[i].startsWith('$today:') || dates[i] == today) {
+        existingIndex = i;
+        break;
+      }
     }
+
+    if (existingIndex != -1) {
+      final entry = dates[existingIndex];
+      if (entry.contains(':')) {
+        final parts = entry.split(':');
+        final count = (int.tryParse(parts[1]) ?? 1) + 1;
+        dates[existingIndex] = '$today:$count';
+      } else {
+        // Upgrade old "yyyy-MM-dd" entry
+        dates[existingIndex] = '$today:2';
+      }
+    } else {
+      dates.add('$today:1');
+    }
+    await _prefs.setStringList(_kSessionDatesKey, dates);
 
     // Track practice usage
     if (practiceId != null) {
@@ -84,8 +103,21 @@ class BloomStreakLocalStore {
     }
   }
 
-  Future<List<String>> getSessionDates() async {
-    return _prefs.getStringList(_kSessionDatesKey) ?? [];
+  Future<Map<String, int>> getSessionDates() async {
+    final raw = _prefs.getStringList(_kSessionDatesKey) ?? [];
+    final result = <String, int>{};
+    for (final item in raw) {
+      if (item.contains(':')) {
+        final parts = item.split(':');
+        if (parts.length >= 2) {
+          result[parts[0]] = int.tryParse(parts[1]) ?? 1;
+        }
+      } else {
+        // Compatibility for old "yyyy-MM-dd" format
+        result[item] = 1;
+      }
+    }
+    return result;
   }
 
   Future<Map<String, int>> getPracticeUsage() async {
