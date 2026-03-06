@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0+3] - 2026-03-06
+
+### Added
+- **GitHub-style Mindful Days Heatmap**: Implemented a contribution graph aesthetic in the 'My Account' window with a 7x14 grid, day-of-week labels (Mon, Wed, Fri), and monthly indicators.
+- **Session Frequency Tracking**: Updated the streak data layer to store and retrieve multiple sessions per day, enabling dynamic opacity in the heatmap.
+- **Visual Heatmap Legend**: Added a GitHub-inspired 'Less to More' legend in the bottom-right corner, fully integrated with the Bloom design system.
+
 ## [0.1.0+2] - 2026-03-05
 
 ### Fixed
