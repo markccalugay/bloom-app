@@ -48,9 +48,43 @@
           "codeOffers" : [
 
           ],
-          "displayPrice" : "4.99",
+          "displayPrice" : "49.99",
           "familyShareable" : false,
           "groupNumber" : 1,
+          "internalID" : "6758075363",
+          "introductoryOffer" : {
+            "internalID" : "6758075364",
+            "numberOfPeriods" : 1,
+            "paymentMode" : "free",
+            "subscriptionPeriod" : "P1W",
+            "type" : "Introductory"
+          },
+          "localizations" : [
+            {
+              "description" : "Full access to guided practices and premium tools.",
+              "displayName" : "Bloom Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "bloom.premium.yearly",
+          "recurringSubscriptionPeriod" : "P1Y",
+          "referenceName" : "Bloom Premium Yearly",
+          "subscriptionGroupID" : "21899742",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "6.99",
+          "familyShareable" : false,
+          "groupNumber" : 2,
           "internalID" : "6758075362",
           "introductoryOffer" : null,
           "localizations" : [
@@ -63,6 +97,34 @@
           "productID" : "bloom.premium.monthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "Bloom Premium Monthly",
+          "subscriptionGroupID" : "21899742",
+          "type" : "RecurringSubscription",
+          "winbackOffers" : [
+
+          ]
+        },
+        {
+          "adHocOffers" : [
+
+          ],
+          "codeOffers" : [
+
+          ],
+          "displayPrice" : "2.99",
+          "familyShareable" : false,
+          "groupNumber" : 3,
+          "internalID" : "6758075365",
+          "introductoryOffer" : null,
+          "localizations" : [
+            {
+              "description" : "Full access to guided practices and premium tools.",
+              "displayName" : "Bloom Premium",
+              "locale" : "en_US"
+            }
+          ],
+          "productID" : "bloom.premium.weekly",
+          "recurringSubscriptionPeriod" : "P1W",
+          "referenceName" : "Bloom Premium Weekly",
           "subscriptionGroupID" : "21899742",
           "type" : "RecurringSubscription",
           "winbackOffers" : [
