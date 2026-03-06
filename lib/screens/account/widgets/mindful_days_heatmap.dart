@@ -119,7 +119,7 @@ class MindfulDaysHeatmap extends StatelessWidget {
             );
           },
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
@@ -127,26 +127,26 @@ class MindfulDaysHeatmap extends StatelessWidget {
               'Less',
               style: theme.textTheme.bodySmall?.copyWith(
                 color: baseTextColor.withValues(alpha: 0.4),
-                fontSize: 10,
+                fontSize: 9,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 4),
             Row(
               children: [0, 1, 2, 3, 4].map((level) {
                 return Container(
                   width: 10,
                   height: 10,
-                  margin: const EdgeInsets.only(left: 4),
+                  margin: const EdgeInsets.only(left: 3),
                   decoration: BoxDecoration(
                     color: level == 0 
                       ? baseTextColor.withValues(alpha: 0.05)
                       : theme.colorScheme.primary.withValues(alpha: _calculateOpacity(level)),
-                    borderRadius: BorderRadius.circular(1),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 7),
             Text(
               'More',
               style: theme.textTheme.bodySmall?.copyWith(
